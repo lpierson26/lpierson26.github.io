@@ -3,17 +3,24 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Spin to Win — 3 Options Prototype</title>
+  <title>Spin to Win — Venmo Only (3 Options)</title>
   <style>
     :root{
+      /* LRL colors */
+      --red:#dc2626;
+      --blue:#1d4ed8;
+      --white:#ffffff;
+
       --bg:#ffffff;
-      --text:#111827;
-      --muted:#6b7280;
-      --border:#e5e7eb;
-      --card:#f9fafb;
-      --btn:#111827;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:#e2e8f0;
+      --card:#f8fafc;
+
+      --btn: var(--blue);
       --btnText:#ffffff;
-      --accent:#2563eb;
+      --accent: var(--red);
+
       --good:#059669;
       --bad:#dc2626;
     }
@@ -21,13 +28,22 @@
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background:var(--bg);
+      background:linear-gradient(180deg, rgba(29,78,216,.06), rgba(220,38,38,.03) 45%, rgba(255,255,255,1));
       color:var(--text);
     }
     header{
       padding:16px 14px;
       border-bottom:1px solid var(--border);
       background:#fff;
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+    .brandBar{
+      height:4px;
+      background:linear-gradient(90deg, var(--blue), var(--white), var(--red));
+      border-radius:999px;
+      margin-bottom:10px;
     }
     .wrap{max-width:980px;margin:0 auto;}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -38,8 +54,9 @@
     .card{
       border:1px solid var(--border);
       background:var(--card);
-      border-radius:12px;
+      border-radius:14px;
       padding:14px;
+      box-shadow:0 8px 20px rgba(15, 23, 42, .05);
     }
     .grid3{
       display:grid;
@@ -60,22 +77,27 @@
     }
     .pill.good{color:var(--good); border-color: rgba(5,150,105,.25)}
     .pill.bad{color:var(--bad); border-color: rgba(220,38,38,.25)}
-    .title{font-weight:800;font-size:16px;margin:0}
+    .pill.blue{color:var(--blue); border-color: rgba(29,78,216,.25)}
+    .title{font-weight:900;font-size:16px;margin:0}
     .sub{color:var(--muted);font-size:13px;margin-top:4px;line-height:1.3}
+
     .btn, button{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      border:none;border-radius:10px;padding:10px 12px;
-      font-weight:700;cursor:pointer;text-decoration:none;font-size:14px;
+      border:none;border-radius:12px;padding:10px 12px;
+      font-weight:800;cursor:pointer;text-decoration:none;font-size:14px;
       background:var(--btn);color:var(--btnText);
+      box-shadow:0 10px 18px rgba(29,78,216,.18);
     }
+    .btn.red{background:var(--red); box-shadow:0 10px 18px rgba(220,38,38,.16);}
     button.secondary, a.secondary{
       background:#fff;color:var(--text);border:1px solid var(--border);
-      font-weight:700;
+      font-weight:800;
+      box-shadow:none;
     }
-    button:disabled{opacity:.55;cursor:not-allowed}
+    button:disabled, a.disabled{opacity:.55;cursor:not-allowed;pointer-events:none}
     label{display:block;margin:10px 0 6px;font-size:12px;color:var(--muted)}
     input, select, textarea{
-      width:100%;padding:10px 10px;border-radius:10px;border:1px solid var(--border);
+      width:100%;padding:10px 10px;border-radius:12px;border:1px solid var(--border);
       background:#fff;color:var(--text);outline:none;font-size:14px;
     }
     textarea{min-height:72px;resize:vertical}
@@ -84,13 +106,13 @@
     }
     @media (max-width:520px){ .photos{grid-template-columns: repeat(2, 1fr);} }
     .photo{
-      border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff;
+      border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;
     }
     .photo img{width:100%;height:110px;object-fit:cover;display:block;background:#f3f4f6;}
     .progressWrap{margin-top:10px;background:#fff;border:1px solid var(--border);border-radius:999px;height:10px;overflow:hidden;}
-    .bar{height:100%;width:0%;background:var(--accent);}
+    .bar{height:100%;width:0%;background:linear-gradient(90deg, var(--blue), var(--red));}
     .notice{
-      margin-top:10px;border:1px dashed var(--border);border-radius:10px;padding:10px;
+      margin-top:10px;border:1px dashed var(--border);border-radius:12px;padding:10px;
       color:var(--muted);background:#fff;font-size:13px;line-height:1.35;
     }
     .notice strong{color:var(--text)}
@@ -99,19 +121,35 @@
     .tiny{font-size:12px;color:var(--muted)}
     .kpiRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
     .kpiRow .pill{flex:0}
+    .checkboxRow{
+      display:flex; gap:10px; align-items:flex-start; padding:10px;
+      border:1px solid var(--border); border-radius:12px; background:#fff; margin-top:10px;
+    }
+    .checkboxRow input{width:auto; margin-top:3px}
+    .callout{
+      background:linear-gradient(90deg, rgba(29,78,216,.08), rgba(220,38,38,.06));
+      border:1px solid rgba(29,78,216,.18);
+      border-radius:14px;
+      padding:12px;
+      margin-top:12px;
+    }
+    .callout strong{color:var(--text)}
   </style>
 </head>
 <body>
 
 <header>
-  <div class="wrap row between">
-    <div>
-      <h1>Spin to Win</h1>
-      <p>Choose a Spin option. Pay by card (or Venmo). Enter your info. When it’s full, we spin & notify the winner.</p>
-    </div>
-    <div class="row">
-      <button class="secondary" id="btnToggleAdmin">Admin: Off</button>
-      <button class="secondary" id="btnReset">Reset</button>
+  <div class="wrap">
+    <div class="brandBar"></div>
+    <div class="row between">
+      <div>
+        <h1>Spin to Win</h1>
+        <p><strong>Venmo only.</strong> Pay → return → submit entry. When full, the shop spins & contacts the winner.</p>
+      </div>
+      <div class="row">
+        <button class="secondary" id="btnToggleAdmin">Admin: Off</button>
+        <button class="secondary" id="btnReset">Reset</button>
+      </div>
     </div>
   </div>
 </header>
@@ -123,8 +161,8 @@
     <div class="row between">
       <div>
         <div class="tiny">Step 1</div>
-        <div style="font-weight:900;font-size:18px">Pick a Spin</div>
-        <div class="tiny">Tap an option to enter and pay.</div>
+        <div style="font-weight:950;font-size:18px">Pick a Spin</div>
+        <div class="tiny">Tap an option to pay on Venmo and enter.</div>
       </div>
       <span class="pill" id="globalStatus">Open</span>
     </div>
@@ -133,9 +171,10 @@
 
     <div class="notice">
       <strong>How it works</strong><br/>
-      • Each entry = 1 slice on the wheel<br/>
-      • When the Spin is full, the wheel spins automatically<br/>
-      • Winner is notified using the phone/email they provide
+      • Tap a Spin option<br/>
+      • Pay on Venmo using the button (note is required)<br/>
+      • Return and submit your info (must confirm you paid)<br/>
+      • Managers verify Venmo payments and spin when the Spin is full
     </div>
   </section>
 
@@ -144,16 +183,17 @@
     <div class="row between">
       <div>
         <div class="tiny">Step 2</div>
-        <div style="font-weight:900;font-size:18px" id="coTitle">Checkout</div>
+        <div style="font-weight:950;font-size:18px" id="coTitle">Checkout</div>
         <div class="tiny" id="coDesc"></div>
       </div>
       <button class="secondary" id="btnBack">← Back</button>
     </div>
 
     <div class="kpiRow">
-      <span class="pill" id="coPrice">$25 / entry</span>
+      <span class="pill blue" id="coPrice">$25 / entry</span>
       <span class="pill" id="coCap">0/30 filled</span>
       <span class="pill" id="coSpots">30 spots left</span>
+      <span class="pill" id="coTotal">Total: $0</span>
     </div>
 
     <div class="progressWrap" aria-label="fill progress">
@@ -161,6 +201,12 @@
     </div>
 
     <div class="photos" id="coPhotos"></div>
+
+    <div class="callout">
+      <strong>Payment required</strong><br/>
+      You must pay on Venmo <strong>before</strong> submitting an entry.
+      Enter the <strong>same name/contact</strong> you used for Venmo so managers can match it quickly.
+    </div>
 
     <hr/>
 
@@ -177,23 +223,30 @@
 
     <div class="row">
       <div style="flex:1">
+        <label for="venmoUser">Your Venmo username</label>
+        <input id="venmoUser" placeholder="@yourVenmo" />
+        <div class="tiny" style="margin-top:6px">Example: <strong>@lockerroomlegendsfan</strong></div>
+      </div>
+
+      <div style="flex:1">
         <label for="qty">How many entries?</label>
         <select id="qty"></select>
         <div class="tiny" style="margin-top:6px">Max 5 entries per person (simple rule).</div>
       </div>
-      <div style="flex:1">
-        <label>Payment</label>
-        <div class="row">
-          <a class="btn" id="cardPayBtn" href="#" target="_blank" rel="noreferrer">Pay by Card</a>
-          <a class="btn secondary" id="venmoPayBtn" href="#" target="_blank" rel="noreferrer">Pay with Venmo</a>
-        </div>
-        <div class="row" style="margin-top:8px">
-          <button class="secondary" id="btnPaid">I Paid</button>
-          <span class="pill bad" id="paidPill">Not confirmed</span>
-        </div>
-        <div class="tiny" style="margin-top:6px">
-          Realistic low-tech flow: customer pays via the link → returns → clicks “I Paid” → submits entry.
-        </div>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <a class="btn red" id="venmoPayBtn" href="#" target="_blank" rel="noreferrer">
+        Pay with Venmo
+      </a>
+      <span class="pill bad" id="paidPill">Payment not confirmed</span>
+    </div>
+
+    <div class="checkboxRow">
+      <input type="checkbox" id="paidCheck" />
+      <div>
+        <div style="font-weight:900">I paid on Venmo</div>
+        <div class="tiny">Required to submit. Managers will verify payment before finalizing winners.</div>
       </div>
     </div>
 
@@ -205,26 +258,47 @@
     <div id="msg" class="notice hidden"></div>
   </section>
 
-  <!-- ADMIN PANEL (edits all 3 spins) -->
+  <!-- ADMIN PANEL -->
   <section id="adminPanel" class="card hidden" style="margin-top:14px">
-    <div style="font-weight:900;font-size:16px">Admin — Update Spin Options</div>
-    <div class="tiny">This is designed so the shop can update between Spins: change title/price/capacity, paste payment links, upload photos.</div>
+    <div style="font-weight:950;font-size:16px">Admin — Update Spin Options</div>
+    <div class="tiny">Admin is protected by a PIN. Update title/price/capacity, set the Venmo receiver username, upload photos.</div>
+
+    <div class="notice" style="margin-top:10px">
+      <strong>Admin PIN</strong><br/>
+      You can change the PIN below (this only protects the Admin toggle on this browser/device).
+      <div class="row" style="margin-top:10px">
+        <input id="adminPinNew" placeholder="New PIN (4–12 digits)" style="max-width:240px" />
+        <button class="secondary" id="btnSetPin">Set PIN</button>
+      </div>
+      <div class="tiny" style="margin-top:8px">Note: This is “front-end only” protection (better than nothing for a prototype). A real system uses login on a server.</div>
+    </div>
 
     <div id="adminSpins"></div>
 
     <div class="notice">
-      <strong>Note</strong><br/>
-      This prototype stores photos + entries in the browser (localStorage). A real site would store photos online + store entries in a database.
+      <strong>Prototype note</strong><br/>
+      This prototype stores photos + entries in the browser (localStorage). For real operations: store entries in a sheet/database and email managers automatically (Apps Script webhook).
     </div>
   </section>
 
 </main>
 
 <script>
+  /***********************
+   * SETTINGS (EDIT THESE)
+   ***********************/
+  // This is the Venmo account that RECEIVES payments.
+  // Put the Locker Room Legends Venmo handle WITHOUT the @
+  // Example: "lockerroomlegends"
+  const DEFAULT_VENMO_RECEIVER = "lockerroomlegends";
+
+  // Optional: prefix used in Venmo note to identify spins quickly
+  const NOTE_PREFIX = "LRL Spin";
+
   // -----------------------------
-  // Data: 3 spin options
-  // -----------------------------
-  const STORAGE_KEY = "lrl_spin_to_win_3options_v1";
+  // Data: 3 spin options (Venmo only)
+   // -----------------------------
+  const STORAGE_KEY = "lrl_spin_to_win_venmo_3options_v2";
 
   const DEFAULT_SPINS = [
     {
@@ -233,8 +307,7 @@
       desc: "Win one of the jerseys shown below.",
       entryPrice: 25,
       capacity: 30,
-      cardPayUrl: "https://example.com/card",   // Stripe/Square Payment Link goes here
-      venmoUrl: "https://example.com/venmo",    // Venmo profile or Venmo QR link
+      venmoReceiver: DEFAULT_VENMO_RECEIVER,
       photos: []
     },
     {
@@ -243,8 +316,7 @@
       desc: "Different jersey set — same rules.",
       entryPrice: 35,
       capacity: 25,
-      cardPayUrl: "https://example.com/card",
-      venmoUrl: "https://example.com/venmo",
+      venmoReceiver: DEFAULT_VENMO_RECEIVER,
       photos: []
     },
     {
@@ -253,27 +325,18 @@
       desc: "Premium jerseys — higher buy-in.",
       entryPrice: 50,
       capacity: 20,
-      cardPayUrl: "https://example.com/card",
-      venmoUrl: "https://example.com/venmo",
+      venmoReceiver: DEFAULT_VENMO_RECEIVER,
       photos: []
     }
   ];
 
   const state = loadState() || {
     adminOn: false,
-    paidConfirmed: false,
     selectedSpinId: null,
     spins: DEFAULT_SPINS,
-    entriesBySpin: {
-      spin1: [],
-      spin2: [],
-      spin3: []
-    },
-    lastWinnerBySpin: {
-      spin1: null,
-      spin2: null,
-      spin3: null
-    }
+    entriesBySpin: { spin1: [], spin2: [], spin3: [] },
+    adminPinHash: null,
+    sessionAdminOk: false
   };
 
   function loadState(){
@@ -304,17 +367,18 @@
   const coPrice = document.getElementById("coPrice");
   const coCap = document.getElementById("coCap");
   const coSpots = document.getElementById("coSpots");
+  const coTotal = document.getElementById("coTotal");
   const coBar = document.getElementById("coBar");
   const coPhotos = document.getElementById("coPhotos");
 
   const nameEl = document.getElementById("name");
   const contactEl = document.getElementById("contact");
+  const venmoUserEl = document.getElementById("venmoUser");
   const qtyEl = document.getElementById("qty");
 
-  const cardPayBtn = document.getElementById("cardPayBtn");
   const venmoPayBtn = document.getElementById("venmoPayBtn");
-  const btnPaid = document.getElementById("btnPaid");
   const paidPill = document.getElementById("paidPill");
+  const paidCheck = document.getElementById("paidCheck");
 
   const btnSubmit = document.getElementById("btnSubmit");
   const btnForceSpin = document.getElementById("btnForceSpin");
@@ -322,6 +386,8 @@
 
   const adminPanel = document.getElementById("adminPanel");
   const adminSpins = document.getElementById("adminSpins");
+  const adminPinNew = document.getElementById("adminPinNew");
+  const btnSetPin = document.getElementById("btnSetPin");
 
   // -----------------------------
   // Helpers
@@ -359,16 +425,30 @@
     return totalEntries(id) >= getSpin(id).capacity;
   }
 
-  // Expand entries into slices
-  function slices(id){
-    const out = [];
-    for(const e of entriesFor(id)){
-      const qty = Math.max(1, Number(e.qty || 1));
-      for(let i=0;i<qty;i++){
-        out.push({ name: e.name, contact: e.contact });
-      }
+  function normalizeVenmoHandle(s){
+    s = (s || "").trim();
+    if(!s) return "";
+    return s.startsWith("@") ? s.slice(1) : s;
+  }
+
+  function buildVenmoLink(spin, qty){
+    // Works as a normal web link on Venmo-supported platforms; fallback opens Venmo profile
+    const receiver = normalizeVenmoHandle(spin.venmoReceiver || DEFAULT_VENMO_RECEIVER);
+    const amount = Math.max(1, Number(spin.entryPrice)) * Math.max(1, Number(qty || 1));
+    const note = encodeURIComponent(`${NOTE_PREFIX} — ${spin.title} — ${qty} entry${Number(qty)===1?"":"ies"}`);
+
+    // venmo.com/u/<username>?txn=pay is commonly used; some devices may ignore amount/note and just open profile.
+    return `https://venmo.com/u/${encodeURIComponent(receiver)}?txn=pay&amount=${encodeURIComponent(amount)}&note=${note}`;
+  }
+
+  function updatePaidPill(){
+    if(paidCheck.checked){
+      paidPill.textContent = "Payment confirmed by user";
+      paidPill.className = "pill good";
+    }else{
+      paidPill.textContent = "Payment not confirmed";
+      paidPill.className = "pill bad";
     }
-    return out;
   }
 
   // -----------------------------
@@ -399,13 +479,13 @@
             <div class="title">${escapeHtml(spin.title)}</div>
             <div class="sub">${escapeHtml(spin.desc)}</div>
           </div>
-          <span class="pill">${money(spin.entryPrice)} / entry</span>
+          <span class="pill blue">${money(spin.entryPrice)} / entry</span>
         </div>
 
         <div class="kpiRow">
           <span class="pill">${filled}/${cap} filled</span>
           <span class="pill">${remainingSpots(spin.id)} spots left</span>
-          <span class="pill ${filled>=cap ? "good" : ""}">${filled>=cap ? "Full" : "Open"}</span>
+          <span class="pill ${filled>=cap ? "bad" : "good"}">${filled>=cap ? "Full" : "Open"}</span>
         </div>
 
         <div class="progressWrap"><div class="bar" style="width:${pct}%"></div></div>
@@ -424,9 +504,8 @@
     });
 
     globalStatus.textContent = anyOpen ? "Open" : "All Full";
-    globalStatus.className = anyOpen ? "pill" : "pill bad";
+    globalStatus.className = anyOpen ? "pill good" : "pill bad";
 
-    // attach handlers
     spinCards.querySelectorAll("button[data-pick]").forEach(btn => {
       btn.addEventListener("click", () => {
         const id = btn.getAttribute("data-pick");
@@ -448,16 +527,6 @@
     }
   }
 
-  function renderPaid(){
-    if(state.paidConfirmed){
-      paidPill.textContent = "Confirmed";
-      paidPill.className = "pill good";
-    }else{
-      paidPill.textContent = "Not confirmed";
-      paidPill.className = "pill bad";
-    }
-  }
-
   function renderCheckout(){
     const spin = getSpin(state.selectedSpinId);
     const filled = totalEntries(spin.id);
@@ -470,10 +539,15 @@
     coPrice.textContent = `${money(spin.entryPrice)} / entry`;
     coCap.textContent = `${filled}/${cap} filled`;
     coSpots.textContent = `${spots} spots left`;
+
+    const qty = Number(qtyEl.value || 1);
+    const total = Number(spin.entryPrice) * qty;
+    coTotal.textContent = `Total: ${money(total)}`;
+
     coBar.style.width = pct + "%";
 
-    cardPayBtn.href = spin.cardPayUrl || "#";
-    venmoPayBtn.href = spin.venmoUrl || "#";
+    // Venmo link uses current qty
+    venmoPayBtn.href = buildVenmoLink(spin, qty);
 
     // photos
     coPhotos.innerHTML = "";
@@ -494,16 +568,17 @@
       });
     }
 
-    renderQty();
-    renderPaid();
+    updatePaidPill();
   }
 
   function goCheckout(id){
     state.selectedSpinId = id;
-    state.paidConfirmed = false;
     nameEl.value = "";
     contactEl.value = "";
+    venmoUserEl.value = "";
+    renderQty();
     qtyEl.value = "1";
+    paidCheck.checked = false;
     clearMessage();
     saveState();
 
@@ -514,7 +589,7 @@
 
   function goPick(){
     state.selectedSpinId = null;
-    state.paidConfirmed = false;
+    paidCheck.checked = false;
     clearMessage();
     saveState();
 
@@ -524,7 +599,7 @@
   }
 
   // -----------------------------
-  // Entry submission
+  // Entry submission (Venmo required)
   // -----------------------------
   function addEntry(){
     const id = state.selectedSpinId;
@@ -532,10 +607,17 @@
 
     const name = nameEl.value.trim();
     const contact = contactEl.value.trim();
+    const venmoUser = venmoUserEl.value.trim();
     const qty = Math.max(1, Math.floor(Number(qtyEl.value || 1)));
 
-    if(!name){ showMessage("Please enter your name.", "bad"); return; }
-    if(!state.paidConfirmed){ showMessage("Please pay first, then click <strong>I Paid</strong>.", "bad"); return; }
+    if(!name){ showMessage("Please enter your <strong>name</strong>.", "bad"); return; }
+    if(!contact){ showMessage("Please enter a <strong>phone or email</strong>.", "bad"); return; }
+    if(!venmoUser){ showMessage("Please enter your <strong>Venmo username</strong>.", "bad"); return; }
+
+    if(!paidCheck.checked){
+      showMessage("Payment is required. Please pay on Venmo and check <strong>I paid on Venmo</strong> to submit.", "bad");
+      return;
+    }
 
     const remaining = remainingSpots(id);
     if(remaining <= 0){
@@ -547,24 +629,34 @@
       return;
     }
 
-    // Store entry (prototype)
-    state.entriesBySpin[id] = state.entriesBySpin[id] || [];
-    state.entriesBySpin[id].push({ id: cryptoId(), name, contact, qty, at: nowISO() });
+    const amountExpected = Number(spin.entryPrice) * qty;
 
-    // reset paid + form
-    state.paidConfirmed = false;
+    // Store entry locally (prototype)
+    state.entriesBySpin[id] = state.entriesBySpin[id] || [];
+    state.entriesBySpin[id].push({
+      id: cryptoId(),
+      name,
+      contact,
+      venmoUser,
+      qty,
+      amountExpected,
+      at: nowISO()
+    });
+
+    // reset form
+    paidCheck.checked = false;
     nameEl.value = "";
     contactEl.value = "";
+    venmoUserEl.value = "";
     qtyEl.value = "1";
 
     saveState();
     renderCheckout();
 
-    // Auto-spin if full (prototype)
     if(isFull(id)){
-      showMessage("Spin is full — (prototype) winner would be selected now.", "ok");
+      showMessage("Spin is now full. Managers can verify Venmo payments and spin the wheel.", "ok");
     }else{
-      showMessage("Entry received! Thank you.", "ok");
+      showMessage("Entry received! Managers will verify your Venmo payment.", "ok");
     }
   }
 
@@ -573,12 +665,59 @@
   }
 
   // -----------------------------
-  // Admin: edit all 3 spins
+  // Admin PIN (front-end protection)
   // -----------------------------
-  function toggleAdmin(){
-    state.adminOn = !state.adminOn;
+  async function sha256(str){
+    const enc = new TextEncoder().encode(str);
+    const buf = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+
+  async function ensureDefaultPin(){
+    if(state.adminPinHash) return;
+    // default PIN is 1234 on first run (change it in Admin panel)
+    state.adminPinHash = await sha256("1234");
+    saveState();
+  }
+
+  async function promptForPin(){
+    const pin = prompt("Enter Admin PIN:");
+    if(pin === null) return false;
+    const h = await sha256(String(pin));
+    return h === state.adminPinHash;
+  }
+
+  async function toggleAdmin(){
+    await ensureDefaultPin();
+
+    if(!state.adminOn){
+      const ok = await promptForPin();
+      if(!ok){
+        alert("Incorrect PIN.");
+        return;
+      }
+      state.adminOn = true;
+      state.sessionAdminOk = true;
+    }else{
+      state.adminOn = false;
+      state.sessionAdminOk = false;
+    }
+
     saveState();
     renderAdmin();
+  }
+
+  async function setNewPin(){
+    await ensureDefaultPin();
+    const raw = (adminPinNew.value || "").trim();
+    if(!/^\d{4,12}$/.test(raw)){
+      alert("PIN must be 4–12 digits.");
+      return;
+    }
+    state.adminPinHash = await sha256(raw);
+    adminPinNew.value = "";
+    saveState();
+    alert("PIN updated.");
   }
 
   function renderAdmin(){
@@ -596,7 +735,7 @@
       wrap.style.marginTop = "12px";
 
       wrap.innerHTML = `
-        <div style="font-weight:900">${escapeHtml(spin.title)} (${spin.id})</div>
+        <div style="font-weight:950">${escapeHtml(spin.title)} (${spin.id})</div>
 
         <label>Title</label>
         <input data-k="title" data-id="${spin.id}" value="${escapeHtml(spin.title)}" />
@@ -615,17 +754,19 @@
           </div>
         </div>
 
-        <label>Card payment link (Stripe/Square Payment Link)</label>
-        <input data-k="cardPayUrl" data-id="${spin.id}" value="${escapeHtml(spin.cardPayUrl || "")}" placeholder="Paste Stripe/Square payment link here" />
-
-        <label>Venmo link (optional)</label>
-        <input data-k="venmoUrl" data-id="${spin.id}" value="${escapeHtml(spin.venmoUrl || "")}" placeholder="Paste Venmo link here" />
+        <label>Venmo receiver (Locker Room Legends) — WITHOUT @</label>
+        <input data-k="venmoReceiver" data-id="${spin.id}" value="${escapeHtml(spin.venmoReceiver || "")}" placeholder="e.g., lockerroomlegends" />
 
         <label>Upload jersey photos</label>
         <input type="file" accept="image/*" multiple data-photo="${spin.id}" />
 
         <div class="row" style="margin-top:10px">
           <button class="secondary" data-clearphotos="${spin.id}">Clear Photos</button>
+          <button class="secondary" data-clearentries="${spin.id}">Clear Entries</button>
+        </div>
+
+        <div class="tiny" style="margin-top:8px">
+          Entries stored on this device only. Clearing entries resets the fill count here.
         </div>
       `;
 
@@ -644,10 +785,12 @@
           v = Math.max(1, Math.floor(Number(v || 1)));
           if(k === "capacity") v = Math.max(2, v);
         }
+        if(k === "venmoReceiver"){
+          v = normalizeVenmoHandle(v);
+        }
+
         spin[k] = v;
         saveState();
-
-        // keep pick page fresh
         renderPickPage();
         if(state.selectedSpinId === id) renderCheckout();
       });
@@ -682,6 +825,18 @@
         if(state.selectedSpinId === id) renderCheckout();
       });
     });
+
+    // clear entries (local)
+    adminSpins.querySelectorAll("button[data-clearentries]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-clearentries");
+        if(!confirm("Clear entries for this Spin on this device?")) return;
+        state.entriesBySpin[id] = [];
+        saveState();
+        renderPickPage();
+        if(state.selectedSpinId === id) renderCheckout();
+      });
+    });
   }
 
   async function filesToBase64(files){
@@ -705,32 +860,41 @@
   // Events
   // -----------------------------
   btnToggleAdmin.addEventListener("click", toggleAdmin);
+
   btnReset.addEventListener("click", () => {
-    if(!confirm("Reset everything?")) return;
+    if(!confirm("Reset everything on THIS device?")) return;
     localStorage.removeItem(STORAGE_KEY);
     location.reload();
   });
 
   btnBack.addEventListener("click", goPick);
 
-  btnPaid.addEventListener("click", () => {
-    state.paidConfirmed = true;
-    saveState();
-    renderPaid();
-    showMessage("Payment marked as confirmed (prototype). You can submit now.", "ok");
+  paidCheck.addEventListener("change", updatePaidPill);
+
+  qtyEl.addEventListener("change", () => {
+    // keep Venmo link + totals synced with qty
+    renderCheckout();
+  });
+
+  venmoPayBtn.addEventListener("click", () => {
+    // friendly reminder (does not block)
+    showMessage("After paying on Venmo, return here and check <strong>I paid on Venmo</strong>, then submit.", "ok");
   });
 
   btnSubmit.addEventListener("click", addEntry);
 
   btnForceSpin.addEventListener("click", () => {
-    showMessage("Admin spin button is a placeholder in this 2-page prototype.", "ok");
+    showMessage("Spin button is a placeholder in this prototype. Next step is connecting entries to a Google Sheet + manager email alerts.", "ok");
   });
+
+  btnSetPin.addEventListener("click", setNewPin);
 
   // -----------------------------
   // Init
   // -----------------------------
   renderPickPage();
   renderAdmin();
+  ensureDefaultPin();
 </script>
 
 </body>
