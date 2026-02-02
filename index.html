@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Spin to Win — 3 Options Prototype</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --card:#f9fafb;
+      --btn:#111827;
+      --btnText:#ffffff;
+      --accent:#2563eb;
+      --good:#059669;
+      --bad:#dc2626;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:var(--bg);
+      color:var(--text);
+    }
+    header{
+      padding:16px 14px;
+      border-bottom:1px solid var(--border);
+      background:#fff;
+    }
+    .wrap{max-width:980px;margin:0 auto;}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .between{justify-content:space-between}
+    h1{margin:0;font-size:20px}
+    p{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
+    main{max-width:980px;margin:0 auto;padding:14px;}
+    .card{
+      border:1px solid var(--border);
+      background:var(--card);
+      border-radius:12px;
+      padding:14px;
+    }
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+    }
+    @media (max-width: 900px){
+      .grid3{grid-template-columns:1fr}
+    }
+    .pill{
+      font-size:12px;
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+      background:#fff;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .pill.good{color:var(--good); border-color: rgba(5,150,105,.25)}
+    .pill.bad{color:var(--bad); border-color: rgba(220,38,38,.25)}
+    .title{font-weight:800;font-size:16px;margin:0}
+    .sub{color:var(--muted);font-size:13px;margin-top:4px;line-height:1.3}
+    .btn, button{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      border:none;border-radius:10px;padding:10px 12px;
+      font-weight:700;cursor:pointer;text-decoration:none;font-size:14px;
+      background:var(--btn);color:var(--btnText);
+    }
+    button.secondary, a.secondary{
+      background:#fff;color:var(--text);border:1px solid var(--border);
+      font-weight:700;
+    }
+    button:disabled{opacity:.55;cursor:not-allowed}
+    label{display:block;margin:10px 0 6px;font-size:12px;color:var(--muted)}
+    input, select, textarea{
+      width:100%;padding:10px 10px;border-radius:10px;border:1px solid var(--border);
+      background:#fff;color:var(--text);outline:none;font-size:14px;
+    }
+    textarea{min-height:72px;resize:vertical}
+    .photos{
+      display:grid;grid-template-columns: repeat(3, 1fr);gap:8px;margin-top:10px;
+    }
+    @media (max-width:520px){ .photos{grid-template-columns: repeat(2, 1fr);} }
+    .photo{
+      border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff;
+    }
+    .photo img{width:100%;height:110px;object-fit:cover;display:block;background:#f3f4f6;}
+    .progressWrap{margin-top:10px;background:#fff;border:1px solid var(--border);border-radius:999px;height:10px;overflow:hidden;}
+    .bar{height:100%;width:0%;background:var(--accent);}
+    .notice{
+      margin-top:10px;border:1px dashed var(--border);border-radius:10px;padding:10px;
+      color:var(--muted);background:#fff;font-size:13px;line-height:1.35;
+    }
+    .notice strong{color:var(--text)}
+    .hidden{display:none !important;}
+    hr{border:none;border-top:1px solid var(--border);margin:12px 0}
+    .tiny{font-size:12px;color:var(--muted)}
+    .kpiRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .kpiRow .pill{flex:0}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="wrap row between">
+    <div>
+      <h1>Spin to Win</h1>
+      <p>Choose a Spin option. Pay by card (or Venmo). Enter your info. When it’s full, we spin & notify the winner.</p>
+    </div>
+    <div class="row">
+      <button class="secondary" id="btnToggleAdmin">Admin: Off</button>
+      <button class="secondary" id="btnReset">Reset</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- PAGE 1: PICK A SPIN -->
+  <section id="pagePick" class="card">
+    <div class="row between">
+      <div>
+        <div class="tiny">Step 1</div>
+        <div style="font-weight:900;font-size:18px">Pick a Spin</div>
+        <div class="tiny">Tap an option to enter and pay.</div>
+      </div>
+      <span class="pill" id="globalStatus">Open</span>
+    </div>
+
+    <div style="margin-top:12px" class="grid3" id="spinCards"></div>
+
+    <div class="notice">
+      <strong>How it works</strong><br/>
+      • Each entry = 1 slice on the wheel<br/>
+      • When the Spin is full, the wheel spins automatically<br/>
+      • Winner is notified using the phone/email they provide
+    </div>
+  </section>
+
+  <!-- PAGE 2: CHECKOUT / ENTRY -->
+  <section id="pageCheckout" class="card hidden">
+    <div class="row between">
+      <div>
+        <div class="tiny">Step 2</div>
+        <div style="font-weight:900;font-size:18px" id="coTitle">Checkout</div>
+        <div class="tiny" id="coDesc"></div>
+      </div>
+      <button class="secondary" id="btnBack">← Back</button>
+    </div>
+
+    <div class="kpiRow">
+      <span class="pill" id="coPrice">$25 / entry</span>
+      <span class="pill" id="coCap">0/30 filled</span>
+      <span class="pill" id="coSpots">30 spots left</span>
+    </div>
+
+    <div class="progressWrap" aria-label="fill progress">
+      <div class="bar" id="coBar"></div>
+    </div>
+
+    <div class="photos" id="coPhotos"></div>
+
+    <hr/>
+
+    <div class="row">
+      <div style="flex:1">
+        <label for="name">Name</label>
+        <input id="name" placeholder="Your name" autocomplete="name" />
+      </div>
+      <div style="flex:1">
+        <label for="contact">Phone or Email</label>
+        <input id="contact" placeholder="Phone or email" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div style="flex:1">
+        <label for="qty">How many entries?</label>
+        <select id="qty"></select>
+        <div class="tiny" style="margin-top:6px">Max 5 entries per person (simple rule).</div>
+      </div>
+      <div style="flex:1">
+        <label>Payment</label>
+        <div class="row">
+          <a class="btn" id="cardPayBtn" href="#" target="_blank" rel="noreferrer">Pay by Card</a>
+          <a class="btn secondary" id="venmoPayBtn" href="#" target="_blank" rel="noreferrer">Pay with Venmo</a>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="secondary" id="btnPaid">I Paid</button>
+          <span class="pill bad" id="paidPill">Not confirmed</span>
+        </div>
+        <div class="tiny" style="margin-top:6px">
+          Realistic low-tech flow: customer pays via the link → returns → clicks “I Paid” → submits entry.
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <button id="btnSubmit" style="flex:1">Submit Entry</button>
+      <button id="btnForceSpin" class="secondary">Spin Now (Admin)</button>
+    </div>
+
+    <div id="msg" class="notice hidden"></div>
+  </section>
+
+  <!-- ADMIN PANEL (edits all 3 spins) -->
+  <section id="adminPanel" class="card hidden" style="margin-top:14px">
+    <div style="font-weight:900;font-size:16px">Admin — Update Spin Options</div>
+    <div class="tiny">This is designed so the shop can update between Spins: change title/price/capacity, paste payment links, upload photos.</div>
+
+    <div id="adminSpins"></div>
+
+    <div class="notice">
+      <strong>Note</strong><br/>
+      This prototype stores photos + entries in the browser (localStorage). A real site would store photos online + store entries in a database.
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // -----------------------------
+  // Data: 3 spin options
+  // -----------------------------
+  const STORAGE_KEY = "lrl_spin_to_win_3options_v1";
+
+  const DEFAULT_SPINS = [
+    {
+      id: "spin1",
+      title: "Jersey Spin #1",
+      desc: "Win one of the jerseys shown below.",
+      entryPrice: 25,
+      capacity: 30,
+      cardPayUrl: "https://example.com/card",   // Stripe/Square Payment Link goes here
+      venmoUrl: "https://example.com/venmo",    // Venmo profile or Venmo QR link
+      photos: []
+    },
+    {
+      id: "spin2",
+      title: "Jersey Spin #2",
+      desc: "Different jersey set — same rules.",
+      entryPrice: 35,
+      capacity: 25,
+      cardPayUrl: "https://example.com/card",
+      venmoUrl: "https://example.com/venmo",
+      photos: []
+    },
+    {
+      id: "spin3",
+      title: "Jersey Spin #3",
+      desc: "Premium jerseys — higher buy-in.",
+      entryPrice: 50,
+      capacity: 20,
+      cardPayUrl: "https://example.com/card",
+      venmoUrl: "https://example.com/venmo",
+      photos: []
+    }
+  ];
+
+  const state = loadState() || {
+    adminOn: false,
+    paidConfirmed: false,
+    selectedSpinId: null,
+    spins: DEFAULT_SPINS,
+    entriesBySpin: {
+      spin1: [],
+      spin2: [],
+      spin3: []
+    },
+    lastWinnerBySpin: {
+      spin1: null,
+      spin2: null,
+      spin3: null
+    }
+  };
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){ return null; }
+  }
+  function saveState(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  // -----------------------------
+  // DOM
+  // -----------------------------
+  const btnToggleAdmin = document.getElementById("btnToggleAdmin");
+  const btnReset = document.getElementById("btnReset");
+
+  const pagePick = document.getElementById("pagePick");
+  const pageCheckout = document.getElementById("pageCheckout");
+  const btnBack = document.getElementById("btnBack");
+
+  const spinCards = document.getElementById("spinCards");
+  const globalStatus = document.getElementById("globalStatus");
+
+  const coTitle = document.getElementById("coTitle");
+  const coDesc = document.getElementById("coDesc");
+  const coPrice = document.getElementById("coPrice");
+  const coCap = document.getElementById("coCap");
+  const coSpots = document.getElementById("coSpots");
+  const coBar = document.getElementById("coBar");
+  const coPhotos = document.getElementById("coPhotos");
+
+  const nameEl = document.getElementById("name");
+  const contactEl = document.getElementById("contact");
+  const qtyEl = document.getElementById("qty");
+
+  const cardPayBtn = document.getElementById("cardPayBtn");
+  const venmoPayBtn = document.getElementById("venmoPayBtn");
+  const btnPaid = document.getElementById("btnPaid");
+  const paidPill = document.getElementById("paidPill");
+
+  const btnSubmit = document.getElementById("btnSubmit");
+  const btnForceSpin = document.getElementById("btnForceSpin");
+  const msg = document.getElementById("msg");
+
+  const adminPanel = document.getElementById("adminPanel");
+  const adminSpins = document.getElementById("adminSpins");
+
+  // -----------------------------
+  // Helpers
+  // -----------------------------
+  const money = n => `$${Number(n).toFixed(0)}`;
+  const nowISO = () => new Date().toISOString();
+
+  function escapeHtml(str){
+    return (str || "").replace(/[&<>"']/g, (m) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+  function showMessage(html, type="info"){
+    msg.classList.remove("hidden");
+    msg.style.borderColor =
+      type==="bad" ? "rgba(220,38,38,.25)" :
+      type==="ok" ? "rgba(5,150,105,.25)" : "var(--border)";
+    msg.innerHTML = html;
+  }
+  function clearMessage(){
+    msg.classList.add("hidden");
+    msg.innerHTML = "";
+  }
+
+  function getSpin(id){ return state.spins.find(s => s.id === id); }
+  function entriesFor(id){ return state.entriesBySpin[id] || []; }
+  function totalEntries(id){
+    return entriesFor(id).reduce((sum,e)=> sum + (e.qty || 1), 0);
+  }
+  function remainingSpots(id){
+    const spin = getSpin(id);
+    return Math.max(0, spin.capacity - totalEntries(id));
+  }
+  function isFull(id){
+    return totalEntries(id) >= getSpin(id).capacity;
+  }
+
+  // Expand entries into slices
+  function slices(id){
+    const out = [];
+    for(const e of entriesFor(id)){
+      const qty = Math.max(1, Number(e.qty || 1));
+      for(let i=0;i<qty;i++){
+        out.push({ name: e.name, contact: e.contact });
+      }
+    }
+    return out;
+  }
+
+  // -----------------------------
+  // Render: Pick page
+  // -----------------------------
+  function renderPickPage(){
+    spinCards.innerHTML = "";
+    let anyOpen = false;
+
+    state.spins.forEach(spin => {
+      const filled = totalEntries(spin.id);
+      const cap = spin.capacity;
+      const pct = Math.min(100, Math.round((filled / cap) * 100));
+      if(filled < cap) anyOpen = true;
+
+      const photos = spin.photos || [];
+      const thumbs = photos.slice(0,3).map(src => `
+        <div class="photo"><img src="${src}" alt="Item photo"></div>
+      `).join("");
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.style.background = "#fff";
+
+      card.innerHTML = `
+        <div class="row between">
+          <div>
+            <div class="title">${escapeHtml(spin.title)}</div>
+            <div class="sub">${escapeHtml(spin.desc)}</div>
+          </div>
+          <span class="pill">${money(spin.entryPrice)} / entry</span>
+        </div>
+
+        <div class="kpiRow">
+          <span class="pill">${filled}/${cap} filled</span>
+          <span class="pill">${remainingSpots(spin.id)} spots left</span>
+          <span class="pill ${filled>=cap ? "good" : ""}">${filled>=cap ? "Full" : "Open"}</span>
+        </div>
+
+        <div class="progressWrap"><div class="bar" style="width:${pct}%"></div></div>
+
+        <div class="photos" style="margin-top:10px">
+          ${thumbs || `<div class="notice" style="grid-column:1/-1;margin:0"><strong>No photos yet.</strong> Admin can upload jersey photos.</div>`}
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button ${filled>=cap ? "disabled" : ""} data-pick="${spin.id}" style="flex:1">
+            ${filled>=cap ? "Full" : "Choose this Spin"}
+          </button>
+        </div>
+      `;
+      spinCards.appendChild(card);
+    });
+
+    globalStatus.textContent = anyOpen ? "Open" : "All Full";
+    globalStatus.className = anyOpen ? "pill" : "pill bad";
+
+    // attach handlers
+    spinCards.querySelectorAll("button[data-pick]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-pick");
+        goCheckout(id);
+      });
+    });
+  }
+
+  // -----------------------------
+  // Checkout page
+  // -----------------------------
+  function renderQty(){
+    qtyEl.innerHTML = "";
+    for(let i=1;i<=5;i++){
+      const opt = document.createElement("option");
+      opt.value = String(i);
+      opt.textContent = String(i);
+      qtyEl.appendChild(opt);
+    }
+  }
+
+  function renderPaid(){
+    if(state.paidConfirmed){
+      paidPill.textContent = "Confirmed";
+      paidPill.className = "pill good";
+    }else{
+      paidPill.textContent = "Not confirmed";
+      paidPill.className = "pill bad";
+    }
+  }
+
+  function renderCheckout(){
+    const spin = getSpin(state.selectedSpinId);
+    const filled = totalEntries(spin.id);
+    const cap = spin.capacity;
+    const spots = remainingSpots(spin.id);
+    const pct = Math.min(100, Math.round((filled / cap) * 100));
+
+    coTitle.textContent = spin.title;
+    coDesc.textContent = spin.desc;
+    coPrice.textContent = `${money(spin.entryPrice)} / entry`;
+    coCap.textContent = `${filled}/${cap} filled`;
+    coSpots.textContent = `${spots} spots left`;
+    coBar.style.width = pct + "%";
+
+    cardPayBtn.href = spin.cardPayUrl || "#";
+    venmoPayBtn.href = spin.venmoUrl || "#";
+
+    // photos
+    coPhotos.innerHTML = "";
+    const photos = spin.photos || [];
+    if(photos.length === 0){
+      const div = document.createElement("div");
+      div.className = "notice";
+      div.style.gridColumn = "1 / -1";
+      div.style.margin = "0";
+      div.innerHTML = "<strong>No photos yet.</strong> Admin can upload jersey photos.";
+      coPhotos.appendChild(div);
+    }else{
+      photos.forEach(src => {
+        const wrap = document.createElement("div");
+        wrap.className = "photo";
+        wrap.innerHTML = `<img src="${src}" alt="Item photo">`;
+        coPhotos.appendChild(wrap);
+      });
+    }
+
+    renderQty();
+    renderPaid();
+  }
+
+  function goCheckout(id){
+    state.selectedSpinId = id;
+    state.paidConfirmed = false;
+    nameEl.value = "";
+    contactEl.value = "";
+    qtyEl.value = "1";
+    clearMessage();
+    saveState();
+
+    pagePick.classList.add("hidden");
+    pageCheckout.classList.remove("hidden");
+    renderCheckout();
+  }
+
+  function goPick(){
+    state.selectedSpinId = null;
+    state.paidConfirmed = false;
+    clearMessage();
+    saveState();
+
+    pageCheckout.classList.add("hidden");
+    pagePick.classList.remove("hidden");
+    renderPickPage();
+  }
+
+  // -----------------------------
+  // Entry submission
+  // -----------------------------
+  function addEntry(){
+    const id = state.selectedSpinId;
+    const spin = getSpin(id);
+
+    const name = nameEl.value.trim();
+    const contact = contactEl.value.trim();
+    const qty = Math.max(1, Math.floor(Number(qtyEl.value || 1)));
+
+    if(!name){ showMessage("Please enter your name.", "bad"); return; }
+    if(!state.paidConfirmed){ showMessage("Please pay first, then click <strong>I Paid</strong>.", "bad"); return; }
+
+    const remaining = remainingSpots(id);
+    if(remaining <= 0){
+      showMessage("This Spin is full. Please go back and choose another.", "bad");
+      return;
+    }
+    if(qty > remaining){
+      showMessage(`Only <strong>${remaining}</strong> spots remain. Choose a smaller quantity.`, "bad");
+      return;
+    }
+
+    // Store entry (prototype)
+    state.entriesBySpin[id] = state.entriesBySpin[id] || [];
+    state.entriesBySpin[id].push({ id: cryptoId(), name, contact, qty, at: nowISO() });
+
+    // reset paid + form
+    state.paidConfirmed = false;
+    nameEl.value = "";
+    contactEl.value = "";
+    qtyEl.value = "1";
+
+    saveState();
+    renderCheckout();
+
+    // Auto-spin if full (prototype)
+    if(isFull(id)){
+      showMessage("Spin is full — (prototype) winner would be selected now.", "ok");
+    }else{
+      showMessage("Entry received! Thank you.", "ok");
+    }
+  }
+
+  function cryptoId(){
+    return Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
+  }
+
+  // -----------------------------
+  // Admin: edit all 3 spins
+  // -----------------------------
+  function toggleAdmin(){
+    state.adminOn = !state.adminOn;
+    saveState();
+    renderAdmin();
+  }
+
+  function renderAdmin(){
+    btnToggleAdmin.textContent = state.adminOn ? "Admin: On" : "Admin: Off";
+    adminPanel.classList.toggle("hidden", !state.adminOn);
+
+    if(!state.adminOn) return;
+
+    adminSpins.innerHTML = "";
+
+    state.spins.forEach((spin) => {
+      const wrap = document.createElement("div");
+      wrap.className = "card";
+      wrap.style.background = "#fff";
+      wrap.style.marginTop = "12px";
+
+      wrap.innerHTML = `
+        <div style="font-weight:900">${escapeHtml(spin.title)} (${spin.id})</div>
+
+        <label>Title</label>
+        <input data-k="title" data-id="${spin.id}" value="${escapeHtml(spin.title)}" />
+
+        <label>Description</label>
+        <textarea data-k="desc" data-id="${spin.id}">${escapeHtml(spin.desc)}</textarea>
+
+        <div class="row">
+          <div style="flex:1">
+            <label>Entry price ($)</label>
+            <input type="number" min="1" step="1" data-k="entryPrice" data-id="${spin.id}" value="${spin.entryPrice}" />
+          </div>
+          <div style="flex:1">
+            <label>Capacity</label>
+            <input type="number" min="2" step="1" data-k="capacity" data-id="${spin.id}" value="${spin.capacity}" />
+          </div>
+        </div>
+
+        <label>Card payment link (Stripe/Square Payment Link)</label>
+        <input data-k="cardPayUrl" data-id="${spin.id}" value="${escapeHtml(spin.cardPayUrl || "")}" placeholder="Paste Stripe/Square payment link here" />
+
+        <label>Venmo link (optional)</label>
+        <input data-k="venmoUrl" data-id="${spin.id}" value="${escapeHtml(spin.venmoUrl || "")}" placeholder="Paste Venmo link here" />
+
+        <label>Upload jersey photos</label>
+        <input type="file" accept="image/*" multiple data-photo="${spin.id}" />
+
+        <div class="row" style="margin-top:10px">
+          <button class="secondary" data-clearphotos="${spin.id}">Clear Photos</button>
+        </div>
+      `;
+
+      adminSpins.appendChild(wrap);
+    });
+
+    // input listeners
+    adminSpins.querySelectorAll("input[data-k], textarea[data-k]").forEach(el => {
+      el.addEventListener("input", () => {
+        const id = el.getAttribute("data-id");
+        const k = el.getAttribute("data-k");
+        const spin = getSpin(id);
+
+        let v = el.value;
+        if(k === "entryPrice" || k === "capacity"){
+          v = Math.max(1, Math.floor(Number(v || 1)));
+          if(k === "capacity") v = Math.max(2, v);
+        }
+        spin[k] = v;
+        saveState();
+
+        // keep pick page fresh
+        renderPickPage();
+        if(state.selectedSpinId === id) renderCheckout();
+      });
+    });
+
+    // photo upload listeners
+    adminSpins.querySelectorAll("input[type=file][data-photo]").forEach(el => {
+      el.addEventListener("change", async () => {
+        const id = el.getAttribute("data-photo");
+        const spin = getSpin(id);
+        spin.photos = spin.photos || [];
+
+        if(el.files && el.files.length){
+          const newPhotos = await filesToBase64(el.files);
+          spin.photos = spin.photos.concat(newPhotos);
+          el.value = "";
+          saveState();
+          renderPickPage();
+          if(state.selectedSpinId === id) renderCheckout();
+        }
+      });
+    });
+
+    // clear photos
+    adminSpins.querySelectorAll("button[data-clearphotos]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-clearphotos");
+        const spin = getSpin(id);
+        spin.photos = [];
+        saveState();
+        renderPickPage();
+        if(state.selectedSpinId === id) renderCheckout();
+      });
+    });
+  }
+
+  async function filesToBase64(files){
+    const arr = [];
+    for(const f of files){
+      const b64 = await fileToBase64(f);
+      arr.push(b64);
+    }
+    return arr;
+  }
+  function fileToBase64(file){
+    return new Promise((resolve,reject)=>{
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // -----------------------------
+  // Events
+  // -----------------------------
+  btnToggleAdmin.addEventListener("click", toggleAdmin);
+  btnReset.addEventListener("click", () => {
+    if(!confirm("Reset everything?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  });
+
+  btnBack.addEventListener("click", goPick);
+
+  btnPaid.addEventListener("click", () => {
+    state.paidConfirmed = true;
+    saveState();
+    renderPaid();
+    showMessage("Payment marked as confirmed (prototype). You can submit now.", "ok");
+  });
+
+  btnSubmit.addEventListener("click", addEntry);
+
+  btnForceSpin.addEventListener("click", () => {
+    showMessage("Admin spin button is a placeholder in this 2-page prototype.", "ok");
+  });
+
+  // -----------------------------
+  // Init
+  // -----------------------------
+  renderPickPage();
+  renderAdmin();
+</script>
+
+</body>
+</html>
