@@ -48,6 +48,18 @@
     .wrap{max-width:980px;margin:0 auto;}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
     .between{justify-content:space-between}
+
+    .brandLeft{display:flex;gap:12px;align-items:center}
+    .logo{
+      height:44px;
+      width:auto;
+      display:block;
+      object-fit:contain;
+    }
+    @media (max-width:520px){
+      .logo{height:38px}
+    }
+
     h1{margin:0;font-size:20px}
     p{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
     main{max-width:980px;margin:0 auto;padding:14px;}
@@ -108,7 +120,7 @@
     .photo{
       border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;
     }
-    .photo img{width:100%;height:110px;object-fit:cover;display:block;background:#f3f4f6;}
+    .photo img{width:100%;height:140px;object-fit:cover;display:block;background:#f3f4f6;}
     .progressWrap{margin-top:10px;background:#fff;border:1px solid var(--border);border-radius:999px;height:10px;overflow:hidden;}
     .bar{height:100%;width:0%;background:linear-gradient(90deg, var(--blue), var(--red));}
     .notice{
@@ -142,9 +154,12 @@
   <div class="wrap">
     <div class="brandBar"></div>
     <div class="row between">
-      <div>
-        <h1>Spin to Win</h1>
-        <p><strong>Venmo only.</strong> Pay → return → submit entry. When full, the shop spins & contacts the winner.</p>
+      <div class="brandLeft">
+        <img src="logo.webp" class="logo" alt="Locker Room Legends logo">
+        <div>
+          <h1>Spin to Win</h1>
+          <p><strong>Venmo only.</strong> Pay → return → submit entry. When full, the shop spins & contacts the winner.</p>
+        </div>
       </div>
       <div class="row">
         <button class="secondary" id="btnToggleAdmin">Admin: Off</button>
@@ -261,7 +276,7 @@
   <!-- ADMIN PANEL -->
   <section id="adminPanel" class="card hidden" style="margin-top:14px">
     <div style="font-weight:950;font-size:16px">Admin — Update Spin Options</div>
-    <div class="tiny">Admin is protected by a PIN. Update title/price/capacity, set the Venmo receiver username, upload photos.</div>
+    <div class="tiny">Admin is protected by a PIN. Update title/price/capacity and the Venmo receiver username.</div>
 
     <div class="notice" style="margin-top:10px">
       <strong>Admin PIN</strong><br/>
@@ -270,14 +285,14 @@
         <input id="adminPinNew" placeholder="New PIN (4–12 digits)" style="max-width:240px" />
         <button class="secondary" id="btnSetPin">Set PIN</button>
       </div>
-      <div class="tiny" style="margin-top:8px">Note: This is “front-end only” protection (better than nothing for a prototype). A real system uses login on a server.</div>
+      <div class="tiny" style="margin-top:8px">Note: This is “front-end only” protection. A real system uses login on a server.</div>
     </div>
 
     <div id="adminSpins"></div>
 
     <div class="notice">
-      <strong>Prototype note</strong><br/>
-      This prototype stores photos + entries in the browser (localStorage). For real operations: store entries in a sheet/database and email managers automatically (Apps Script webhook).
+      <strong>Important</strong><br/>
+      Photos are now loaded from the GitHub repo so everyone sees the same pictures. To change photos, replace the image files in the repo.
     </div>
   </section>
 
@@ -287,18 +302,17 @@
   /***********************
    * SETTINGS (EDIT THESE)
    ***********************/
-  // This is the Venmo account that RECEIVES payments.
-  // Put the Locker Room Legends Venmo handle WITHOUT the @
-  // Example: "lockerroomlegends"
   const DEFAULT_VENMO_RECEIVER = "lockerroomlegends";
-
-  // Optional: prefix used in Venmo note to identify spins quickly
   const NOTE_PREFIX = "LRL Spin";
 
-  // -----------------------------
-  // Data: 3 spin options (Venmo only)
-   // -----------------------------
-  const STORAGE_KEY = "lrl_spin_to_win_venmo_3options_v2";
+  // These files must exist in your repo next to index.html
+  const SPIN_PHOTOS_DEFAULT = [
+    "boozer.jpg",
+    "evans.jpeg",
+    "test.webp"
+  ];
+
+  const STORAGE_KEY = "lrl_spin_to_win_venmo_3options_v3";
 
   const DEFAULT_SPINS = [
     {
@@ -308,25 +322,25 @@
       entryPrice: 25,
       capacity: 30,
       venmoReceiver: DEFAULT_VENMO_RECEIVER,
-      photos: []
+      photos: SPIN_PHOTOS_DEFAULT
     },
     {
       id: "spin2",
       title: "Jersey Spin #2",
-      desc: "Different jersey set — same rules.",
+      desc: "Win one of the jerseys shown below.",
       entryPrice: 35,
       capacity: 25,
       venmoReceiver: DEFAULT_VENMO_RECEIVER,
-      photos: []
+      photos: SPIN_PHOTOS_DEFAULT
     },
     {
       id: "spin3",
       title: "Jersey Spin #3",
-      desc: "Premium jerseys — higher buy-in.",
+      desc: "Win one of the jerseys shown below.",
       entryPrice: 50,
       capacity: 20,
       venmoReceiver: DEFAULT_VENMO_RECEIVER,
-      photos: []
+      photos: SPIN_PHOTOS_DEFAULT
     }
   ];
 
@@ -335,8 +349,7 @@
     selectedSpinId: null,
     spins: DEFAULT_SPINS,
     entriesBySpin: { spin1: [], spin2: [], spin3: [] },
-    adminPinHash: null,
-    sessionAdminOk: false
+    adminPinHash: null
   };
 
   function loadState(){
@@ -432,12 +445,9 @@
   }
 
   function buildVenmoLink(spin, qty){
-    // Works as a normal web link on Venmo-supported platforms; fallback opens Venmo profile
     const receiver = normalizeVenmoHandle(spin.venmoReceiver || DEFAULT_VENMO_RECEIVER);
     const amount = Math.max(1, Number(spin.entryPrice)) * Math.max(1, Number(qty || 1));
     const note = encodeURIComponent(`${NOTE_PREFIX} — ${spin.title} — ${qty} entry${Number(qty)===1?"":"ies"}`);
-
-    // venmo.com/u/<username>?txn=pay is commonly used; some devices may ignore amount/note and just open profile.
     return `https://venmo.com/u/${encodeURIComponent(receiver)}?txn=pay&amount=${encodeURIComponent(amount)}&note=${note}`;
   }
 
@@ -451,9 +461,6 @@
     }
   }
 
-  // -----------------------------
-  // Render: Pick page
-  // -----------------------------
   function renderPickPage(){
     spinCards.innerHTML = "";
     let anyOpen = false;
@@ -491,7 +498,7 @@
         <div class="progressWrap"><div class="bar" style="width:${pct}%"></div></div>
 
         <div class="photos" style="margin-top:10px">
-          ${thumbs || `<div class="notice" style="grid-column:1/-1;margin:0"><strong>No photos yet.</strong> Admin can upload jersey photos.</div>`}
+          ${thumbs || `<div class="notice" style="grid-column:1/-1;margin:0"><strong>No photos yet.</strong></div>`}
         </div>
 
         <div class="row" style="margin-top:10px">
@@ -514,9 +521,6 @@
     });
   }
 
-  // -----------------------------
-  // Checkout page
-  // -----------------------------
   function renderQty(){
     qtyEl.innerHTML = "";
     for(let i=1;i<=5;i++){
@@ -545,11 +549,8 @@
     coTotal.textContent = `Total: ${money(total)}`;
 
     coBar.style.width = pct + "%";
-
-    // Venmo link uses current qty
     venmoPayBtn.href = buildVenmoLink(spin, qty);
 
-    // photos
     coPhotos.innerHTML = "";
     const photos = spin.photos || [];
     if(photos.length === 0){
@@ -557,7 +558,7 @@
       div.className = "notice";
       div.style.gridColumn = "1 / -1";
       div.style.margin = "0";
-      div.innerHTML = "<strong>No photos yet.</strong> Admin can upload jersey photos.";
+      div.innerHTML = "<strong>No photos yet.</strong>";
       coPhotos.appendChild(div);
     }else{
       photos.forEach(src => {
@@ -598,9 +599,6 @@
     renderPickPage();
   }
 
-  // -----------------------------
-  // Entry submission (Venmo required)
-  // -----------------------------
   function addEntry(){
     const id = state.selectedSpinId;
     const spin = getSpin(id);
@@ -631,7 +629,6 @@
 
     const amountExpected = Number(spin.entryPrice) * qty;
 
-    // Store entry locally (prototype)
     state.entriesBySpin[id] = state.entriesBySpin[id] || [];
     state.entriesBySpin[id].push({
       id: cryptoId(),
@@ -643,7 +640,6 @@
       at: nowISO()
     });
 
-    // reset form
     paidCheck.checked = false;
     nameEl.value = "";
     contactEl.value = "";
@@ -675,7 +671,6 @@
 
   async function ensureDefaultPin(){
     if(state.adminPinHash) return;
-    // default PIN is 1234 on first run (change it in Admin panel)
     state.adminPinHash = await sha256("1234");
     saveState();
   }
@@ -689,20 +684,13 @@
 
   async function toggleAdmin(){
     await ensureDefaultPin();
-
     if(!state.adminOn){
       const ok = await promptForPin();
-      if(!ok){
-        alert("Incorrect PIN.");
-        return;
-      }
+      if(!ok){ alert("Incorrect PIN."); return; }
       state.adminOn = true;
-      state.sessionAdminOk = true;
     }else{
       state.adminOn = false;
-      state.sessionAdminOk = false;
     }
-
     saveState();
     renderAdmin();
   }
@@ -723,11 +711,9 @@
   function renderAdmin(){
     btnToggleAdmin.textContent = state.adminOn ? "Admin: On" : "Admin: Off";
     adminPanel.classList.toggle("hidden", !state.adminOn);
-
     if(!state.adminOn) return;
 
     adminSpins.innerHTML = "";
-
     state.spins.forEach((spin) => {
       const wrap = document.createElement("div");
       wrap.className = "card";
@@ -757,23 +743,14 @@
         <label>Venmo receiver (Locker Room Legends) — WITHOUT @</label>
         <input data-k="venmoReceiver" data-id="${spin.id}" value="${escapeHtml(spin.venmoReceiver || "")}" placeholder="e.g., lockerroomlegends" />
 
-        <label>Upload jersey photos</label>
-        <input type="file" accept="image/*" multiple data-photo="${spin.id}" />
-
-        <div class="row" style="margin-top:10px">
-          <button class="secondary" data-clearphotos="${spin.id}">Clear Photos</button>
-          <button class="secondary" data-clearentries="${spin.id}">Clear Entries</button>
-        </div>
-
         <div class="tiny" style="margin-top:8px">
-          Entries stored on this device only. Clearing entries resets the fill count here.
+          Photos are loaded from the repo (shared for everyone): <strong>${SPIN_PHOTOS_DEFAULT.join(", ")}</strong>
         </div>
       `;
 
       adminSpins.appendChild(wrap);
     });
 
-    // input listeners
     adminSpins.querySelectorAll("input[data-k], textarea[data-k]").forEach(el => {
       el.addEventListener("input", () => {
         const id = el.getAttribute("data-id");
@@ -785,74 +762,13 @@
           v = Math.max(1, Math.floor(Number(v || 1)));
           if(k === "capacity") v = Math.max(2, v);
         }
-        if(k === "venmoReceiver"){
-          v = normalizeVenmoHandle(v);
-        }
+        if(k === "venmoReceiver"){ v = normalizeVenmoHandle(v); }
 
         spin[k] = v;
         saveState();
         renderPickPage();
         if(state.selectedSpinId === id) renderCheckout();
       });
-    });
-
-    // photo upload listeners
-    adminSpins.querySelectorAll("input[type=file][data-photo]").forEach(el => {
-      el.addEventListener("change", async () => {
-        const id = el.getAttribute("data-photo");
-        const spin = getSpin(id);
-        spin.photos = spin.photos || [];
-
-        if(el.files && el.files.length){
-          const newPhotos = await filesToBase64(el.files);
-          spin.photos = spin.photos.concat(newPhotos);
-          el.value = "";
-          saveState();
-          renderPickPage();
-          if(state.selectedSpinId === id) renderCheckout();
-        }
-      });
-    });
-
-    // clear photos
-    adminSpins.querySelectorAll("button[data-clearphotos]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-clearphotos");
-        const spin = getSpin(id);
-        spin.photos = [];
-        saveState();
-        renderPickPage();
-        if(state.selectedSpinId === id) renderCheckout();
-      });
-    });
-
-    // clear entries (local)
-    adminSpins.querySelectorAll("button[data-clearentries]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-clearentries");
-        if(!confirm("Clear entries for this Spin on this device?")) return;
-        state.entriesBySpin[id] = [];
-        saveState();
-        renderPickPage();
-        if(state.selectedSpinId === id) renderCheckout();
-      });
-    });
-  }
-
-  async function filesToBase64(files){
-    const arr = [];
-    for(const f of files){
-      const b64 = await fileToBase64(f);
-      arr.push(b64);
-    }
-    return arr;
-  }
-  function fileToBase64(file){
-    return new Promise((resolve,reject)=>{
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
     });
   }
 
@@ -872,12 +788,10 @@
   paidCheck.addEventListener("change", updatePaidPill);
 
   qtyEl.addEventListener("change", () => {
-    // keep Venmo link + totals synced with qty
     renderCheckout();
   });
 
   venmoPayBtn.addEventListener("click", () => {
-    // friendly reminder (does not block)
     showMessage("After paying on Venmo, return here and check <strong>I paid on Venmo</strong>, then submit.", "ok");
   });
 
@@ -892,9 +806,11 @@
   // -----------------------------
   // Init
   // -----------------------------
-  renderPickPage();
-  renderAdmin();
-  ensureDefaultPin();
+  (async function init(){
+    renderPickPage();
+    renderAdmin();
+    await ensureDefaultPin();
+  })();
 </script>
 
 </body>
