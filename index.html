@@ -305,44 +305,39 @@
   const DEFAULT_VENMO_RECEIVER = "lockerroomlegends";
   const NOTE_PREFIX = "LRL Spin";
 
-  // These files must exist in your repo next to index.html
-  const SPIN_PHOTOS_DEFAULT = [
-    "boozer.jpg",
-    "evans.jpeg",
-    "test.webp"
-  ];
+
 
   const STORAGE_KEY = "lrl_spin_to_win_venmo_3options_v3";
 
-  const DEFAULT_SPINS = [
-    {
-      id: "spin1",
-      title: "Jersey Spin #1",
-      desc: "Win one of the jerseys shown below.",
-      entryPrice: 25,
-      capacity: 30,
-      venmoReceiver: DEFAULT_VENMO_RECEIVER,
-      photos: SPIN_PHOTOS_DEFAULT
-    },
-    {
-      id: "spin2",
-      title: "Jersey Spin #2",
-      desc: "Win one of the jerseys shown below.",
-      entryPrice: 35,
-      capacity: 25,
-      venmoReceiver: DEFAULT_VENMO_RECEIVER,
-      photos: SPIN_PHOTOS_DEFAULT
-    },
-    {
-      id: "spin3",
-      title: "Jersey Spin #3",
-      desc: "Win one of the jerseys shown below.",
-      entryPrice: 50,
-      capacity: 20,
-      venmoReceiver: DEFAULT_VENMO_RECEIVER,
-      photos: SPIN_PHOTOS_DEFAULT
-    }
-  ];
+const DEFAULT_SPINS = [
+  {
+    id: "spin1",
+    title: "Jersey Spin #1",
+    desc: "Win the Duke Boozer #12 jersey.",
+    entryPrice: 100,
+    capacity: 20,
+    venmoReceiver: DEFAULT_VENMO_RECEIVER,
+    photos: ["boozer.jpg"]
+  },
+  {
+    id: "spin2",
+    title: "Jersey Spin #2",
+    desc: "Win the Duke Evans #3 jersey.",
+    entryPrice: 80,
+    capacity: 25,
+    venmoReceiver: DEFAULT_VENMO_RECEIVER,
+    photos: ["evans.jpeg"]
+  },
+  {
+    id: "spin3",
+    title: "Jersey Spin #3",
+    desc: "Win the Illinois Wagler #23 jersey.",
+    entryPrice: 10,
+    capacity: 20,
+    venmoReceiver: DEFAULT_VENMO_RECEIVER,
+    photos: ["test.webp"]
+  }
+];
 
   const state = loadState() || {
     adminOn: false,
