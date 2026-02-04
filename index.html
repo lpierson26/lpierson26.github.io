@@ -17,7 +17,6 @@
   --good:#059669;
   --bad:#dc2626;
 }
-
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -25,29 +24,21 @@ body{
   background:linear-gradient(180deg,rgba(29,78,216,.06),rgba(220,38,38,.03));
   color:var(--text);
 }
-
 header{
   background:#fff;
   border-bottom:1px solid var(--border);
   padding:14px;
 }
-
 .brandBar{
   height:4px;
   background:linear-gradient(90deg,var(--blue),var(--white),var(--red));
   border-radius:999px;
   margin-bottom:10px;
 }
-
 .wrap{max-width:980px;margin:0 auto}
 .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .between{justify-content:space-between}
-
-.logo{
-  height:44px;
-  object-fit:contain;
-}
-
+.logo{height:44px;object-fit:contain}
 main{padding:14px}
 .card{
   background:var(--card);
@@ -56,14 +47,12 @@ main{padding:14px}
   padding:14px;
   margin-bottom:14px;
 }
-
 .grid3{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:12px;
 }
 @media(max-width:900px){.grid3{grid-template-columns:1fr}}
-
 .pill{
   font-size:12px;
   padding:6px 10px;
@@ -74,7 +63,6 @@ main{padding:14px}
 .pill.good{color:var(--good)}
 .pill.bad{color:var(--bad)}
 .pill.blue{color:var(--blue)}
-
 .title{font-weight:900}
 .sub{font-size:13px;color:var(--muted)}
 
@@ -93,22 +81,16 @@ button.secondary{
   color:var(--text);
   border:1px solid var(--border);
 }
-button:disabled{opacity:.5}
+button:disabled{opacity:.5; cursor:not-allowed}
 
 /* ✅ single photo centered */
-.photos{
-  display:flex;
-  justify-content:center;
-  margin-top:10px;
-}
-
+.photos{display:flex;justify-content:center;margin-top:10px}
 .photo{
   border:1px solid var(--border);
   border-radius:12px;
   overflow:hidden;
   background:#fff;
 }
-
 .photo img{
   width:100%;
   max-width:320px;
@@ -141,6 +123,52 @@ button:disabled{opacity:.5}
   color:var(--muted);
   background:#fff;
 }
+
+/* form bits */
+label{display:block;margin:10px 0 6px;font-size:12px;color:var(--muted)}
+input,select{
+  width:100%;
+  padding:10px 10px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#fff;
+  font-size:14px;
+}
+.hr{height:1px;background:var(--border);margin:12px 0}
+
+/* wheel */
+.wheelWrap{
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+canvas{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 10px 18px rgba(15,23,42,.06);
+}
+.wheelSide{
+  min-width:240px;
+  flex:1;
+}
+.small{font-size:12px;color:var(--muted)}
+.list{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px;
+  max-height:240px;
+  overflow:auto;
+}
+.list div{
+  padding:6px 8px;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+.list div:last-child{border-bottom:none}
 </style>
 </head>
 
@@ -151,25 +179,27 @@ button:disabled{opacity:.5}
     <div class="brandBar"></div>
     <div class="row between">
       <div class="row">
-        <!-- ✅ logo stays -->
         <img src="images/logo.webp" class="logo" alt="Locker Room Legends">
         <div>
           <div class="title">Spin to Win</div>
-          <div class="sub"><strong>Venmo only.</strong> Pay → return → submit.</div>
+          <div class="sub"><strong>Venmo only.</strong> Pay → return → submit. When full, the wheel spins.</div>
         </div>
       </div>
-      <button id="btnReset" class="secondary">Reset</button>
+      <div class="row">
+        <button id="btnReset" class="secondary">Reset</button>
+      </div>
     </div>
   </div>
 </header>
 
 <main class="wrap">
 
-<section class="card">
+<!-- PAGE 1 -->
+<section id="pagePick" class="card">
   <div class="row between">
     <div>
       <div class="title">Pick a Spin</div>
-      <div class="sub">One entry = one chance to win.</div>
+      <div class="sub">Choose an option to sign up.</div>
     </div>
     <span id="globalStatus" class="pill">Open</span>
   </div>
@@ -177,70 +207,191 @@ button:disabled{opacity:.5}
   <div id="spinCards" class="grid3" style="margin-top:12px"></div>
 
   <div class="notice">
-    Pay on Venmo → return → confirm payment → submit entry.
+    This demo stores entries on <strong>this device</strong> (localStorage). If you need entries shared for everyone, you’ll need Google Forms/Sheet or a small backend.
   </div>
+</section>
+
+<!-- PAGE 2 -->
+<section id="pageSignup" class="card hidden">
+  <div class="row between">
+    <div>
+      <div class="title" id="signupTitle">Sign up</div>
+      <div class="sub" id="signupDesc"></div>
+    </div>
+    <button id="btnBack" class="secondary">← Back</button>
+  </div>
+
+  <div class="row" style="margin-top:10px;gap:10px">
+    <span class="pill blue" id="signupPrice">$0</span>
+    <span class="pill" id="signupFill">0/0 filled</span>
+    <span class="pill" id="signupSpots">0 spots left</span>
+    <span class="pill" id="signupStatus">Open</span>
+  </div>
+
+  <div class="progressWrap" aria-label="fill progress">
+    <div class="bar" id="signupBar"></div>
+  </div>
+
+  <div class="photos" id="signupPhotoWrap"></div>
+
+  <div class="wheelWrap">
+    <canvas id="wheel" width="360" height="360"></canvas>
+    <div class="wheelSide">
+      <div class="title" style="margin-bottom:6px">Wheel Entries</div>
+      <div class="small">Names added after submit. When full, it spins automatically.</div>
+      <div class="list" id="entryList" style="margin-top:10px"></div>
+
+      <div class="row" style="margin-top:10px">
+        <button id="btnSpinNow" class="secondary">Spin Now</button>
+      </div>
+      <div class="notice hidden" id="winnerBox"></div>
+    </div>
+  </div>
+
+  <div class="hr"></div>
+
+  <div class="row" style="gap:10px">
+    <div style="flex:1;min-width:240px">
+      <label for="name">Name</label>
+      <input id="name" placeholder="Your name" autocomplete="name" />
+    </div>
+    <div style="flex:1;min-width:240px">
+      <label for="phone">Phone</label>
+      <input id="phone" placeholder="(###) ###-####" autocomplete="tel" />
+    </div>
+  </div>
+
+  <div class="row" style="gap:10px">
+    <div style="flex:1;min-width:240px">
+      <label for="email">Email</label>
+      <input id="email" placeholder="you@email.com" autocomplete="email" />
+    </div>
+    <div style="flex:1;min-width:240px">
+      <label for="venmo">Venmo username</label>
+      <input id="venmo" placeholder="@yourVenmo" />
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:10px">
+    <button id="btnSubmit" style="width:100%">Submit Entry (adds name to wheel)</button>
+  </div>
+
+  <div id="msg" class="notice hidden"></div>
 </section>
 
 </main>
 
 <script>
-const STORAGE_KEY="lrl_spin_single_photo_v1";
+const STORAGE_KEY="lrl_spin_wheel_demo_v1";
 const DEFAULT_VENMO_RECEIVER="lockerroomlegends";
 
+/* ✅ Use your github image paths here (you already have photos in your repo) */
 const DEFAULT_SPINS=[
-  {
-    id:"spin1",
-    title:"Jersey Spin #1",
-    desc:"Duke Boozer #12 Jersey",
-    entryPrice:100,
-    capacity:20,
-    venmoReceiver:DEFAULT_VENMO_RECEIVER,
-    photos:["images/boozer.jpg"]  // ✅ only first is used
-  },
-  {
-    id:"spin2",
-    title:"Jersey Spin #2",
-    desc:"Duke Evans #3 Jersey",
-    entryPrice:80,
-    capacity:25,
-    venmoReceiver:DEFAULT_VENMO_RECEIVER,
-    photos:["images/evans.jpeg"]  // ✅ only first is used
-  },
-  {
-    id:"spin3",
-    title:"Jersey Spin #3",
-    desc:"Illinois Wagler #23 Jersey",
-    entryPrice:10,
-    capacity:20,
-    venmoReceiver:DEFAULT_VENMO_RECEIVER,
-    photos:["images/test.webp"]   // ✅ only first is used
-  }
+  { id:"spin1", title:"Jersey Spin #1", desc:"Duke Boozer #12 Jersey", entryPrice:100, capacity:20, venmoReceiver:DEFAULT_VENMO_RECEIVER, photos:["images/boozer.jpg"] },
+  { id:"spin2", title:"Jersey Spin #2", desc:"Duke Evans #3 Jersey", entryPrice:80,  capacity:25, venmoReceiver:DEFAULT_VENMO_RECEIVER, photos:["images/evans.jpeg"] },
+  { id:"spin3", title:"Jersey Spin #3", desc:"Illinois Wagler #23 Jersey", entryPrice:10,  capacity:20, venmoReceiver:DEFAULT_VENMO_RECEIVER, photos:["images/test.webp"] }
 ];
 
 const state=JSON.parse(localStorage.getItem(STORAGE_KEY))||{
+  selectedSpinId:null,
   spins:DEFAULT_SPINS,
-  entries:{spin1:[],spin2:[],spin3:[]}
+  entries:{spin1:[],spin2:[],spin3:[]},
+  spunWinners:{} // spinId -> {name, at}
 };
 
 function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
-function total(id){return state.entries[id].length;}
-function remaining(s){return s.capacity-total(s.id);}
+function getSpin(id){ return state.spins.find(s=>s.id===id); }
+function entries(id){ return state.entries[id] || []; }
+function total(id){ return entries(id).length; }
+function remaining(s){ return Math.max(0, s.capacity-total(s.id)); }
+function isFull(s){ return total(s.id) >= s.capacity; }
 
+const pagePick=document.getElementById("pagePick");
+const pageSignup=document.getElementById("pageSignup");
 const spinCards=document.getElementById("spinCards");
 const globalStatus=document.getElementById("globalStatus");
 
-function render(){
+const btnBack=document.getElementById("btnBack");
+const btnSubmit=document.getElementById("btnSubmit");
+const btnSpinNow=document.getElementById("btnSpinNow");
+
+const signupTitle=document.getElementById("signupTitle");
+const signupDesc=document.getElementById("signupDesc");
+const signupPrice=document.getElementById("signupPrice");
+const signupFill=document.getElementById("signupFill");
+const signupSpots=document.getElementById("signupSpots");
+const signupBar=document.getElementById("signupBar");
+const signupPhotoWrap=document.getElementById("signupPhotoWrap");
+const signupStatus=document.getElementById("signupStatus");
+
+const nameEl=document.getElementById("name");
+const phoneEl=document.getElementById("phone");
+const emailEl=document.getElementById("email");
+const venmoEl=document.getElementById("venmo");
+
+const msg=document.getElementById("msg");
+const winnerBox=document.getElementById("winnerBox");
+const entryList=document.getElementById("entryList");
+
+const wheel=document.getElementById("wheel");
+const ctx=wheel.getContext("2d");
+
+let anim=null; // spin animation handle
+let wheelAngle=0;
+
+function showMsg(html){
+  msg.classList.remove("hidden");
+  msg.innerHTML=html;
+}
+function clearMsg(){
+  msg.classList.add("hidden");
+  msg.innerHTML="";
+}
+function showWinner(html){
+  winnerBox.classList.remove("hidden");
+  winnerBox.innerHTML=html;
+}
+function clearWinner(){
+  winnerBox.classList.add("hidden");
+  winnerBox.innerHTML="";
+}
+
+function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||""); }
+
+function goSignup(id){
+  state.selectedSpinId=id;
+  save();
+  clearMsg();
+  clearWinner();
+
+  nameEl.value=""; phoneEl.value=""; emailEl.value=""; venmoEl.value="";
+
+  pagePick.classList.add("hidden");
+  pageSignup.classList.remove("hidden");
+  renderSignup();
+}
+
+function goPick(){
+  state.selectedSpinId=null;
+  save();
+  clearMsg();
+  clearWinner();
+  pageSignup.classList.add("hidden");
+  pagePick.classList.remove("hidden");
+  renderPick();
+}
+
+function renderPick(){
   spinCards.innerHTML="";
-  let open=false;
+  let anyOpen=false;
 
   state.spins.forEach(s=>{
-    if(remaining(s)>0) open=true;
-
-    // ✅ ONLY ONE PHOTO (first)
+    if(remaining(s)>0) anyOpen=true;
     const photo=(s.photos && s.photos.length) ? s.photos[0] : null;
 
     const div=document.createElement("div");
     div.className="card";
+    div.style.background="#fff";
     div.innerHTML=`
       <div class="row between">
         <div>
@@ -256,32 +407,277 @@ function render(){
       </div>
 
       <div class="progressWrap">
-        <div class="bar" style="width:${(total(s.id)/s.capacity)*100}%"></div>
+        <div class="bar" style="width:${Math.min(100,(total(s.id)/s.capacity)*100)}%"></div>
       </div>
 
       <div class="photos">
         ${photo ? `<div class="photo"><img src="${photo}" alt="Jersey photo"></div>` : ""}
       </div>
 
-      <button ${remaining(s)<=0?"disabled":""} style="margin-top:10px;width:100%">
+      <button data-pick="${s.id}" ${remaining(s)<=0?"disabled":""} style="margin-top:10px;width:100%">
         ${remaining(s)<=0?"Full":"Choose Spin"}
       </button>
     `;
     spinCards.appendChild(div);
   });
 
-  globalStatus.textContent=open?"Open":"All Full";
-  globalStatus.className=`pill ${open?"good":"bad"}`;
+  globalStatus.textContent=anyOpen?"Open":"All Full";
+  globalStatus.className=`pill ${anyOpen?"good":"bad"}`;
+
+  spinCards.querySelectorAll("button[data-pick]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id=btn.getAttribute("data-pick");
+      goSignup(id);
+    });
+  });
 }
 
+function renderSignup(){
+  const s=getSpin(state.selectedSpinId);
+  if(!s) return;
+
+  const filled=total(s.id);
+  const cap=s.capacity;
+  const spots=remaining(s);
+  const pct=Math.min(100, Math.round((filled/cap)*100));
+  const photo=(s.photos && s.photos.length) ? s.photos[0] : null;
+
+  signupTitle.textContent=`Sign up — ${s.title}`;
+  signupDesc.textContent=s.desc;
+  signupPrice.textContent=`$${s.entryPrice} per entry`;
+  signupFill.textContent=`${filled}/${cap} filled`;
+  signupSpots.textContent=`${spots} spots left`;
+  signupBar.style.width=pct+"%";
+
+  const full=isFull(s);
+  signupStatus.textContent = full ? "Full" : "Open";
+  signupStatus.className = `pill ${full ? "bad" : "good"}`;
+
+  signupPhotoWrap.innerHTML = photo
+    ? `<div class="photo"><img src="${photo}" alt="Jersey photo"></div>`
+    : `<div class="notice" style="margin:10px 0 0"><strong>No photo found.</strong></div>`;
+
+  // list + wheel
+  renderEntryList();
+  drawWheel();
+
+  // if already spun, show winner
+  const w = state.spunWinners[s.id];
+  if(w){
+    showWinner(`<strong>Winner already selected:</strong> ${escapeHtml(w.name)}<br/><span class="small">(${new Date(w.at).toLocaleString()})</span>`);
+  }else{
+    clearWinner();
+  }
+
+  btnSubmit.disabled = full || !!state.spunWinners[s.id];
+  btnSpinNow.disabled = entries(s.id).length < 2 || !!state.spunWinners[s.id];
+}
+
+function escapeHtml(str){
+  return (str || "").replace(/[&<>"']/g, (m) => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+
+function renderEntryList(){
+  const s=getSpin(state.selectedSpinId);
+  if(!s) return;
+
+  const list = entries(s.id).map((e, i)=> `<div>${i+1}. ${escapeHtml(e.name)}</div>`).join("");
+  entryList.innerHTML = list || `<div class="small">No entries yet.</div>`;
+}
+
+/* ---------- WHEEL DRAW/SPIN ---------- */
+
+function getNamesForWheel(){
+  const s=getSpin(state.selectedSpinId);
+  if(!s) return [];
+  return entries(s.id).map(e=>e.name);
+}
+
+function drawWheel(){
+  const names = getNamesForWheel();
+  const n = Math.max(1, names.length);
+  const cx = wheel.width/2;
+  const cy = wheel.height/2;
+  const r  = Math.min(cx, cy) - 10;
+
+  ctx.clearRect(0,0,wheel.width,wheel.height);
+
+  // outer circle
+  ctx.beginPath();
+  ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle="#fff";
+  ctx.fill();
+  ctx.strokeStyle="rgba(15,23,42,.12)";
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  // pointer
+  ctx.beginPath();
+  ctx.moveTo(cx, 8);
+  ctx.lineTo(cx-10, 28);
+  ctx.lineTo(cx+10, 28);
+  ctx.closePath();
+  ctx.fillStyle="rgba(220,38,38,.9)";
+  ctx.fill();
+
+  const slice = (Math.PI*2)/n;
+
+  for(let i=0;i<n;i++){
+    const start = wheelAngle + i*slice;
+    const end   = start + slice;
+
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,end);
+    ctx.closePath();
+
+    // alternating light fills (no custom colors needed)
+    ctx.fillStyle = i%2===0 ? "rgba(29,78,216,.10)" : "rgba(220,38,38,.08)";
+    ctx.fill();
+    ctx.strokeStyle="rgba(15,23,42,.08)";
+    ctx.stroke();
+
+    // label
+    const label = names[i] || "Waiting...";
+    const mid = (start+end)/2;
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(mid);
+    ctx.textAlign="right";
+    ctx.fillStyle="rgba(15,23,42,.85)";
+    ctx.font="12px system-ui";
+    ctx.fillText(label.length>18 ? label.slice(0,18)+"…" : label, r-14, 4);
+    ctx.restore();
+  }
+}
+
+function winnerIndexFromAngle(n){
+  // pointer is at top (angle -PI/2). Normalize angle to [0, 2PI)
+  const slice = (Math.PI*2)/n;
+  const a = ( ( (Math.PI*2) - (wheelAngle % (Math.PI*2)) ) + (Math.PI/2) ) % (Math.PI*2);
+  const idx = Math.floor(a / slice) % n;
+  return idx;
+}
+
+function spinWheelAndPickWinner(){
+  const s=getSpin(state.selectedSpinId);
+  if(!s) return;
+  if(state.spunWinners[s.id]) return;
+
+  const names=getNamesForWheel();
+  if(names.length < 2){
+    showMsg("Need at least <strong>2 entries</strong> to spin.");
+    return;
+  }
+
+  // random final angle (multiple turns)
+  const extraTurns = 6 + Math.random()*4; // 6-10 turns
+  const final = wheelAngle + extraTurns*Math.PI*2 + Math.random()*Math.PI*2;
+
+  const start = performance.now();
+  const duration = 2600;
+
+  cancelAnimationFrame(anim);
+  function easeOutCubic(t){ return 1 - Math.pow(1-t,3); }
+
+  function step(now){
+    const t = Math.min(1, (now-start)/duration);
+    const e = easeOutCubic(t);
+    wheelAngle = wheelAngle + (final - wheelAngle) * 0.08; // smooth toward final
+    // better: directly interpolate
+    wheelAngle = wheelAngle * (1-e) + final * e;
+
+    drawWheel();
+
+    if(t < 1){
+      anim = requestAnimationFrame(step);
+    }else{
+      // finalize precisely
+      wheelAngle = final;
+      drawWheel();
+
+      const idx = winnerIndexFromAngle(names.length);
+      const winner = names[idx];
+
+      state.spunWinners[s.id] = { name: winner, at: new Date().toISOString() };
+      save();
+
+      showWinner(`<strong>Winner:</strong> ${escapeHtml(winner)}<br/><span class="small">Managers: verify Venmo before awarding.</span>`);
+      btnSubmit.disabled = true;
+      btnSpinNow.disabled = true;
+      showMsg("<strong>Wheel spun.</strong> Winner selected.");
+    }
+  }
+
+  anim = requestAnimationFrame(step);
+}
+
+/* ---------- SUBMIT ENTRY + AUTO SPIN WHEN FULL ---------- */
+
+function submitEntry(){
+  const s=getSpin(state.selectedSpinId);
+  if(!s) return;
+
+  if(state.spunWinners[s.id]){
+    showMsg("<strong>This spin already selected a winner.</strong>");
+    return;
+  }
+
+  if(isFull(s)){
+    showMsg("<strong>This spin is full.</strong>");
+    return;
+  }
+
+  const name=nameEl.value.trim();
+  const phone=phoneEl.value.trim();
+  const email=emailEl.value.trim();
+  const venmo=venmoEl.value.trim();
+
+  if(!name){ showMsg("Please enter your <strong>name</strong>."); return; }
+  if(!phone){ showMsg("Please enter your <strong>phone</strong>."); return; }
+  if(!email || !validEmail(email)){ showMsg("Please enter a valid <strong>email</strong>."); return; }
+  if(!venmo){ showMsg("Please enter your <strong>Venmo username</strong>."); return; }
+
+  // add entry (name goes on wheel)
+  state.entries[s.id] = state.entries[s.id] || [];
+  state.entries[s.id].push({
+    at:new Date().toISOString(),
+    name, phone, email, venmo
+  });
+  save();
+
+  // reset form
+  nameEl.value=""; phoneEl.value=""; emailEl.value=""; venmoEl.value="";
+
+  renderPick();
+  renderSignup();
+
+  if(isFull(s)){
+    showMsg("<strong>Last spot filled!</strong> Spinning the wheel now…");
+    // small delay for UX
+    setTimeout(()=> spinWheelAndPickWinner(), 600);
+  }else{
+    showMsg("<strong>Entry submitted!</strong> Your name is now on the wheel.");
+  }
+}
+
+/* ---------- EVENTS ---------- */
+
+btnBack.addEventListener("click", goPick);
+btnSubmit.addEventListener("click", submitEntry);
+btnSpinNow.addEventListener("click", spinWheelAndPickWinner);
+
 document.getElementById("btnReset").onclick=()=>{
-  if(confirm("Reset local data?")){
+  if(confirm("Reset all local entries + winners on THIS device?")){
     localStorage.removeItem(STORAGE_KEY);
     location.reload();
   }
 };
 
-render();
+/* init */
+renderPick();
 </script>
 
 </body>
