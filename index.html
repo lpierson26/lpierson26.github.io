@@ -95,6 +95,7 @@ button.secondary{
 }
 button:disabled{opacity:.5}
 
+/* ✅ single photo centered */
 .photos{
   display:flex;
   justify-content:center;
@@ -150,6 +151,7 @@ button:disabled{opacity:.5}
     <div class="brandBar"></div>
     <div class="row between">
       <div class="row">
+        <!-- ✅ logo stays -->
         <img src="images/logo.webp" class="logo" alt="Locker Room Legends">
         <div>
           <div class="title">Spin to Win</div>
@@ -193,7 +195,7 @@ const DEFAULT_SPINS=[
     entryPrice:100,
     capacity:20,
     venmoReceiver:DEFAULT_VENMO_RECEIVER,
-    photos:["images/boozer.jpg"]
+    photos:["images/boozer.jpg"]  // ✅ only first is used
   },
   {
     id:"spin2",
@@ -202,7 +204,7 @@ const DEFAULT_SPINS=[
     entryPrice:80,
     capacity:25,
     venmoReceiver:DEFAULT_VENMO_RECEIVER,
-    photos:["images/evans.jpeg"]
+    photos:["images/evans.jpeg"]  // ✅ only first is used
   },
   {
     id:"spin3",
@@ -211,7 +213,7 @@ const DEFAULT_SPINS=[
     entryPrice:10,
     capacity:20,
     venmoReceiver:DEFAULT_VENMO_RECEIVER,
-    photos:["images/test.webp"]
+    photos:["images/test.webp"]   // ✅ only first is used
   }
 ];
 
@@ -233,7 +235,9 @@ function render(){
 
   state.spins.forEach(s=>{
     if(remaining(s)>0) open=true;
-    const photo=s.photos?.[0];
+
+    // ✅ ONLY ONE PHOTO (first)
+    const photo=(s.photos && s.photos.length) ? s.photos[0] : null;
 
     const div=document.createElement("div");
     div.className="card";
@@ -256,7 +260,7 @@ function render(){
       </div>
 
       <div class="photos">
-        ${photo?`<div class="photo"><img src="${photo}" alt=""></div>`:""}
+        ${photo ? `<div class="photo"><img src="${photo}" alt="Jersey photo"></div>` : ""}
       </div>
 
       <button ${remaining(s)<=0?"disabled":""} style="margin-top:10px;width:100%">
