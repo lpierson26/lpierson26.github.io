@@ -1,811 +1,283 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Spin to Win — Venmo Only (3 Options)</title>
-  <style>
-    :root{
-      /* LRL colors */
-      --red:#dc2626;
-      --blue:#1d4ed8;
-      --white:#ffffff;
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Spin to Win — Venmo Only</title>
 
-      --bg:#ffffff;
-      --text:#0f172a;
-      --muted:#64748b;
-      --border:#e2e8f0;
-      --card:#f8fafc;
+<style>
+:root{
+  --red:#dc2626;
+  --blue:#1d4ed8;
+  --white:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --card:#f8fafc;
+  --good:#059669;
+  --bad:#dc2626;
+}
 
-      --btn: var(--blue);
-      --btnText:#ffffff;
-      --accent: var(--red);
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:linear-gradient(180deg,rgba(29,78,216,.06),rgba(220,38,38,.03));
+  color:var(--text);
+}
 
-      --good:#059669;
-      --bad:#dc2626;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background:linear-gradient(180deg, rgba(29,78,216,.06), rgba(220,38,38,.03) 45%, rgba(255,255,255,1));
-      color:var(--text);
-    }
-    header{
-      padding:16px 14px;
-      border-bottom:1px solid var(--border);
-      background:#fff;
-      position:sticky;
-      top:0;
-      z-index:10;
-    }
-    .brandBar{
-      height:4px;
-      background:linear-gradient(90deg, var(--blue), var(--white), var(--red));
-      border-radius:999px;
-      margin-bottom:10px;
-    }
-    .wrap{max-width:980px;margin:0 auto;}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .between{justify-content:space-between}
+header{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:14px;
+}
 
-    .brandLeft{display:flex;gap:12px;align-items:center}
-    .logo{
-      height:44px;
-      width:auto;
-      display:block;
-      object-fit:contain;
-    }
-    @media (max-width:520px){
-      .logo{height:38px}
-    }
+.brandBar{
+  height:4px;
+  background:linear-gradient(90deg,var(--blue),var(--white),var(--red));
+  border-radius:999px;
+  margin-bottom:10px;
+}
 
-    h1{margin:0;font-size:20px}
-    p{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.35}
-    main{max-width:980px;margin:0 auto;padding:14px;}
-    .card{
-      border:1px solid var(--border);
-      background:var(--card);
-      border-radius:14px;
-      padding:14px;
-      box-shadow:0 8px 20px rgba(15, 23, 42, .05);
-    }
-    .grid3{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:12px;
-    }
-    @media (max-width: 900px){
-      .grid3{grid-template-columns:1fr}
-    }
-    .pill{
-      font-size:12px;
-      border:1px solid var(--border);
-      padding:6px 10px;
-      border-radius:999px;
-      background:#fff;
-      color:var(--muted);
-      white-space:nowrap;
-    }
-    .pill.good{color:var(--good); border-color: rgba(5,150,105,.25)}
-    .pill.bad{color:var(--bad); border-color: rgba(220,38,38,.25)}
-    .pill.blue{color:var(--blue); border-color: rgba(29,78,216,.25)}
-    .title{font-weight:900;font-size:16px;margin:0}
-    .sub{color:var(--muted);font-size:13px;margin-top:4px;line-height:1.3}
+.wrap{max-width:980px;margin:0 auto}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
 
-    .btn, button{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      border:none;border-radius:12px;padding:10px 12px;
-      font-weight:800;cursor:pointer;text-decoration:none;font-size:14px;
-      background:var(--btn);color:var(--btnText);
-      box-shadow:0 10px 18px rgba(29,78,216,.18);
-    }
-    .btn.red{background:var(--red); box-shadow:0 10px 18px rgba(220,38,38,.16);}
-    button.secondary, a.secondary{
-      background:#fff;color:var(--text);border:1px solid var(--border);
-      font-weight:800;
-      box-shadow:none;
-    }
-    button:disabled, a.disabled{opacity:.55;cursor:not-allowed;pointer-events:none}
-    label{display:block;margin:10px 0 6px;font-size:12px;color:var(--muted)}
-    input, select, textarea{
-      width:100%;padding:10px 10px;border-radius:12px;border:1px solid var(--border);
-      background:#fff;color:var(--text);outline:none;font-size:14px;
-    }
-    textarea{min-height:72px;resize:vertical}
-    .photos{
-      display:grid;grid-template-columns: repeat(3, 1fr);gap:8px;margin-top:10px;
-    }
-    @media (max-width:520px){ .photos{grid-template-columns: repeat(2, 1fr);} }
-    .photo{
-      border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;
-    }
-    .photo img{width:100%;height:140px;object-fit:cover;display:block;background:#f3f4f6;}
-    .progressWrap{margin-top:10px;background:#fff;border:1px solid var(--border);border-radius:999px;height:10px;overflow:hidden;}
-    .bar{height:100%;width:0%;background:linear-gradient(90deg, var(--blue), var(--red));}
-    .notice{
-      margin-top:10px;border:1px dashed var(--border);border-radius:12px;padding:10px;
-      color:var(--muted);background:#fff;font-size:13px;line-height:1.35;
-    }
-    .notice strong{color:var(--text)}
-    .hidden{display:none !important;}
-    hr{border:none;border-top:1px solid var(--border);margin:12px 0}
-    .tiny{font-size:12px;color:var(--muted)}
-    .kpiRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .kpiRow .pill{flex:0}
-    .checkboxRow{
-      display:flex; gap:10px; align-items:flex-start; padding:10px;
-      border:1px solid var(--border); border-radius:12px; background:#fff; margin-top:10px;
-    }
-    .checkboxRow input{width:auto; margin-top:3px}
-    .callout{
-      background:linear-gradient(90deg, rgba(29,78,216,.08), rgba(220,38,38,.06));
-      border:1px solid rgba(29,78,216,.18);
-      border-radius:14px;
-      padding:12px;
-      margin-top:12px;
-    }
-    .callout strong{color:var(--text)}
-  </style>
+.logo{
+  height:44px;
+  object-fit:contain;
+}
+
+main{padding:14px}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:14px;
+}
+
+.grid3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+@media(max-width:900px){.grid3{grid-template-columns:1fr}}
+
+.pill{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:#fff;
+}
+.pill.good{color:var(--good)}
+.pill.bad{color:var(--bad)}
+.pill.blue{color:var(--blue)}
+
+.title{font-weight:900}
+.sub{font-size:13px;color:var(--muted)}
+
+button,a.btn{
+  border:none;
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:800;
+  cursor:pointer;
+  background:var(--blue);
+  color:#fff;
+  text-decoration:none;
+}
+button.secondary{
+  background:#fff;
+  color:var(--text);
+  border:1px solid var(--border);
+}
+button:disabled{opacity:.5}
+
+.photos{
+  display:flex;
+  justify-content:center;
+  margin-top:10px;
+}
+
+.photo{
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  background:#fff;
+}
+
+.photo img{
+  width:100%;
+  max-width:320px;
+  height:180px;
+  object-fit:contain;
+  display:block;
+}
+
+.progressWrap{
+  margin-top:10px;
+  height:10px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:999px;
+  overflow:hidden;
+}
+.bar{
+  height:100%;
+  background:linear-gradient(90deg,var(--blue),var(--red));
+  width:0%;
+}
+
+.hidden{display:none}
+.notice{
+  margin-top:10px;
+  border:1px dashed var(--border);
+  border-radius:12px;
+  padding:10px;
+  font-size:13px;
+  color:var(--muted);
+  background:#fff;
+}
+</style>
 </head>
+
 <body>
 
 <header>
   <div class="wrap">
     <div class="brandBar"></div>
     <div class="row between">
-      <div class="brandLeft">
-        <img src="logo.webp" class="logo" alt="Locker Room Legends logo">
+      <div class="row">
+        <img src="images/logo.webp" class="logo" alt="Locker Room Legends">
         <div>
-          <h1>Spin to Win</h1>
-          <p><strong>Venmo only.</strong> Pay → return → submit entry. When full, the shop spins & contacts the winner.</p>
+          <div class="title">Spin to Win</div>
+          <div class="sub"><strong>Venmo only.</strong> Pay → return → submit.</div>
         </div>
       </div>
-      <div class="row">
-        <button class="secondary" id="btnToggleAdmin">Admin: Off</button>
-        <button class="secondary" id="btnReset">Reset</button>
-      </div>
+      <button id="btnReset" class="secondary">Reset</button>
     </div>
   </div>
 </header>
 
 <main class="wrap">
 
-  <!-- PAGE 1: PICK A SPIN -->
-  <section id="pagePick" class="card">
-    <div class="row between">
-      <div>
-        <div class="tiny">Step 1</div>
-        <div style="font-weight:950;font-size:18px">Pick a Spin</div>
-        <div class="tiny">Tap an option to pay on Venmo and enter.</div>
-      </div>
-      <span class="pill" id="globalStatus">Open</span>
+<section class="card">
+  <div class="row between">
+    <div>
+      <div class="title">Pick a Spin</div>
+      <div class="sub">One entry = one chance to win.</div>
     </div>
+    <span id="globalStatus" class="pill">Open</span>
+  </div>
 
-    <div style="margin-top:12px" class="grid3" id="spinCards"></div>
+  <div id="spinCards" class="grid3" style="margin-top:12px"></div>
 
-    <div class="notice">
-      <strong>How it works</strong><br/>
-      • Tap a Spin option<br/>
-      • Pay on Venmo using the button (note is required)<br/>
-      • Return and submit your info (must confirm you paid)<br/>
-      • Managers verify Venmo payments and spin when the Spin is full
-    </div>
-  </section>
-
-  <!-- PAGE 2: CHECKOUT / ENTRY -->
-  <section id="pageCheckout" class="card hidden">
-    <div class="row between">
-      <div>
-        <div class="tiny">Step 2</div>
-        <div style="font-weight:950;font-size:18px" id="coTitle">Checkout</div>
-        <div class="tiny" id="coDesc"></div>
-      </div>
-      <button class="secondary" id="btnBack">← Back</button>
-    </div>
-
-    <div class="kpiRow">
-      <span class="pill blue" id="coPrice">$25 / entry</span>
-      <span class="pill" id="coCap">0/30 filled</span>
-      <span class="pill" id="coSpots">30 spots left</span>
-      <span class="pill" id="coTotal">Total: $0</span>
-    </div>
-
-    <div class="progressWrap" aria-label="fill progress">
-      <div class="bar" id="coBar"></div>
-    </div>
-
-    <div class="photos" id="coPhotos"></div>
-
-    <div class="callout">
-      <strong>Payment required</strong><br/>
-      You must pay on Venmo <strong>before</strong> submitting an entry.
-      Enter the <strong>same name/contact</strong> you used for Venmo so managers can match it quickly.
-    </div>
-
-    <hr/>
-
-    <div class="row">
-      <div style="flex:1">
-        <label for="name">Name</label>
-        <input id="name" placeholder="Your name" autocomplete="name" />
-      </div>
-      <div style="flex:1">
-        <label for="contact">Phone or Email</label>
-        <input id="contact" placeholder="Phone or email" />
-      </div>
-    </div>
-
-    <div class="row">
-      <div style="flex:1">
-        <label for="venmoUser">Your Venmo username</label>
-        <input id="venmoUser" placeholder="@yourVenmo" />
-        <div class="tiny" style="margin-top:6px">Example: <strong>@lockerroomlegendsfan</strong></div>
-      </div>
-
-      <div style="flex:1">
-        <label for="qty">How many entries?</label>
-        <select id="qty"></select>
-        <div class="tiny" style="margin-top:6px">Max 5 entries per person (simple rule).</div>
-      </div>
-    </div>
-
-    <div class="row" style="margin-top:10px">
-      <a class="btn red" id="venmoPayBtn" href="#" target="_blank" rel="noreferrer">
-        Pay with Venmo
-      </a>
-      <span class="pill bad" id="paidPill">Payment not confirmed</span>
-    </div>
-
-    <div class="checkboxRow">
-      <input type="checkbox" id="paidCheck" />
-      <div>
-        <div style="font-weight:900">I paid on Venmo</div>
-        <div class="tiny">Required to submit. Managers will verify payment before finalizing winners.</div>
-      </div>
-    </div>
-
-    <div class="row" style="margin-top:10px">
-      <button id="btnSubmit" style="flex:1">Submit Entry</button>
-      <button id="btnForceSpin" class="secondary">Spin Now (Admin)</button>
-    </div>
-
-    <div id="msg" class="notice hidden"></div>
-  </section>
-
-  <!-- ADMIN PANEL -->
-  <section id="adminPanel" class="card hidden" style="margin-top:14px">
-    <div style="font-weight:950;font-size:16px">Admin — Update Spin Options</div>
-    <div class="tiny">Admin is protected by a PIN. Update title/price/capacity and the Venmo receiver username.</div>
-
-    <div class="notice" style="margin-top:10px">
-      <strong>Admin PIN</strong><br/>
-      You can change the PIN below (this only protects the Admin toggle on this browser/device).
-      <div class="row" style="margin-top:10px">
-        <input id="adminPinNew" placeholder="New PIN (4–12 digits)" style="max-width:240px" />
-        <button class="secondary" id="btnSetPin">Set PIN</button>
-      </div>
-      <div class="tiny" style="margin-top:8px">Note: This is “front-end only” protection. A real system uses login on a server.</div>
-    </div>
-
-    <div id="adminSpins"></div>
-
-    <div class="notice">
-      <strong>Important</strong><br/>
-      Photos are now loaded from the GitHub repo so everyone sees the same pictures. To change photos, replace the image files in the repo.
-    </div>
-  </section>
+  <div class="notice">
+    Pay on Venmo → return → confirm payment → submit entry.
+  </div>
+</section>
 
 </main>
 
 <script>
-  /***********************
-   * SETTINGS (EDIT THESE)
-   ***********************/
-  const DEFAULT_VENMO_RECEIVER = "lockerroomlegends";
-  const NOTE_PREFIX = "LRL Spin";
+const STORAGE_KEY="lrl_spin_single_photo_v1";
+const DEFAULT_VENMO_RECEIVER="lockerroomlegends";
 
-
-
-  const STORAGE_KEY = "lrl_spin_to_win_venmo_3options_v3";
-
-const DEFAULT_SPINS = [
+const DEFAULT_SPINS=[
   {
-    id: "spin1",
-    title: "Jersey Spin #1",
-    desc: "Win the Duke Boozer #12 jersey.",
-    entryPrice: 100,
-    capacity: 20,
-    venmoReceiver: DEFAULT_VENMO_RECEIVER,
-    photos: ["boozer.jpg"]
+    id:"spin1",
+    title:"Jersey Spin #1",
+    desc:"Duke Boozer #12 Jersey",
+    entryPrice:100,
+    capacity:20,
+    venmoReceiver:DEFAULT_VENMO_RECEIVER,
+    photos:["images/boozer.jpg"]
   },
   {
-    id: "spin2",
-    title: "Jersey Spin #2",
-    desc: "Win the Duke Evans #3 jersey.",
-    entryPrice: 80,
-    capacity: 25,
-    venmoReceiver: DEFAULT_VENMO_RECEIVER,
-    photos: ["evans.jpeg"]
+    id:"spin2",
+    title:"Jersey Spin #2",
+    desc:"Duke Evans #3 Jersey",
+    entryPrice:80,
+    capacity:25,
+    venmoReceiver:DEFAULT_VENMO_RECEIVER,
+    photos:["images/evans.jpeg"]
   },
   {
-    id: "spin3",
-    title: "Jersey Spin #3",
-    desc: "Win the Illinois Wagler #23 jersey.",
-    entryPrice: 10,
-    capacity: 20,
-    venmoReceiver: DEFAULT_VENMO_RECEIVER,
-    photos: ["test.webp"]
+    id:"spin3",
+    title:"Jersey Spin #3",
+    desc:"Illinois Wagler #23 Jersey",
+    entryPrice:10,
+    capacity:20,
+    venmoReceiver:DEFAULT_VENMO_RECEIVER,
+    photos:["images/test.webp"]
   }
 ];
 
-  const state = loadState() || {
-    adminOn: false,
-    selectedSpinId: null,
-    spins: DEFAULT_SPINS,
-    entriesBySpin: { spin1: [], spin2: [], spin3: [] },
-    adminPinHash: null
-  };
+const state=JSON.parse(localStorage.getItem(STORAGE_KEY))||{
+  spins:DEFAULT_SPINS,
+  entries:{spin1:[],spin2:[],spin3:[]}
+};
 
-  function loadState(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    }catch(e){ return null; }
-  }
-  function saveState(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
+function total(id){return state.entries[id].length;}
+function remaining(s){return s.capacity-total(s.id);}
 
-  // -----------------------------
-  // DOM
-  // -----------------------------
-  const btnToggleAdmin = document.getElementById("btnToggleAdmin");
-  const btnReset = document.getElementById("btnReset");
+const spinCards=document.getElementById("spinCards");
+const globalStatus=document.getElementById("globalStatus");
 
-  const pagePick = document.getElementById("pagePick");
-  const pageCheckout = document.getElementById("pageCheckout");
-  const btnBack = document.getElementById("btnBack");
+function render(){
+  spinCards.innerHTML="";
+  let open=false;
 
-  const spinCards = document.getElementById("spinCards");
-  const globalStatus = document.getElementById("globalStatus");
+  state.spins.forEach(s=>{
+    if(remaining(s)>0) open=true;
+    const photo=s.photos?.[0];
 
-  const coTitle = document.getElementById("coTitle");
-  const coDesc = document.getElementById("coDesc");
-  const coPrice = document.getElementById("coPrice");
-  const coCap = document.getElementById("coCap");
-  const coSpots = document.getElementById("coSpots");
-  const coTotal = document.getElementById("coTotal");
-  const coBar = document.getElementById("coBar");
-  const coPhotos = document.getElementById("coPhotos");
-
-  const nameEl = document.getElementById("name");
-  const contactEl = document.getElementById("contact");
-  const venmoUserEl = document.getElementById("venmoUser");
-  const qtyEl = document.getElementById("qty");
-
-  const venmoPayBtn = document.getElementById("venmoPayBtn");
-  const paidPill = document.getElementById("paidPill");
-  const paidCheck = document.getElementById("paidCheck");
-
-  const btnSubmit = document.getElementById("btnSubmit");
-  const btnForceSpin = document.getElementById("btnForceSpin");
-  const msg = document.getElementById("msg");
-
-  const adminPanel = document.getElementById("adminPanel");
-  const adminSpins = document.getElementById("adminSpins");
-  const adminPinNew = document.getElementById("adminPinNew");
-  const btnSetPin = document.getElementById("btnSetPin");
-
-  // -----------------------------
-  // Helpers
-  // -----------------------------
-  const money = n => `$${Number(n).toFixed(0)}`;
-  const nowISO = () => new Date().toISOString();
-
-  function escapeHtml(str){
-    return (str || "").replace(/[&<>"']/g, (m) => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[m]));
-  }
-  function showMessage(html, type="info"){
-    msg.classList.remove("hidden");
-    msg.style.borderColor =
-      type==="bad" ? "rgba(220,38,38,.25)" :
-      type==="ok" ? "rgba(5,150,105,.25)" : "var(--border)";
-    msg.innerHTML = html;
-  }
-  function clearMessage(){
-    msg.classList.add("hidden");
-    msg.innerHTML = "";
-  }
-
-  function getSpin(id){ return state.spins.find(s => s.id === id); }
-  function entriesFor(id){ return state.entriesBySpin[id] || []; }
-  function totalEntries(id){
-    return entriesFor(id).reduce((sum,e)=> sum + (e.qty || 1), 0);
-  }
-  function remainingSpots(id){
-    const spin = getSpin(id);
-    return Math.max(0, spin.capacity - totalEntries(id));
-  }
-  function isFull(id){
-    return totalEntries(id) >= getSpin(id).capacity;
-  }
-
-  function normalizeVenmoHandle(s){
-    s = (s || "").trim();
-    if(!s) return "";
-    return s.startsWith("@") ? s.slice(1) : s;
-  }
-
-  function buildVenmoLink(spin, qty){
-    const receiver = normalizeVenmoHandle(spin.venmoReceiver || DEFAULT_VENMO_RECEIVER);
-    const amount = Math.max(1, Number(spin.entryPrice)) * Math.max(1, Number(qty || 1));
-    const note = encodeURIComponent(`${NOTE_PREFIX} — ${spin.title} — ${qty} entry${Number(qty)===1?"":"ies"}`);
-    return `https://venmo.com/u/${encodeURIComponent(receiver)}?txn=pay&amount=${encodeURIComponent(amount)}&note=${note}`;
-  }
-
-  function updatePaidPill(){
-    if(paidCheck.checked){
-      paidPill.textContent = "Payment confirmed by user";
-      paidPill.className = "pill good";
-    }else{
-      paidPill.textContent = "Payment not confirmed";
-      paidPill.className = "pill bad";
-    }
-  }
-
-  function renderPickPage(){
-    spinCards.innerHTML = "";
-    let anyOpen = false;
-
-    state.spins.forEach(spin => {
-      const filled = totalEntries(spin.id);
-      const cap = spin.capacity;
-      const pct = Math.min(100, Math.round((filled / cap) * 100));
-      if(filled < cap) anyOpen = true;
-
-      const photos = spin.photos || [];
-      const thumbs = photos.slice(0,3).map(src => `
-        <div class="photo"><img src="${src}" alt="Item photo"></div>
-      `).join("");
-
-      const card = document.createElement("div");
-      card.className = "card";
-      card.style.background = "#fff";
-
-      card.innerHTML = `
-        <div class="row between">
-          <div>
-            <div class="title">${escapeHtml(spin.title)}</div>
-            <div class="sub">${escapeHtml(spin.desc)}</div>
-          </div>
-          <span class="pill blue">${money(spin.entryPrice)} / entry</span>
+    const div=document.createElement("div");
+    div.className="card";
+    div.innerHTML=`
+      <div class="row between">
+        <div>
+          <div class="title">${s.title}</div>
+          <div class="sub">${s.desc}</div>
         </div>
+        <span class="pill blue">$${s.entryPrice}</span>
+      </div>
 
-        <div class="kpiRow">
-          <span class="pill">${filled}/${cap} filled</span>
-          <span class="pill">${remainingSpots(spin.id)} spots left</span>
-          <span class="pill ${filled>=cap ? "bad" : "good"}">${filled>=cap ? "Full" : "Open"}</span>
-        </div>
+      <div class="row" style="margin-top:6px">
+        <span class="pill">${total(s.id)}/${s.capacity} filled</span>
+        <span class="pill ${remaining(s)>0?"good":"bad"}">${remaining(s)>0?"Open":"Full"}</span>
+      </div>
 
-        <div class="progressWrap"><div class="bar" style="width:${pct}%"></div></div>
+      <div class="progressWrap">
+        <div class="bar" style="width:${(total(s.id)/s.capacity)*100}%"></div>
+      </div>
 
-        <div class="photos" style="margin-top:10px">
-          ${thumbs || `<div class="notice" style="grid-column:1/-1;margin:0"><strong>No photos yet.</strong></div>`}
-        </div>
+      <div class="photos">
+        ${photo?`<div class="photo"><img src="${photo}" alt=""></div>`:""}
+      </div>
 
-        <div class="row" style="margin-top:10px">
-          <button ${filled>=cap ? "disabled" : ""} data-pick="${spin.id}" style="flex:1">
-            ${filled>=cap ? "Full" : "Choose this Spin"}
-          </button>
-        </div>
-      `;
-      spinCards.appendChild(card);
-    });
+      <button ${remaining(s)<=0?"disabled":""} style="margin-top:10px;width:100%">
+        ${remaining(s)<=0?"Full":"Choose Spin"}
+      </button>
+    `;
+    spinCards.appendChild(div);
+  });
 
-    globalStatus.textContent = anyOpen ? "Open" : "All Full";
-    globalStatus.className = anyOpen ? "pill good" : "pill bad";
+  globalStatus.textContent=open?"Open":"All Full";
+  globalStatus.className=`pill ${open?"good":"bad"}`;
+}
 
-    spinCards.querySelectorAll("button[data-pick]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-pick");
-        goCheckout(id);
-      });
-    });
-  }
-
-  function renderQty(){
-    qtyEl.innerHTML = "";
-    for(let i=1;i<=5;i++){
-      const opt = document.createElement("option");
-      opt.value = String(i);
-      opt.textContent = String(i);
-      qtyEl.appendChild(opt);
-    }
-  }
-
-  function renderCheckout(){
-    const spin = getSpin(state.selectedSpinId);
-    const filled = totalEntries(spin.id);
-    const cap = spin.capacity;
-    const spots = remainingSpots(spin.id);
-    const pct = Math.min(100, Math.round((filled / cap) * 100));
-
-    coTitle.textContent = spin.title;
-    coDesc.textContent = spin.desc;
-    coPrice.textContent = `${money(spin.entryPrice)} / entry`;
-    coCap.textContent = `${filled}/${cap} filled`;
-    coSpots.textContent = `${spots} spots left`;
-
-    const qty = Number(qtyEl.value || 1);
-    const total = Number(spin.entryPrice) * qty;
-    coTotal.textContent = `Total: ${money(total)}`;
-
-    coBar.style.width = pct + "%";
-    venmoPayBtn.href = buildVenmoLink(spin, qty);
-
-    coPhotos.innerHTML = "";
-    const photos = spin.photos || [];
-    if(photos.length === 0){
-      const div = document.createElement("div");
-      div.className = "notice";
-      div.style.gridColumn = "1 / -1";
-      div.style.margin = "0";
-      div.innerHTML = "<strong>No photos yet.</strong>";
-      coPhotos.appendChild(div);
-    }else{
-      photos.forEach(src => {
-        const wrap = document.createElement("div");
-        wrap.className = "photo";
-        wrap.innerHTML = `<img src="${src}" alt="Item photo">`;
-        coPhotos.appendChild(wrap);
-      });
-    }
-
-    updatePaidPill();
-  }
-
-  function goCheckout(id){
-    state.selectedSpinId = id;
-    nameEl.value = "";
-    contactEl.value = "";
-    venmoUserEl.value = "";
-    renderQty();
-    qtyEl.value = "1";
-    paidCheck.checked = false;
-    clearMessage();
-    saveState();
-
-    pagePick.classList.add("hidden");
-    pageCheckout.classList.remove("hidden");
-    renderCheckout();
-  }
-
-  function goPick(){
-    state.selectedSpinId = null;
-    paidCheck.checked = false;
-    clearMessage();
-    saveState();
-
-    pageCheckout.classList.add("hidden");
-    pagePick.classList.remove("hidden");
-    renderPickPage();
-  }
-
-  function addEntry(){
-    const id = state.selectedSpinId;
-    const spin = getSpin(id);
-
-    const name = nameEl.value.trim();
-    const contact = contactEl.value.trim();
-    const venmoUser = venmoUserEl.value.trim();
-    const qty = Math.max(1, Math.floor(Number(qtyEl.value || 1)));
-
-    if(!name){ showMessage("Please enter your <strong>name</strong>.", "bad"); return; }
-    if(!contact){ showMessage("Please enter a <strong>phone or email</strong>.", "bad"); return; }
-    if(!venmoUser){ showMessage("Please enter your <strong>Venmo username</strong>.", "bad"); return; }
-
-    if(!paidCheck.checked){
-      showMessage("Payment is required. Please pay on Venmo and check <strong>I paid on Venmo</strong> to submit.", "bad");
-      return;
-    }
-
-    const remaining = remainingSpots(id);
-    if(remaining <= 0){
-      showMessage("This Spin is full. Please go back and choose another.", "bad");
-      return;
-    }
-    if(qty > remaining){
-      showMessage(`Only <strong>${remaining}</strong> spots remain. Choose a smaller quantity.`, "bad");
-      return;
-    }
-
-    const amountExpected = Number(spin.entryPrice) * qty;
-
-    state.entriesBySpin[id] = state.entriesBySpin[id] || [];
-    state.entriesBySpin[id].push({
-      id: cryptoId(),
-      name,
-      contact,
-      venmoUser,
-      qty,
-      amountExpected,
-      at: nowISO()
-    });
-
-    paidCheck.checked = false;
-    nameEl.value = "";
-    contactEl.value = "";
-    venmoUserEl.value = "";
-    qtyEl.value = "1";
-
-    saveState();
-    renderCheckout();
-
-    if(isFull(id)){
-      showMessage("Spin is now full. Managers can verify Venmo payments and spin the wheel.", "ok");
-    }else{
-      showMessage("Entry received! Managers will verify your Venmo payment.", "ok");
-    }
-  }
-
-  function cryptoId(){
-    return Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
-  }
-
-  // -----------------------------
-  // Admin PIN (front-end protection)
-  // -----------------------------
-  async function sha256(str){
-    const enc = new TextEncoder().encode(str);
-    const buf = await crypto.subtle.digest("SHA-256", enc);
-    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
-  }
-
-  async function ensureDefaultPin(){
-    if(state.adminPinHash) return;
-    state.adminPinHash = await sha256("1234");
-    saveState();
-  }
-
-  async function promptForPin(){
-    const pin = prompt("Enter Admin PIN:");
-    if(pin === null) return false;
-    const h = await sha256(String(pin));
-    return h === state.adminPinHash;
-  }
-
-  async function toggleAdmin(){
-    await ensureDefaultPin();
-    if(!state.adminOn){
-      const ok = await promptForPin();
-      if(!ok){ alert("Incorrect PIN."); return; }
-      state.adminOn = true;
-    }else{
-      state.adminOn = false;
-    }
-    saveState();
-    renderAdmin();
-  }
-
-  async function setNewPin(){
-    await ensureDefaultPin();
-    const raw = (adminPinNew.value || "").trim();
-    if(!/^\d{4,12}$/.test(raw)){
-      alert("PIN must be 4–12 digits.");
-      return;
-    }
-    state.adminPinHash = await sha256(raw);
-    adminPinNew.value = "";
-    saveState();
-    alert("PIN updated.");
-  }
-
-  function renderAdmin(){
-    btnToggleAdmin.textContent = state.adminOn ? "Admin: On" : "Admin: Off";
-    adminPanel.classList.toggle("hidden", !state.adminOn);
-    if(!state.adminOn) return;
-
-    adminSpins.innerHTML = "";
-    state.spins.forEach((spin) => {
-      const wrap = document.createElement("div");
-      wrap.className = "card";
-      wrap.style.background = "#fff";
-      wrap.style.marginTop = "12px";
-
-      wrap.innerHTML = `
-        <div style="font-weight:950">${escapeHtml(spin.title)} (${spin.id})</div>
-
-        <label>Title</label>
-        <input data-k="title" data-id="${spin.id}" value="${escapeHtml(spin.title)}" />
-
-        <label>Description</label>
-        <textarea data-k="desc" data-id="${spin.id}">${escapeHtml(spin.desc)}</textarea>
-
-        <div class="row">
-          <div style="flex:1">
-            <label>Entry price ($)</label>
-            <input type="number" min="1" step="1" data-k="entryPrice" data-id="${spin.id}" value="${spin.entryPrice}" />
-          </div>
-          <div style="flex:1">
-            <label>Capacity</label>
-            <input type="number" min="2" step="1" data-k="capacity" data-id="${spin.id}" value="${spin.capacity}" />
-          </div>
-        </div>
-
-        <label>Venmo receiver (Locker Room Legends) — WITHOUT @</label>
-        <input data-k="venmoReceiver" data-id="${spin.id}" value="${escapeHtml(spin.venmoReceiver || "")}" placeholder="e.g., lockerroomlegends" />
-
-        <div class="tiny" style="margin-top:8px">
-          Photos are loaded from the repo (shared for everyone): <strong>${(spin.photos || []).join(", ") || "None"}</strong>
-        </div>
-      `;
-
-      adminSpins.appendChild(wrap);
-    });
-
-    adminSpins.querySelectorAll("input[data-k], textarea[data-k]").forEach(el => {
-      el.addEventListener("input", () => {
-        const id = el.getAttribute("data-id");
-        const k = el.getAttribute("data-k");
-        const spin = getSpin(id);
-
-        let v = el.value;
-        if(k === "entryPrice" || k === "capacity"){
-          v = Math.max(1, Math.floor(Number(v || 1)));
-          if(k === "capacity") v = Math.max(2, v);
-        }
-        if(k === "venmoReceiver"){ v = normalizeVenmoHandle(v); }
-
-        spin[k] = v;
-        saveState();
-        renderPickPage();
-        if(state.selectedSpinId === id) renderCheckout();
-      });
-    });
-  }
-
-  // -----------------------------
-  // Events
-  // -----------------------------
-  btnToggleAdmin.addEventListener("click", toggleAdmin);
-
-  btnReset.addEventListener("click", () => {
-    if(!confirm("Reset everything on THIS device?")) return;
+document.getElementById("btnReset").onclick=()=>{
+  if(confirm("Reset local data?")){
     localStorage.removeItem(STORAGE_KEY);
     location.reload();
-  });
+  }
+};
 
-  btnBack.addEventListener("click", goPick);
-
-  paidCheck.addEventListener("change", updatePaidPill);
-
-  qtyEl.addEventListener("change", () => {
-    renderCheckout();
-  });
-
-  venmoPayBtn.addEventListener("click", () => {
-    showMessage("After paying on Venmo, return here and check <strong>I paid on Venmo</strong>, then submit.", "ok");
-  });
-
-  btnSubmit.addEventListener("click", addEntry);
-
-  btnForceSpin.addEventListener("click", () => {
-    showMessage("Spin button is a placeholder in this prototype. Next step is connecting entries to a Google Sheet + manager email alerts.", "ok");
-  });
-
-  btnSetPin.addEventListener("click", setNewPin);
-
-  // -----------------------------
-  // Init
-  // -----------------------------
-  (async function init(){
-    renderPickPage();
-    renderAdmin();
-    await ensureDefaultPin();
-  })();
+render();
 </script>
 
 </body>
