@@ -136,39 +136,6 @@ input,select{
 }
 .hr{height:1px;background:var(--border);margin:12px 0}
 
-/* wheel */
-.wheelWrap{
-  display:flex;
-  gap:14px;
-  align-items:flex-start;
-  flex-wrap:wrap;
-  margin-top:12px;
-}
-canvas{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  box-shadow:0 10px 18px rgba(15,23,42,.06);
-}
-.wheelSide{
-  min-width:240px;
-  flex:1;
-}
-.small{font-size:12px;color:var(--muted)}
-.list{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:10px;
-  max-height:240px;
-  overflow:auto;
-}
-.list div{
-  padding:6px 8px;
-  border-bottom:1px solid var(--border);
-  font-size:13px;
-}
-.list div:last-child{border-bottom:none}
 </style>
 </head>
 
@@ -185,9 +152,6 @@ canvas{
           <div class="title">Spin to Win</div>
           <div class="sub"><strong>Venmo only.</strong> Pay → return → submit. When full, the wheel spins.</div>
         </div>
-      </div>
-      <div class="row">
-        <button id="btnReset" class="secondary">Reset</button>
       </div>
     </div>
   </div>
@@ -234,20 +198,6 @@ canvas{
   </div>
 
   <div class="photos" id="signupPhotoWrap"></div>
-
-  <div class="wheelWrap">
-    <canvas id="wheel" width="360" height="360"></canvas>
-    <div class="wheelSide">
-      <div class="title" style="margin-bottom:6px">Wheel Entries</div>
-      <div class="small">Names added after submit. When full, it spins automatically.</div>
-      <div class="list" id="entryList" style="margin-top:10px"></div>
-
-      <div class="row" style="margin-top:10px">
-        <button id="btnSpinNow" class="secondary">Spin Now</button>
-      </div>
-      <div class="notice hidden" id="winnerBox"></div>
-    </div>
-  </div>
 
   <div class="hr"></div>
 
