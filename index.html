@@ -739,7 +739,7 @@ const DEFAULT_SPINS = [
         <input data-k="venmoReceiver" data-id="${spin.id}" value="${escapeHtml(spin.venmoReceiver || "")}" placeholder="e.g., lockerroomlegends" />
 
         <div class="tiny" style="margin-top:8px">
-          Photos are loaded from the repo (shared for everyone): <strong>${SPIN_PHOTOS_DEFAULT.join(", ")}</strong>
+          Photos are loaded from the repo (shared for everyone): <strong>${(spin.photos || []).join(", ") || "None"}</strong>
         </div>
       `;
 
