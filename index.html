@@ -283,30 +283,17 @@ canvas{
 </main>
 
 <script>
-const STORAGE_KEY="lrl_spin_wheel_demo_v2";
-const DEFAULT_VENMO_RECEIVER="lockerroomlegends";
+/** ====== CONFIG ====== */
+const API_URL = "https://script.google.com/a/macros/coe.edu/s/AKfycbzgGmbb2KdEVkEIfFvs5tOOMzolPqS6U0CeVCTRj26aVD2X4Y5tnceHfM4AMASqcL3rYQ/exec"; // <-- required
 
-/* ✅ your filenames in repo root */
-const DEFAULT_SPINS=[
-  { id:"spin1", title:"Jersey Spin #1", desc:"Duke Boozer #12 Jersey", entryPrice:100, capacity:20, venmoReceiver:DEFAULT_VENMO_RECEIVER, photos:["boozer.jpg"] },
-  { id:"spin2", title:"Jersey Spin #2", desc:"Duke Evans #3 Jersey", entryPrice:80,  capacity:25, venmoReceiver:DEFAULT_VENMO_RECEIVER, photos:["evans.jpeg"] },
-  { id:"spin3", title:"Jersey Spin #3", desc:"Illinois Wagler #23 Jersey", entryPrice:10,  capacity:20, venmoReceiver:DEFAULT_VENMO_RECEIVER, photos:["test.webp"] }
+// spins shown on the site (Sheet holds the live counts + entries)
+const SPINS = [
+  { id:"spin1", title:"Jersey Spin #1", desc:"Duke Boozer #12 Jersey", entryPrice:100, capacity:20, photo:"boozer.jpg" },
+  { id:"spin2", title:"Jersey Spin #2", desc:"Duke Evans #3 Jersey", entryPrice:80,  capacity:25, photo:"evans.jpeg" },
+  { id:"spin3", title:"Jersey Spin #3", desc:"Illinois Wagler #23 Jersey", entryPrice:10,  capacity:20, photo:"test.webp" }
 ];
 
-const state=JSON.parse(localStorage.getItem(STORAGE_KEY))||{
-  selectedSpinId:null,
-  spins:DEFAULT_SPINS,
-  entries:{spin1:[],spin2:[],spin3:[]},
-  spunWinners:{} // spinId -> {name, at}
-};
-
-function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
-function getSpin(id){ return state.spins.find(s=>s.id===id); }
-function entries(id){ return state.entries[id] || []; }
-function total(id){ return entries(id).length; }
-function remaining(s){ return Math.max(0, s.capacity-total(s.id)); }
-function isFull(s){ return total(s.id) >= s.capacity; }
-
+/** ====== ELEMENTS (these IDs already exist in your HTML) ====== */
 const pagePick=document.getElementById("pagePick");
 const pageSignup=document.getElementById("pageSignup");
 const spinCards=document.getElementById("spinCards");
@@ -314,7 +301,6 @@ const globalStatus=document.getElementById("globalStatus");
 
 const btnBack=document.getElementById("btnBack");
 const btnSubmit=document.getElementById("btnSubmit");
-const btnSpinNow=document.getElementById("btnSpinNow");
 
 const signupTitle=document.getElementById("signupTitle");
 const signupDesc=document.getElementById("signupDesc");
@@ -323,57 +309,81 @@ const signupFill=document.getElementById("signupFill");
 const signupSpots=document.getElementById("signupSpots");
 const signupBar=document.getElementById("signupBar");
 const signupPhotoWrap=document.getElementById("signupPhotoWrap");
-const signupStatus=document.getElementById("signupStatus");
 
 const nameEl=document.getElementById("name");
 const phoneEl=document.getElementById("phone");
 const emailEl=document.getElementById("email");
 const venmoEl=document.getElementById("venmo");
-
 const msg=document.getElementById("msg");
-const winnerBox=document.getElementById("winnerBox");
-const entryList=document.getElementById("entryList");
 
-const wheel=document.getElementById("wheel");
-const ctx=wheel.getContext("2d");
+let selectedSpinId=null;
+let statusById={}; // spinId -> {filled, capacity}
 
-let anim=null;
-let wheelAngle=0;
-
-function showMsg(html){ msg.classList.remove("hidden"); msg.innerHTML=html; }
-function clearMsg(){ msg.classList.add("hidden"); msg.innerHTML=""; }
-function showWinner(html){ winnerBox.classList.remove("hidden"); winnerBox.innerHTML=html; }
-function clearWinner(){ winnerBox.classList.add("hidden"); winnerBox.innerHTML=""; }
-
+/** ====== HELPERS ====== */
+function showMsg(html){
+  msg.classList.remove("hidden");
+  msg.innerHTML=html;
+}
+function clearMsg(){
+  msg.classList.add("hidden");
+  msg.innerHTML="";
+}
 function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||""); }
 
+function getSpin(id){ return SPINS.find(s=>s.id===id); }
+function filled(id){ return (statusById[id]?.filled ?? 0); }
+function capacity(id){ return (statusById[id]?.capacity ?? getSpin(id)?.capacity ?? 0); }
+function remaining(id){ return Math.max(0, capacity(id)-filled(id)); }
+
+/** ====== API ====== */
+async function fetchStatus(){
+  const res = await fetch(`${API_URL}?action=status`, { method:"GET" });
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || "Status error");
+  statusById = {};
+  data.spins.forEach(s=>{
+    statusById[s.id] = { filled: s.filled, capacity: s.capacity };
+  });
+}
+
+async function postEntry(payload){
+  const res = await fetch(API_URL, {
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" }, // GAS-friendly
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || "Submit error");
+  return data;
+}
+
+/** ====== UI NAV ====== */
 function goSignup(id){
-  state.selectedSpinId=id;
-  save();
+  selectedSpinId=id;
   clearMsg();
-  clearWinner();
   nameEl.value=""; phoneEl.value=""; emailEl.value=""; venmoEl.value="";
   pagePick.classList.add("hidden");
   pageSignup.classList.remove("hidden");
   renderSignup();
 }
 function goPick(){
-  state.selectedSpinId=null;
-  save();
+  selectedSpinId=null;
   clearMsg();
-  clearWinner();
   pageSignup.classList.add("hidden");
   pagePick.classList.remove("hidden");
   renderPick();
 }
 
+/** ====== RENDER ====== */
 function renderPick(){
   spinCards.innerHTML="";
   let anyOpen=false;
 
-  state.spins.forEach(s=>{
-    if(remaining(s)>0) anyOpen=true;
-    const photo=(s.photos && s.photos.length) ? s.photos[0] : null;
+  SPINS.forEach(s=>{
+    const cap = capacity(s.id);
+    const f = filled(s.id);
+    const rem = Math.max(0, cap - f);
+    if(rem>0) anyOpen=true;
 
     const div=document.createElement("div");
     div.className="card";
@@ -388,20 +398,20 @@ function renderPick(){
       </div>
 
       <div class="row" style="margin-top:6px">
-        <span class="pill">${total(s.id)}/${s.capacity} filled</span>
-        <span class="pill ${remaining(s)>0?"good":"bad"}">${remaining(s)>0?"Open":"Full"}</span>
+        <span class="pill">${f}/${cap} filled</span>
+        <span class="pill ${rem>0?"good":"bad"}">${rem>0?"Open":"Full"}</span>
       </div>
 
       <div class="progressWrap">
-        <div class="bar" style="width:${Math.min(100,(total(s.id)/s.capacity)*100)}%"></div>
+        <div class="bar" style="width:${cap?Math.min(100,(f/cap)*100):0}%"></div>
       </div>
 
       <div class="photos">
-        ${photo ? `<div class="photo"><img src="${photo}" alt="Jersey photo"></div>` : ""}
+        ${s.photo ? `<div class="photo"><img src="${s.photo}" alt="Jersey photo"></div>` : ""}
       </div>
 
-      <button data-pick="${s.id}" ${remaining(s)<=0?"disabled":""} style="margin-top:10px;width:100%">
-        ${remaining(s)<=0?"Full":"Choose Spin"}
+      <button data-pick="${s.id}" ${rem<=0?"disabled":""} style="margin-top:10px;width:100%">
+        ${rem<=0?"Full":"Choose Spin"}
       </button>
     `;
     spinCards.appendChild(div);
@@ -411,235 +421,100 @@ function renderPick(){
   globalStatus.className=`pill ${anyOpen?"good":"bad"}`;
 
   spinCards.querySelectorAll("button[data-pick]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      goSignup(btn.getAttribute("data-pick"));
-    });
+    btn.addEventListener("click", ()=> goSignup(btn.getAttribute("data-pick")));
   });
 }
 
-function escapeHtml(str){
-  return (str || "").replace(/[&<>"']/g, (m) => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-  }[m]));
-}
-
-function renderEntryList(){
-  const s=getSpin(state.selectedSpinId);
-  if(!s) return;
-  const list = entries(s.id).map((e, i)=> `<div>${i+1}. ${escapeHtml(e.name)}</div>`).join("");
-  entryList.innerHTML = list || `<div class="small">No entries yet.</div>`;
-}
-
-function getNamesForWheel(){
-  const s=getSpin(state.selectedSpinId);
-  if(!s) return [];
-  return entries(s.id).map(e=>e.name);
-}
-
-function drawWheel(){
-  const names = getNamesForWheel();
-  const n = Math.max(1, names.length);
-  const cx = wheel.width/2, cy = wheel.height/2;
-  const r  = Math.min(cx, cy) - 10;
-
-  ctx.clearRect(0,0,wheel.width,wheel.height);
-
-  // circle
-  ctx.beginPath();
-  ctx.arc(cx,cy,r,0,Math.PI*2);
-  ctx.fillStyle="#fff";
-  ctx.fill();
-  ctx.strokeStyle="rgba(15,23,42,.12)";
-  ctx.lineWidth=2;
-  ctx.stroke();
-
-  // pointer
-  ctx.beginPath();
-  ctx.moveTo(cx, 8);
-  ctx.lineTo(cx-10, 28);
-  ctx.lineTo(cx+10, 28);
-  ctx.closePath();
-  ctx.fillStyle="rgba(220,38,38,.9)";
-  ctx.fill();
-
-  const slice = (Math.PI*2)/n;
-
-  for(let i=0;i<n;i++){
-    const start = wheelAngle + i*slice;
-    const end   = start + slice;
-
-    ctx.beginPath();
-    ctx.moveTo(cx,cy);
-    ctx.arc(cx,cy,r,start,end);
-    ctx.closePath();
-
-    ctx.fillStyle = i%2===0 ? "rgba(29,78,216,.10)" : "rgba(220,38,38,.08)";
-    ctx.fill();
-    ctx.strokeStyle="rgba(15,23,42,.08)";
-    ctx.stroke();
-
-    const label = names[i] || "Waiting...";
-    const mid = (start+end)/2;
-
-    ctx.save();
-    ctx.translate(cx,cy);
-    ctx.rotate(mid);
-    ctx.textAlign="right";
-    ctx.fillStyle="rgba(15,23,42,.85)";
-    ctx.font="12px system-ui";
-    ctx.fillText(label.length>18 ? label.slice(0,18)+"…" : label, r-14, 4);
-    ctx.restore();
-  }
-}
-
-function winnerIndexFromAngle(n){
-  const slice = (Math.PI*2)/n;
-  const a = ((((Math.PI*2) - (wheelAngle % (Math.PI*2))) + (Math.PI/2)) % (Math.PI*2));
-  return Math.floor(a / slice) % n;
-}
-
-function spinWheelAndPickWinner(){
-  const s=getSpin(state.selectedSpinId);
-  if(!s || state.spunWinners[s.id]) return;
-
-  const names=getNamesForWheel();
-  if(names.length < 2){
-    showMsg("Need at least <strong>2 entries</strong> to spin.");
-    return;
-  }
-
-  const extraTurns = 6 + Math.random()*4;
-  const final = wheelAngle + extraTurns*Math.PI*2 + Math.random()*Math.PI*2;
-
-  const start = performance.now();
-  const duration = 2600;
-
-  cancelAnimationFrame(anim);
-
-  function easeOutCubic(t){ return 1 - Math.pow(1-t,3); }
-
-  function step(now){
-    const t = Math.min(1, (now-start)/duration);
-    const e = easeOutCubic(t);
-
-    wheelAngle = wheelAngle * (1-e) + final * e;
-    drawWheel();
-
-    if(t < 1){
-      anim = requestAnimationFrame(step);
-    }else{
-      wheelAngle = final;
-      drawWheel();
-
-      const idx = winnerIndexFromAngle(names.length);
-      const winner = names[idx];
-
-      state.spunWinners[s.id] = { name: winner, at: new Date().toISOString() };
-      save();
-
-      showWinner(`<strong>Winner:</strong> ${escapeHtml(winner)}<br/><span class="small">Verify Venmo before awarding.</span>`);
-      btnSubmit.disabled = true;
-      btnSpinNow.disabled = true;
-      showMsg("<strong>Wheel spun.</strong> Winner selected.");
-    }
-  }
-
-  anim = requestAnimationFrame(step);
-}
-
 function renderSignup(){
-  const s=getSpin(state.selectedSpinId);
+  const s=getSpin(selectedSpinId);
   if(!s) return;
 
-  const filled=total(s.id);
-  const cap=s.capacity;
-  const spots=remaining(s);
-  const pct=Math.min(100, Math.round((filled/cap)*100));
-  const photo=(s.photos && s.photos.length) ? s.photos[0] : null;
+  const cap = capacity(s.id);
+  const f = filled(s.id);
+  const rem = Math.max(0, cap-f);
+  const pct = cap?Math.min(100, Math.round((f/cap)*100)):0;
 
   signupTitle.textContent=`Sign up — ${s.title}`;
   signupDesc.textContent=s.desc;
   signupPrice.textContent=`$${s.entryPrice} per entry`;
-  signupFill.textContent=`${filled}/${cap} filled`;
-  signupSpots.textContent=`${spots} spots left`;
+  signupFill.textContent=`${f}/${cap} filled`;
+  signupSpots.textContent=`${rem} spots left`;
   signupBar.style.width=pct+"%";
 
-  const full=isFull(s);
-  signupStatus.textContent = full ? "Full" : "Open";
-  signupStatus.className = `pill ${full ? "bad" : "good"}`;
+  signupPhotoWrap.innerHTML = s.photo
+    ? `<div class="photo"><img src="${s.photo}" alt="Jersey photo"></div>`
+    : "";
 
-  signupPhotoWrap.innerHTML = photo
-    ? `<div class="photo"><img src="${photo}" alt="Jersey photo"></div>`
-    : `<div class="notice" style="margin:10px 0 0"><strong>No photo found.</strong></div>`;
-
-  renderEntryList();
-  drawWheel();
-
-  const w = state.spunWinners[s.id];
-  if(w){
-    showWinner(`<strong>Winner already selected:</strong> ${escapeHtml(w.name)}<br/><span class="small">(${new Date(w.at).toLocaleString()})</span>`);
-  }else{
-    clearWinner();
-  }
-
-  btnSubmit.disabled = full || !!state.spunWinners[s.id];
-  btnSpinNow.disabled = entries(s.id).length < 2 || !!state.spunWinners[s.id];
+  btnSubmit.disabled = (rem<=0);
 }
 
-function submitEntry(){
-  const s=getSpin(state.selectedSpinId);
+/** ====== SUBMIT ====== */
+async function submitEntry(){
+  clearMsg();
+  const s=getSpin(selectedSpinId);
   if(!s) return;
 
-  if(state.spunWinners[s.id]){
-    showMsg("<strong>This spin already selected a winner.</strong>");
-    return;
-  }
-  if(isFull(s)){
-    showMsg("<strong>This spin is full.</strong>");
-    return;
-  }
+  try{
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = "Submitting…";
 
-  const name=nameEl.value.trim();
-  const phone=phoneEl.value.trim();
-  const email=emailEl.value.trim();
-  const venmo=venmoEl.value.trim();
+    // refresh counts right before submit
+    await fetchStatus();
+    renderSignup();
 
-  if(!name){ showMsg("Please enter your <strong>name</strong>."); return; }
-  if(!phone){ showMsg("Please enter your <strong>phone</strong>."); return; }
-  if(!email || !validEmail(email)){ showMsg("Please enter a valid <strong>email</strong>."); return; }
-  if(!venmo){ showMsg("Please enter your <strong>Venmo username</strong>."); return; }
+    if(remaining(s.id) <= 0){
+      showMsg("<strong>Sorry — this spin just filled.</strong> Please go back and choose another.");
+      return;
+    }
 
-  state.entries[s.id] = state.entries[s.id] || [];
-  state.entries[s.id].push({ at:new Date().toISOString(), name, phone, email, venmo });
-  save();
+    const name=nameEl.value.trim();
+    const phone=phoneEl.value.trim();
+    const email=emailEl.value.trim();
+    const venmo=venmoEl.value.trim();
 
-  nameEl.value=""; phoneEl.value=""; emailEl.value=""; venmoEl.value="";
+    if(!name){ showMsg("Please enter your <strong>name</strong>."); return; }
+    if(!phone){ showMsg("Please enter your <strong>phone</strong>."); return; }
+    if(!email || !validEmail(email)){ showMsg("Please enter a valid <strong>email</strong>."); return; }
+    if(!venmo){ showMsg("Please enter your <strong>Venmo username</strong>."); return; }
 
-  renderPick();
-  renderSignup();
+    await postEntry({ spinId: s.id, name, phone, email, venmo });
 
-  if(isFull(s)){
-    showMsg("<strong>Last spot filled!</strong> Spinning the wheel now…");
-    setTimeout(()=> spinWheelAndPickWinner(), 600);
-  }else{
-    showMsg("<strong>Entry submitted!</strong> Your name is now on the wheel.");
+    // pull latest counts after submit
+    await fetchStatus();
+    renderPick();
+    renderSignup();
+
+    showMsg("<strong>Entry submitted!</strong> Your spot is reserved. Please pay on Venmo and use the same name/handle so it matches.");
+
+  }catch(err){
+    showMsg(`<strong>Error:</strong> ${String(err.message || err)}`);
+  }finally{
+    btnSubmit.textContent = "Submit Entry";
+    btnSubmit.disabled = (selectedSpinId ? remaining(selectedSpinId)<=0 : false);
   }
 }
 
-/* events */
 btnBack.addEventListener("click", goPick);
 btnSubmit.addEventListener("click", submitEntry);
-btnSpinNow.addEventListener("click", spinWheelAndPickWinner);
 
-document.getElementById("btnReset").onclick=()=>{
-  if(confirm("Reset all local entries + winners on THIS device?")){
-    localStorage.removeItem(STORAGE_KEY);
-    location.reload();
+/** ====== INIT + AUTO-REFRESH ====== */
+(async function init(){
+  try{
+    await fetchStatus();
+  }catch(err){
+    showMsg(`<strong>Can’t reach sign-up server yet.</strong><br/>Paste your Apps Script URL into <code>API_URL</code>.<br/><span class="small">${String(err.message || err)}</span>`);
   }
-};
+  renderPick();
+})();
 
-/* init */
-renderPick();
+// refresh counts every 15 seconds
+setInterval(async ()=>{
+  try{
+    await fetchStatus();
+    if(!selectedSpinId) renderPick();
+    else renderSignup();
+  }catch(e){}
+}, 15000);
 </script>
 
 </body>
