@@ -234,14 +234,23 @@ input,select{
 
 <script>
 /** ====== CONFIG ====== */
-const API_URL = "https://script.google.com/macros/s/AKfycbzZRhwEcPGRyCmR_0EfndfRJSNpFDHetyqB2BSK9998jQfksnAG-S9is_xvx1TZ_wB58Q/exec"; // <-- required
+const API_URL = "https://script.google.com/macros/s/AKfycbw30RXY3gwDczs4ZOYDbVkD0zaqQo0vSi7-vTM8TAACeZYqn8G6n7_PxByjHcOqstgyaw/exec"; // <-- required
 
-// spins shown on the site (Sheet holds the live counts + entries)
-const SPINS = [
-  { id:"spin1", title:"Jersey Spin #1", desc:"Duke Boozer #12 Jersey", entryPrice:100, capacity:20, photo:"boozer.jpg" },
-  { id:"spin2", title:"Jersey Spin #2", desc:"Duke Evans #3 Jersey", entryPrice:80,  capacity:25, photo:"evans.jpeg" },
-  { id:"spin3", title:"Jersey Spin #3", desc:"Illinois Wagler #23 Jersey", entryPrice:10,  capacity:20, photo:"test.webp" }
-];
+
+let SPINS = []; // will load from sheet
+
+async function loadSpins(){
+  const res = await fetch(`${API_URL}?action=getSpins`);
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || "Failed to load spins");
+  SPINS = data.spins;
+  renderPick(); // whatever function builds your spin cards
+}
+
+loadSpins().catch(err=>{
+  console.error(err);
+  alert("Could not load spins. Check API URL and deployment access.");
+});
 
 /** ====== ELEMENTS (these IDs already exist in your HTML) ====== */
 const pagePick=document.getElementById("pagePick");
