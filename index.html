@@ -295,8 +295,9 @@ function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||""); }
 
 /** Supports BOTH "spinId" (from sheet) and "id" */
 function spinKey(spin){
-  return String(spin?.spinId || spin?.id || "").trim();
+  return String(spin?.spinID || spin?.spinId || spin?.id || "").trim();
 }
+
 function getSpinByKey(key){
   return state.spins.find(s => spinKey(s) === String(key));
 }
@@ -541,12 +542,14 @@ async function submitEntry(){
 
   try{
   const payload = {
-    spinId: spinId,   // REQUIRED
-    name: name,       // REQUIRED
-    phone: phone,     // REQUIRED
-    email: email,     // REQUIRED
-    venmo: venmo      // REQUIRED
+    spinID: spinId,   // ✅ THIS is what your Sheet/API uses
+    spinId: spinId,   // harmless fallback
+    name: name,
+    phone: phone,
+    email: email,
+    venmo: venmo
   };
+
 
 console.log("Submitting payload:", payload); // DEBUG (leave this for now)
 
