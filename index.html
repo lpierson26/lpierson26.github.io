@@ -540,22 +540,17 @@ async function submitEntry(){
   btnSubmit.textContent = "Submitting…";
 
   try{
-      const payload = {
-  spinId: spinId,   // what Code.gs expects
-  id: spinId,       // fallback safety (harmless if unused)
-  name: name,
-  phone: phone,
-  email: email,
-  venmo: venmo
-};
+  const payload = {
+    spinId: spinId,   // REQUIRED
+    name: name,       // REQUIRED
+    phone: phone,     // REQUIRED
+    email: email,     // REQUIRED
+    venmo: venmo      // REQUIRED
+  };
 
-console.log("Submitting payload:", payload); // DEBUG
+console.log("Submitting payload:", payload); // DEBUG (leave this for now)
 
-await apiSubmitEntry(payload);
-
-console.log("Submitting payload:", payload); // DEBUG
-
-await apiSubmitEntry(payload);
+await apiSubmitEntry(payload); // ✅ ONLY ONCE
 
 
     // refresh spins + counts
