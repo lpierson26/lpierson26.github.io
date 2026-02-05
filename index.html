@@ -233,79 +233,90 @@ input,select{
 </main>
 
 <script>
+<script>
 /** ====== CONFIG ====== */
-const API_URL = "https://script.google.com/macros/s/AKfycbwYgaxll6VfAmw8lqejfI2cKVSBpeBuc5iyPd8kXinLZBUR8Hj95hTO8dvROP49oH9Vvg/exec"; // <-- required
+const API_URL = "https://script.google.com/macros/s/AKfycbwYgaxll6VfAmw8lqejfI2cKVSBpeBuc5iyPd8kXinLZBUR8Hj95hTO8dvROP49oH9Vvg/exec";
 
+/** ====== ELEMENTS ====== */
+const pagePick = document.getElementById("pagePick");
+const pageSignup = document.getElementById("pageSignup");
+const spinCards = document.getElementById("spinCards");
+const globalStatus = document.getElementById("globalStatus");
 
-let SPINS = []; // will load from sheet
+const btnBack = document.getElementById("btnBack");
+const btnSubmit = document.getElementById("btnSubmit");
 
-async function loadSpins(){
-  const res = await fetch(`${API_URL}?action=getSpins`);
-  const data = await res.json();
-  if(!data.ok) throw new Error(data.error || "Failed to load spins");
-  SPINS = data.spins;
-  renderPick(); // whatever function builds your spin cards
-}
+const signupTitle = document.getElementById("signupTitle");
+const signupDesc = document.getElementById("signupDesc");
+const signupPrice = document.getElementById("signupPrice");
+const signupFill = document.getElementById("signupFill");
+const signupSpots = document.getElementById("signupSpots");
+const signupBar = document.getElementById("signupBar");
+const signupPhotoWrap = document.getElementById("signupPhotoWrap");
+const signupStatus = document.getElementById("signupStatus");
 
-loadSpins().catch(err=>{
-  console.error(err);
-  alert("Could not load spins. Check API URL and deployment access.");
-});
+const nameEl = document.getElementById("name");
+const phoneEl = document.getElementById("phone");
+const emailEl = document.getElementById("email");
+const venmoEl = document.getElementById("venmo");
+const msg = document.getElementById("msg");
 
-/** ====== ELEMENTS (these IDs already exist in your HTML) ====== */
-const pagePick=document.getElementById("pagePick");
-const pageSignup=document.getElementById("pageSignup");
-const spinCards=document.getElementById("spinCards");
-const globalStatus=document.getElementById("globalStatus");
-
-const btnBack=document.getElementById("btnBack");
-const btnSubmit=document.getElementById("btnSubmit");
-
-const signupTitle=document.getElementById("signupTitle");
-const signupDesc=document.getElementById("signupDesc");
-const signupPrice=document.getElementById("signupPrice");
-const signupFill=document.getElementById("signupFill");
-const signupSpots=document.getElementById("signupSpots");
-const signupBar=document.getElementById("signupBar");
-const signupPhotoWrap=document.getElementById("signupPhotoWrap");
-
-const nameEl=document.getElementById("name");
-const phoneEl=document.getElementById("phone");
-const emailEl=document.getElementById("email");
-const venmoEl=document.getElementById("venmo");
-const msg=document.getElementById("msg");
-
-let selectedSpinId=null;
-let statusById={}; // spinId -> {filled, capacity}
+/** ====== STATE ====== */
+let SPINS = [];
+let selectedSpinId = null;
 
 /** ====== HELPERS ====== */
 function showMsg(html){
+  if(!msg) return;
   msg.classList.remove("hidden");
-  msg.innerHTML=html;
+  msg.innerHTML = html;
 }
 function clearMsg(){
+  if(!msg) return;
   msg.classList.add("hidden");
-  msg.innerHTML="";
+  msg.innerHTML = "";
 }
 function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||""); }
-
-function getSpin(id){ return SPINS.find(s=>s.id===id); }
-function filled(id){ return (statusById[id]?.filled ?? 0); }
-function capacity(id){ return (statusById[id]?.capacity ?? getSpin(id)?.capacity ?? 0); }
-function remaining(id){ return Math.max(0, capacity(id)-filled(id)); }
-
-/** ====== API ====== */
-async function fetchStatus(){
-  const res = await fetch(`${API_URL}?action=status`, { method:"GET" });
-  const data = await res.json();
-  if(!data.ok) throw new Error(data.error || "Status error");
-  statusById = {};
-  data.spins.forEach(s=>{
-    statusById[s.id] = { filled: s.filled, capacity: s.capacity };
-  });
+function escapeHtml(str){
+  return String(str||"").replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
 }
 
-async function postEntry(payload){
+/** normalize fields from API */
+function normSpin(s){
+  const spinId = String(s.spinId ?? s.id ?? "").trim();
+  const entryPrice = Number(s.entryPrice ?? s.price ?? 0) || 0;
+  const capacity = Number(s.capacity ?? 0) || 0;
+  const signedUp = Number(s.signedUp ?? 0) || 0;
+  const spotsLeft = (s.spotsLeft !== undefined && s.spotsLeft !== null)
+    ? (Number(s.spotsLeft) || 0)
+    : Math.max(0, capacity - signedUp);
+
+  return {
+    ...s,
+    spinId,
+    entryPrice,
+    capacity,
+    signedUp,
+    spotsLeft,
+    status: String(s.status ?? "OPEN").toUpperCase()
+  };
+}
+
+function getSpin(spinId){
+  return SPINS.find(s => String(s.spinId) === String(spinId));
+}
+
+/** ====== API ====== */
+async function apiGetSpins(){
+  const res = await fetch(`${API_URL}?ts=${Date.now()}`, { method:"GET" });
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || "Failed to load spins");
+  SPINS = (data.spins || []).map(normSpin);
+}
+
+async function apiPostEntry(payload){
   const res = await fetch(API_URL, {
     method:"POST",
     headers:{ "Content-Type":"text/plain;charset=utf-8" }, // GAS-friendly
@@ -316,164 +327,162 @@ async function postEntry(payload){
   return data;
 }
 
-/** ====== UI NAV ====== */
-function goSignup(id){
-  selectedSpinId=id;
+/** ====== NAV ====== */
+function goSignup(spinId){
+  selectedSpinId = spinId;
   clearMsg();
   nameEl.value=""; phoneEl.value=""; emailEl.value=""; venmoEl.value="";
   pagePick.classList.add("hidden");
   pageSignup.classList.remove("hidden");
   renderSignup();
 }
+
 function goPick(){
-  selectedSpinId=null;
+  selectedSpinId = null;
   clearMsg();
   pageSignup.classList.add("hidden");
   pagePick.classList.remove("hidden");
   renderPick();
 }
 
-/** ====== RENDER ====== */
+/** ====== RENDER PICK ====== */
 function renderPick(){
-  spinCards.innerHTML="";
-  let anyOpen=false;
+  spinCards.innerHTML = "";
+  let anyOpen = false;
 
   SPINS.forEach(s=>{
-    const cap = capacity(s.id);
-    const f = filled(s.id);
-    const rem = Math.max(0, cap - f);
-    if(rem>0) anyOpen=true;
+    const open = (s.status === "OPEN") && (s.spotsLeft > 0);
+    if(open) anyOpen = true;
 
-    const div=document.createElement("div");
-    div.className="card";
-    div.style.background="#fff";
-    div.innerHTML=`
+    const pct = s.capacity ? Math.min(100, (s.signedUp / s.capacity) * 100) : 0;
+
+    const div = document.createElement("div");
+    div.className = "card";
+    div.style.background = "#fff";
+    div.innerHTML = `
       <div class="row between">
         <div>
-          <div class="title">${s.title}</div>
-          <div class="sub">${s.desc}</div>
+          <div class="title">${escapeHtml(s.title || "")}</div>
+          <div class="sub">${escapeHtml(s.desc || "")}</div>
         </div>
         <span class="pill blue">$${s.entryPrice}</span>
       </div>
 
       <div class="row" style="margin-top:6px">
-        <span class="pill">${f}/${cap} filled</span>
-        <span class="pill ${rem>0?"good":"bad"}">${rem>0?"Open":"Full"}</span>
+        <span class="pill">${s.signedUp}/${s.capacity} filled</span>
+        <span class="pill ${open ? "good":"bad"}">${open ? "Open":"Full"}</span>
       </div>
 
       <div class="progressWrap">
-        <div class="bar" style="width:${cap?Math.min(100,(f/cap)*100):0}%"></div>
+        <div class="bar" style="width:${pct}%"></div>
       </div>
 
       <div class="photos">
-        ${s.photo ? `<div class="photo"><img src="${s.photo}" alt="Jersey photo"></div>` : ""}
+        ${s.photo ? `<div class="photo"><img src="${s.photo}" alt="Spin photo"></div>` : ""}
       </div>
 
-      <button data-pick="${s.id}" ${rem<=0?"disabled":""} style="margin-top:10px;width:100%">
-        ${rem<=0?"Full":"Choose Spin"}
+      <button data-pick="${escapeHtml(s.spinId)}" ${open ? "" : "disabled"} style="margin-top:10px;width:100%">
+        ${open ? "Choose Spin" : "Full"}
       </button>
     `;
     spinCards.appendChild(div);
   });
 
-  globalStatus.textContent=anyOpen?"Open":"All Full";
-  globalStatus.className=`pill ${anyOpen?"good":"bad"}`;
+  globalStatus.textContent = anyOpen ? "Open" : "All Full";
+  globalStatus.className = `pill ${anyOpen ? "good":"bad"}`;
 
   spinCards.querySelectorAll("button[data-pick]").forEach(btn=>{
     btn.addEventListener("click", ()=> goSignup(btn.getAttribute("data-pick")));
   });
 }
 
+/** ====== RENDER SIGNUP ====== */
 function renderSignup(){
-  const s=getSpin(selectedSpinId);
+  const s = getSpin(selectedSpinId);
   if(!s) return;
 
-  const cap = capacity(s.id);
-  const f = filled(s.id);
-  const rem = Math.max(0, cap-f);
-  const pct = cap?Math.min(100, Math.round((f/cap)*100)):0;
+  const pct = s.capacity ? Math.min(100, Math.round((s.signedUp / s.capacity) * 100)) : 0;
+  const open = (s.status === "OPEN") && (s.spotsLeft > 0);
 
-  signupTitle.textContent=`Sign up — ${s.title}`;
-  signupDesc.textContent=s.desc;
-  signupPrice.textContent=`$${s.entryPrice} per entry`;
-  signupFill.textContent=`${f}/${cap} filled`;
-  signupSpots.textContent=`${rem} spots left`;
-  signupBar.style.width=pct+"%";
+  signupTitle.textContent = `Sign up — ${s.title || ""}`;
+  signupDesc.textContent = s.desc || "";
+  signupPrice.textContent = `$${s.entryPrice} per entry`;
+  signupFill.textContent = `${s.signedUp}/${s.capacity} filled`;
+  signupSpots.textContent = `${s.spotsLeft} spots left`;
+  signupBar.style.width = pct + "%";
+
+  signupStatus.textContent = open ? "Open" : "Full";
+  signupStatus.className = `pill ${open ? "good":"bad"}`;
 
   signupPhotoWrap.innerHTML = s.photo
-    ? `<div class="photo"><img src="${s.photo}" alt="Jersey photo"></div>`
+    ? `<div class="photo"><img src="${s.photo}" alt="Spin photo"></div>`
     : "";
 
-  btnSubmit.disabled = (rem<=0);
+  btnSubmit.disabled = !open;
 }
 
 /** ====== SUBMIT ====== */
 async function submitEntry(){
   clearMsg();
-  const s=getSpin(selectedSpinId);
-  if(!s) return;
+
+  const s = getSpin(selectedSpinId);
+  if(!s) return showMsg("<strong>Error:</strong> Spin not found.");
+
+  const name = nameEl.value.trim();
+  const phone = phoneEl.value.trim();
+  const email = emailEl.value.trim();
+  const venmo = venmoEl.value.trim();
+
+  if(!name) return showMsg("Please enter your <strong>name</strong>.");
+  if(!phone) return showMsg("Please enter your <strong>phone</strong>.");
+  if(!email || !validEmail(email)) return showMsg("Please enter a valid <strong>email</strong>.");
+  if(!venmo) return showMsg("Please enter your <strong>Venmo username</strong>.");
+
+  btnSubmit.disabled = true;
+  const oldText = btnSubmit.textContent;
+  btnSubmit.textContent = "Submitting…";
 
   try{
-    btnSubmit.disabled = true;
-    btnSubmit.textContent = "Submitting…";
+    await apiPostEntry({ spinId: s.spinId, name, phone, email, venmo });
 
-    // refresh counts right before submit
-    await fetchStatus();
-    renderSignup();
-
-    if(remaining(s.id) <= 0){
-      showMsg("<strong>Sorry — this spin just filled.</strong> Please go back and choose another.");
-      return;
-    }
-
-    const name=nameEl.value.trim();
-    const phone=phoneEl.value.trim();
-    const email=emailEl.value.trim();
-    const venmo=venmoEl.value.trim();
-
-    if(!name){ showMsg("Please enter your <strong>name</strong>."); return; }
-    if(!phone){ showMsg("Please enter your <strong>phone</strong>."); return; }
-    if(!email || !validEmail(email)){ showMsg("Please enter a valid <strong>email</strong>."); return; }
-    if(!venmo){ showMsg("Please enter your <strong>Venmo username</strong>."); return; }
-
-    await postEntry({ spinId: s.id, name, phone, email, venmo });
-
-    // pull latest counts after submit
-    await fetchStatus();
+    // refresh spins & counts
+    await apiGetSpins();
     renderPick();
     renderSignup();
 
-    showMsg("<strong>Entry submitted!</strong> Your spot is reserved. Please pay on Venmo and use the same name/handle so it matches.");
-
+    showMsg(
+      `<strong>Entry submitted ✅</strong><br/>
+       We added you to <strong>${escapeHtml(s.title || s.spinId)}</strong>.<br/>
+       Please pay <strong>$${s.entryPrice}</strong> via Venmo and include your name in the note.`
+    );
   }catch(err){
-    showMsg(`<strong>Error:</strong> ${String(err.message || err)}`);
+    showMsg(`<strong>Error:</strong> ${escapeHtml(err.message || String(err))}`);
   }finally{
-    btnSubmit.textContent = "Submit Entry";
-    btnSubmit.disabled = (selectedSpinId ? remaining(selectedSpinId)<=0 : false);
+    btnSubmit.textContent = oldText || "Submit Entry";
+    const s2 = getSpin(selectedSpinId);
+    btnSubmit.disabled = !(s2 && s2.status === "OPEN" && s2.spotsLeft > 0);
   }
 }
 
 btnBack.addEventListener("click", goPick);
 btnSubmit.addEventListener("click", submitEntry);
 
-/** ====== INIT + AUTO-REFRESH ====== */
+/** ====== INIT ====== */
 (async function init(){
   try{
-    await fetchStatus();
+    await apiGetSpins();
+    renderPick();
   }catch(err){
-    showMsg(`<strong>Can’t reach sign-up server yet.</strong><br/>Paste your Apps Script URL into <code>API_URL</code>.<br/><span class="small">${String(err.message || err)}</span>`);
+    console.error(err);
+    showMsg(
+      `<strong>Could not load spins.</strong><br/>
+       ${escapeHtml(err.message || String(err))}<br/><br/>
+       Check that your Apps Script Web App is deployed as <strong>Anyone</strong>.`
+    );
   }
-  renderPick();
 })();
+</script>
 
-// refresh counts every 15 seconds
-setInterval(async ()=>{
-  try{
-    await fetchStatus();
-    if(!selectedSpinId) renderPick();
-    else renderSignup();
-  }catch(e){}
-}, 15000);
 </script>
 
 </body>
