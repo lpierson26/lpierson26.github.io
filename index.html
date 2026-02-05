@@ -53,6 +53,7 @@ main{padding:14px}
   gap:12px;
 }
 @media(max-width:900px){.grid3{grid-template-columns:1fr}}
+
 .pill{
   font-size:12px;
   padding:6px 10px;
@@ -83,7 +84,7 @@ button.secondary{
 }
 button:disabled{opacity:.5; cursor:not-allowed}
 
-/* ✅ single photo centered */
+/* photo */
 .photos{display:flex;justify-content:center;margin-top:10px}
 .photo{
   border:1px solid var(--border);
@@ -126,7 +127,7 @@ button:disabled{opacity:.5; cursor:not-allowed}
 
 /* form bits */
 label{display:block;margin:10px 0 6px;font-size:12px;color:var(--muted)}
-input,select{
+input{
   width:100%;
   padding:10px 10px;
   border-radius:12px;
@@ -135,7 +136,7 @@ input,select{
   font-size:14px;
 }
 .hr{height:1px;background:var(--border);margin:12px 0}
-
+.small{font-size:12px;color:var(--muted)}
 </style>
 </head>
 
@@ -146,13 +147,13 @@ input,select{
     <div class="brandBar"></div>
     <div class="row between">
       <div class="row">
-        <!-- ✅ your logo filename -->
         <img src="logo.webp" class="logo" alt="Locker Room Legends">
         <div>
           <div class="title">Spin to Win</div>
-          <div class="sub"><strong>Venmo only.</strong> Pay → return → submit. When full, the wheel spins.</div>
+          <div class="sub"><strong>Venmo only.</strong> Sign up → get email → pay Venmo.</div>
         </div>
       </div>
+      <span id="globalStatus" class="pill">Loading…</span>
     </div>
   </div>
 </header>
@@ -166,14 +167,11 @@ input,select{
       <div class="title">Pick a Spin</div>
       <div class="sub">Choose an option to sign up.</div>
     </div>
-    <span id="globalStatus" class="pill">Open</span>
   </div>
 
   <div id="spinCards" class="grid3" style="margin-top:12px"></div>
 
-  <div class="notice">
-    This version stores entries on <strong>this device</strong> (localStorage). If you need shared entries for everyone online, you’ll need a Google Sheet / backend.
-  </div>
+  <div id="pickMsg" class="notice hidden"></div>
 </section>
 
 <!-- PAGE 2 -->
@@ -224,7 +222,7 @@ input,select{
   </div>
 
   <div class="row" style="margin-top:10px">
-    <button id="btnSubmit" style="width:100%">Submit Entry (adds name to wheel)</button>
+    <button id="btnSubmit" style="width:100%">Submit Entry</button>
   </div>
 
   <div id="msg" class="notice hidden"></div>
@@ -233,13 +231,17 @@ input,select{
 </main>
 
 <script>
-<script>
-/** ====== CONFIG ====== */
-const API_URL = "https://script.google.com/macros/s/AKfycbwYgaxll6VfAmw8lqejfI2cKVSBpeBuc5iyPd8kXinLZBUR8Hj95hTO8dvROP49oH9Vvg/exec";
+/** =========================
+ *  CONFIG
+ *  ========================= */
+const API_URL = "https://script.google.com/macros/s/AKfycbx9cB69xPZ6er4ohacrUnkwjgShfPfRHtMQCbkszCLI05dTVnxiQVcKuE9s-C0lWb_cKg/exec"; // <-- your Apps Script Web App URL (must end with /exec)
 
-/** ====== ELEMENTS ====== */
+/** =========================
+ *  ELEMENTS
+ *  ========================= */
 const pagePick = document.getElementById("pagePick");
 const pageSignup = document.getElementById("pageSignup");
+
 const spinCards = document.getElementById("spinCards");
 const globalStatus = document.getElementById("globalStatus");
 
@@ -259,102 +261,168 @@ const nameEl = document.getElementById("name");
 const phoneEl = document.getElementById("phone");
 const emailEl = document.getElementById("email");
 const venmoEl = document.getElementById("venmo");
+
 const msg = document.getElementById("msg");
+const pickMsg = document.getElementById("pickMsg");
 
-/** ====== STATE ====== */
-let SPINS = [];
-let selectedSpinId = null;
+/** =========================
+ *  STATE
+ *  ========================= */
+const state = {
+  spins: [],
+  selectedSpinKey: null
+};
 
-/** ====== HELPERS ====== */
-function showMsg(html){
-  if(!msg) return;
-  msg.classList.remove("hidden");
-  msg.innerHTML = html;
+/** =========================
+ *  HELPERS
+ *  ========================= */
+function showMsg(el, html){
+  if(!el) return;
+  el.classList.remove("hidden");
+  el.innerHTML = html;
 }
-function clearMsg(){
-  if(!msg) return;
-  msg.classList.add("hidden");
-  msg.innerHTML = "";
+function clearMsg(el){
+  if(!el) return;
+  el.classList.add("hidden");
+  el.innerHTML = "";
 }
-function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||""); }
 function escapeHtml(str){
-  return String(str||"").replace(/[&<>"']/g, m => ({
+  return String(str || "").replace(/[&<>"']/g, m => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
   }[m]));
 }
+function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||""); }
 
-/** normalize fields from API */
-function normSpin(s){
-  const spinId = String(s.spinId ?? s.id ?? "").trim();
-  const entryPrice = Number(s.entryPrice ?? s.price ?? 0) || 0;
-  const capacity = Number(s.capacity ?? 0) || 0;
-  const signedUp = Number(s.signedUp ?? 0) || 0;
-  const spotsLeft = (s.spotsLeft !== undefined && s.spotsLeft !== null)
-    ? (Number(s.spotsLeft) || 0)
-    : Math.max(0, capacity - signedUp);
-
-  return {
-    ...s,
-    spinId,
-    entryPrice,
-    capacity,
-    signedUp,
-    spotsLeft,
-    status: String(s.status ?? "OPEN").toUpperCase()
-  };
+/** Supports BOTH "spinId" (from sheet) and "id" */
+function spinKey(spin){
+  return String(spin?.spinId || spin?.id || "").trim();
+}
+function getSpinByKey(key){
+  return state.spins.find(s => spinKey(s) === String(key));
 }
 
-function getSpin(spinId){
-  return SPINS.find(s => String(s.spinId) === String(spinId));
+/** normalize numeric fields safely */
+function num(v, fallback=0){
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+function getPrice(spin){
+  return num(spin?.price ?? spin?.entryPrice ?? 0, 0);
+}
+function getCapacity(spin){
+  return num(spin?.capacity ?? 0, 0);
+}
+function getSignedUp(spin){
+  return num(spin?.signedUp ?? 0, 0);
+}
+function getSpotsLeft(spin){
+  if (spin?.spotsLeft !== undefined && spin?.spotsLeft !== null){
+    return Math.max(0, num(spin.spotsLeft, 0));
+  }
+  return Math.max(0, getCapacity(spin) - getSignedUp(spin));
 }
 
-/** ====== API ====== */
+/**
+ * Photo resolver:
+ * - "boozer.jpg" or "images/boozer.jpg" (in your GitHub repo)
+ * - GitHub blob link -> raw.githubusercontent.com
+ * - Google Drive share link -> uc?export=view&id=...
+ * - already-direct URL stays as-is
+ */
+function resolvePhotoUrl(photo){
+  const p = String(photo || "").trim();
+  if(!p) return "";
+
+  if(p.startsWith("http://") || p.startsWith("https://")){
+    // GitHub blob -> raw
+    if(p.includes("github.com") && p.includes("/blob/")){
+      return p.replace("https://github.com/", "https://raw.githubusercontent.com/").replace("/blob/", "/");
+    }
+    // Drive file/d/ID/view -> uc
+    const m1 = p.match(/drive\.google\.com\/file\/d\/([^/]+)/i);
+    if(m1 && m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
+    // Drive open?id=ID -> uc
+    const m2 = p.match(/drive\.google\.com\/open\?id=([^&]+)/i);
+    if(m2 && m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
+    return p;
+  }
+
+  // relative file path -> resolve against current page URL
+  try{
+    return new URL(p.replace(/^\/+/, ""), window.location.href).href;
+  }catch{
+    return p.replace(/^\/+/, "");
+  }
+}
+
+/** =========================
+ *  API
+ *  ========================= */
 async function apiGetSpins(){
-  const res = await fetch(`${API_URL}?ts=${Date.now()}`, { method:"GET" });
+  const res = await fetch(`${API_URL}?ts=${Date.now()}`, { method:"GET", redirect:"follow" });
+  if(!res.ok) throw new Error(`GET failed (${res.status})`);
   const data = await res.json();
-  if(!data.ok) throw new Error(data.error || "Failed to load spins");
-  SPINS = (data.spins || []).map(normSpin);
+  if(!data?.ok) throw new Error(data?.error || "Bad response from API");
+  return data.spins || [];
 }
 
-async function apiPostEntry(payload){
+async function apiSubmitEntry(payload){
   const res = await fetch(API_URL, {
     method:"POST",
-    headers:{ "Content-Type":"text/plain;charset=utf-8" }, // GAS-friendly
+    headers:{ "Content-Type":"text/plain;charset=utf-8" }, // Apps Script friendly
+    redirect:"follow",
     body: JSON.stringify(payload)
   });
-  const data = await res.json();
-  if(!data.ok) throw new Error(data.error || "Submit error");
+  const data = await res.json().catch(()=> ({}));
+  if(!res.ok || !data?.ok) throw new Error(data?.error || `Submit failed (${res.status})`);
   return data;
 }
 
-/** ====== NAV ====== */
-function goSignup(spinId){
-  selectedSpinId = spinId;
-  clearMsg();
+/** =========================
+ * ENDER / NAV
+ *  ========================= */
+function goSignup(key){
+  state.selectedSpinKey = String(key);
+  clearMsg(msg);
+
   nameEl.value=""; phoneEl.value=""; emailEl.value=""; venmoEl.value="";
+
   pagePick.classList.add("hidden");
   pageSignup.classList.remove("hidden");
   renderSignup();
 }
 
 function goPick(){
-  selectedSpinId = null;
-  clearMsg();
+  state.selectedSpinKey = null;
+  clearMsg(msg);
   pageSignup.classList.add("hidden");
   pagePick.classList.remove("hidden");
   renderPick();
 }
 
-/** ====== RENDER PICK ====== */
 function renderPick(){
   spinCards.innerHTML = "";
+  clearMsg(pickMsg);
+
   let anyOpen = false;
 
-  SPINS.forEach(s=>{
-    const open = (s.status === "OPEN") && (s.spotsLeft > 0);
+  state.spins.forEach(spin=>{
+    const key = spinKey(spin);
+    const title = String(spin.title || "");
+    const desc  = String(spin.desc || "");
+    const price = getPrice(spin);
+    const cap   = getCapacity(spin);
+    const signed= getSignedUp(spin);
+    const left  = getSpotsLeft(spin);
+
+    const status = String(spin.status || "OPEN").toUpperCase();
+    const open = left > 0 && status === "OPEN";
     if(open) anyOpen = true;
 
-    const pct = s.capacity ? Math.min(100, (s.signedUp / s.capacity) * 100) : 0;
+    const pct = cap > 0 ? Math.min(100, (signed/cap)*100) : 0;
+
+    const photoValue = spin.photo || (Array.isArray(spin.photos) ? spin.photos[0] : "");
+    const photoUrl = resolvePhotoUrl(photoValue);
 
     const div = document.createElement("div");
     div.className = "card";
@@ -362,14 +430,14 @@ function renderPick(){
     div.innerHTML = `
       <div class="row between">
         <div>
-          <div class="title">${escapeHtml(s.title || "")}</div>
-          <div class="sub">${escapeHtml(s.desc || "")}</div>
+          <div class="title">${escapeHtml(title)}</div>
+          <div class="sub">${escapeHtml(desc)}</div>
         </div>
-        <span class="pill blue">$${s.entryPrice}</span>
+        <span class="pill blue">$${price}</span>
       </div>
 
       <div class="row" style="margin-top:6px">
-        <span class="pill">${s.signedUp}/${s.capacity} filled</span>
+        <span class="pill">${signed}/${cap} filled</span>
         <span class="pill ${open ? "good":"bad"}">${open ? "Open":"Full"}</span>
       </div>
 
@@ -378,10 +446,14 @@ function renderPick(){
       </div>
 
       <div class="photos">
-        ${s.photo ? `<div class="photo"><img src="${s.photo}" alt="Spin photo"></div>` : ""}
+        ${photoUrl ? `
+          <div class="photo">
+            <img src="${photoUrl}" alt="Spin photo"
+                 onerror="this.style.display='none'; console.warn('Image failed:', this.src);" />
+          </div>` : ``}
       </div>
 
-      <button data-pick="${escapeHtml(s.spinId)}" ${open ? "" : "disabled"} style="margin-top:10px;width:100%">
+      <button data-pick="${escapeHtml(key)}" ${open ? "" : "disabled"} style="margin-top:10px;width:100%">
         ${open ? "Choose Spin" : "Full"}
       </button>
     `;
@@ -389,100 +461,133 @@ function renderPick(){
   });
 
   globalStatus.textContent = anyOpen ? "Open" : "All Full";
-  globalStatus.className = `pill ${anyOpen ? "good":"bad"}`;
+  globalStatus.className = `pill ${anyOpen ? "good" : "bad"}`;
 
   spinCards.querySelectorAll("button[data-pick]").forEach(btn=>{
     btn.addEventListener("click", ()=> goSignup(btn.getAttribute("data-pick")));
   });
+
+  if(!state.spins.length){
+    showMsg(pickMsg, `<strong>No spins found.</strong><br/><span class="small">Check your Spins sheet rows and that the Web App is deployed as "Anyone".</span>`);
+  }
 }
 
-/** ====== RENDER SIGNUP ====== */
 function renderSignup(){
-  const s = getSpin(selectedSpinId);
-  if(!s) return;
+  const spin = getSpinByKey(state.selectedSpinKey);
+  if(!spin){
+    showMsg(msg, "<strong>Spin not found.</strong> Go back and try again.");
+    return;
+  }
 
-  const pct = s.capacity ? Math.min(100, Math.round((s.signedUp / s.capacity) * 100)) : 0;
-  const open = (s.status === "OPEN") && (s.spotsLeft > 0);
+  const title = String(spin.title || "");
+  const desc  = String(spin.desc || "");
+  const price = getPrice(spin);
+  const cap   = getCapacity(spin);
+  const signed= getSignedUp(spin);
+  const left  = getSpotsLeft(spin);
 
-  signupTitle.textContent = `Sign up — ${s.title || ""}`;
-  signupDesc.textContent = s.desc || "";
-  signupPrice.textContent = `$${s.entryPrice} per entry`;
-  signupFill.textContent = `${s.signedUp}/${s.capacity} filled`;
-  signupSpots.textContent = `${s.spotsLeft} spots left`;
+  const pct = cap > 0 ? Math.min(100, Math.round((signed/cap)*100)) : 0;
+
+  const status = String(spin.status || "OPEN").toUpperCase();
+  const open = left > 0 && status === "OPEN";
+
+  const photoValue = spin.photo || (Array.isArray(spin.photos) ? spin.photos[0] : "");
+  const photoUrl = resolvePhotoUrl(photoValue);
+
+  signupTitle.textContent = `Sign up — ${title}`;
+  signupDesc.textContent = desc;
+  signupPrice.textContent = `$${price} per entry`;
+  signupFill.textContent = `${signed}/${cap} filled`;
+  signupSpots.textContent = `${left} spots left`;
   signupBar.style.width = pct + "%";
 
   signupStatus.textContent = open ? "Open" : "Full";
-  signupStatus.className = `pill ${open ? "good":"bad"}`;
+  signupStatus.className = `pill ${open ? "good" : "bad"}`;
 
-  signupPhotoWrap.innerHTML = s.photo
-    ? `<div class="photo"><img src="${s.photo}" alt="Spin photo"></div>`
-    : "";
+  signupPhotoWrap.innerHTML = photoUrl
+    ? `<div class="photo">
+         <img src="${photoUrl}" alt="Spin photo"
+              onerror="this.style.display='none'; console.warn('Signup image failed:', this.src);" />
+       </div>`
+    : ``;
 
   btnSubmit.disabled = !open;
 }
 
-/** ====== SUBMIT ====== */
+/** =========================
+ *  SUBMIT
+ *  ========================= */
 async function submitEntry(){
-  clearMsg();
+  clearMsg(msg);
 
-  const s = getSpin(selectedSpinId);
-  if(!s) return showMsg("<strong>Error:</strong> Spin not found.");
+  const spin = getSpinByKey(state.selectedSpinKey);
+  if(!spin) return showMsg(msg, "<strong>Error:</strong> Spin not found.");
 
-  const name = nameEl.value.trim();
+  const spinId = spinKey(spin); // ALWAYS send spinId to Apps Script
+
+  const name  = nameEl.value.trim();
   const phone = phoneEl.value.trim();
   const email = emailEl.value.trim();
   const venmo = venmoEl.value.trim();
 
-  if(!name) return showMsg("Please enter your <strong>name</strong>.");
-  if(!phone) return showMsg("Please enter your <strong>phone</strong>.");
-  if(!email || !validEmail(email)) return showMsg("Please enter a valid <strong>email</strong>.");
-  if(!venmo) return showMsg("Please enter your <strong>Venmo username</strong>.");
+  if(!name)  return showMsg(msg, "Please enter your <strong>name</strong>.");
+  if(!phone) return showMsg(msg, "Please enter your <strong>phone</strong>.");
+  if(!email || !validEmail(email)) return showMsg(msg, "Please enter a valid <strong>email</strong>.");
+  if(!venmo) return showMsg(msg, "Please enter your <strong>Venmo username</strong>.");
 
   btnSubmit.disabled = true;
   const oldText = btnSubmit.textContent;
   btnSubmit.textContent = "Submitting…";
 
   try{
-    await apiPostEntry({ spinId: s.spinId, name, phone, email, venmo });
+    await apiSubmitEntry({ spinId, name, phone, email, venmo });
 
-    // refresh spins & counts
-    await apiGetSpins();
-    renderPick();
-    renderSignup();
+    // refresh spins + counts
+    state.spins = await apiGetSpins();
 
-    showMsg(
-      `<strong>Entry submitted ✅</strong><br/>
-       We added you to <strong>${escapeHtml(s.title || s.spinId)}</strong>.<br/>
-       Please pay <strong>$${s.entryPrice}</strong> via Venmo and include your name in the note.`
+    const updated = getSpinByKey(spinId) || spin;
+    const amount = getPrice(updated);
+
+    showMsg(msg,
+      `<strong>You're signed up ✅</strong><br/>
+       We sent a confirmation email to <strong>${escapeHtml(email)}</strong>.<br/>
+       Amount due: <strong>$${amount}</strong>`
     );
+
+    renderSignup();
   }catch(err){
-    showMsg(`<strong>Error:</strong> ${escapeHtml(err.message || String(err))}`);
+    showMsg(msg, `<strong>Error:</strong> ${escapeHtml(err.message || String(err))}`);
   }finally{
-    btnSubmit.textContent = oldText || "Submit Entry";
-    const s2 = getSpin(selectedSpinId);
-    btnSubmit.disabled = !(s2 && s2.status === "OPEN" && s2.spotsLeft > 0);
+    btnSubmit.textContent = oldText;
+    // re-enable only if still open
+    const s2 = getSpinByKey(state.selectedSpinKey);
+    if(s2){
+      const open2 = getSpotsLeft(s2) > 0 && String(s2.status || "OPEN").toUpperCase() === "OPEN";
+      btnSubmit.disabled = !open2;
+    }
   }
 }
 
+/** =========================
+ *  INIT
+ *  ========================= */
 btnBack.addEventListener("click", goPick);
 btnSubmit.addEventListener("click", submitEntry);
 
-/** ====== INIT ====== */
 (async function init(){
   try{
-    await apiGetSpins();
+    state.spins = await apiGetSpins();
     renderPick();
   }catch(err){
-    console.error(err);
-    showMsg(
+    globalStatus.textContent = "Error";
+    globalStatus.className = "pill bad";
+    showMsg(pickMsg,
       `<strong>Could not load spins.</strong><br/>
        ${escapeHtml(err.message || String(err))}<br/><br/>
-       Check that your Apps Script Web App is deployed as <strong>Anyone</strong>.`
+       <span class="small">Check: (1) API_URL is your Apps Script /exec URL, (2) Web App access is set to Anyone.</span>`
     );
   }
 })();
-</script>
-
 </script>
 
 </body>
