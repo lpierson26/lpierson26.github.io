@@ -422,8 +422,9 @@ function renderPick(){
 
     const pct = cap > 0 ? Math.min(100, (signed/cap)*100) : 0;
 
-    const photoValue = spin.photo || (Array.isArray(spin.photos) ? spin.photos[0] : "");
+    const photoValue = spin.imageUrl || spin.imageURL || spin.photo || (Array.isArray(spin.photos) ? spin.photos[0] : "");
     const photoUrl = resolvePhotoUrl(photoValue);
+
 
     const div = document.createElement("div");
     div.className = "card";
@@ -492,8 +493,9 @@ function renderSignup(){
   const status = String(spin.status || "OPEN").toUpperCase();
   const open = left > 0 && status === "OPEN";
 
-  const photoValue = spin.photo || (Array.isArray(spin.photos) ? spin.photos[0] : "");
+  const photoValue = spin.imageUrl || spin.imageURL || spin.photo || (Array.isArray(spin.photos) ? spin.photos[0] : "");
   const photoUrl = resolvePhotoUrl(photoValue);
+
 
   signupTitle.textContent = `Sign up — ${title}`;
   signupDesc.textContent = desc;
