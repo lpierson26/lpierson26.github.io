@@ -4,7 +4,7 @@
  **********************/
 
 /** ✅ PUT YOUR WEB APP URL HERE (must end with /exec) **/
-const API_BASE = "https://script.google.com/macros/s/AKfycbysyqIIqHnS6eLyVvX4DIHOKJBxCYOastm8qxsGntLCpJdoEGBwF-g3bK5zJaVGteyjhw/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbxIeUC_DKuO5b1xH8QzoXL8A9unft9M1Mb0P4T_m5xI9rPGWYUJua7B0nDqHm-3HxssHw/exec";
 
 /** UI elements */
 const pagePick = document.getElementById("pagePick");
