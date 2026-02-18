@@ -1,15 +1,3 @@
-<!-- ===========================
-     ✅ UPDATED INDEX.HTML + CODE.GS (COPY/PASTE)
-     - Adds dropdown number selection (1–24)
-     - Numbers are “reserved” per spin (can’t be picked again)
-     - Saves chosen number to Google Sheet (Entries)
-     =========================== -->
-
-
-<!-- ===========================
-     ✅ 1) UPDATED index.html
-     Replace your entire index.html with this
-     =========================== -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -65,7 +53,6 @@ main{padding:14px}
   gap:12px;
 }
 @media(max-width:900px){.grid3{grid-template-columns:1fr}}
-
 .pill{
   font-size:12px;
   padding:6px 10px;
@@ -182,7 +169,6 @@ input,select{
   </div>
 
   <div id="spinCards" class="grid3" style="margin-top:12px"></div>
-
   <div id="pickMsg" class="notice hidden"></div>
 </section>
 
@@ -233,17 +219,16 @@ input,select{
     </div>
   </div>
 
-<div class="row" style="gap:10px">
-  <div style="flex:1;min-width:240px">
-    <label for="slot">Pick your number (1–24)</label>
-    <select id="slot">
-      <option value="">Select a number…</option>
-    </select>
-    <div class="small" style="margin-top:6px">
-      Once a number is taken for this spin, it can’t be selected again.
+  <!-- ✅ ONE dropdown only -->
+  <div class="row" style="gap:10px">
+    <div style="flex:1;min-width:240px">
+      <label for="slot">Pick your wheel number (1–24)</label>
+      <select id="slot">
+        <option value="">Select a number…</option>
+      </select>
+      <div class="small" style="margin-top:6px">Numbers already taken for this spin won’t be available.</div>
     </div>
   </div>
-</div>
 
   <div class="row" style="margin-top:10px">
     <button id="btnSubmit" style="width:100%">Submit Entry</button>
@@ -258,7 +243,7 @@ input,select{
 /** =========================
  *  CONFIG
  *  ========================= */
-const API_URL = "https://script.google.com/macros/s/AKfycbxIeUC_DKuO5b1xH8QzoXL8A9unft9M1Mb0P4T_m5xI9rPGWYUJua7B0nDqHm-3HxssHw/exec";
+const API_URL = "PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE"; // must end with /exec
 
 /** =========================
  *  ELEMENTS
@@ -283,7 +268,7 @@ const nameEl = document.getElementById("name");
 const phoneEl = document.getElementById("phone");
 const emailEl = document.getElementById("email");
 const venmoEl = document.getElementById("venmo");
-const slotEl  = document.getElementById("slot");   // ✅ NEW
+const slotEl  = document.getElementById("slot");
 
 const msg = document.getElementById("msg");
 const pickMsg = document.getElementById("pickMsg");
@@ -291,7 +276,7 @@ const pickMsg = document.getElementById("pickMsg");
 /** =========================
  *  STATE
  *  ========================= */
-const state = { spins: [], selectedSpinKey: null };
+const state = { spins: [], selectedSpinId: null };
 
 /** =========================
  *  HELPERS
@@ -302,31 +287,28 @@ function escapeHtml(str){ return String(str||"").replace(/[&<>"']/g,m=>({"&":"&a
 function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||""); }
 function num(v,f=0){ const n=Number(v); return Number.isFinite(n)?n:f; }
 
-/** key supports spinID / spinId / id */
-function spinKey(spin){ return String(spin?.spinID || spin?.spinId || spin?.id || "").trim(); }
-function getSpinByKey(key){ return state.spins.find(s => spinKey(s) === String(key)); }
+/** Your Spins sheet uses spinID */
+function spinIdOf(spin){ return String(spin?.spinID || "").trim(); }
+function getSpin(spinId){ return state.spins.find(s => spinIdOf(s) === String(spinId)); }
 
-function getPrice(spin){ return num(spin?.price ?? spin?.entryPrice ?? 0, 0); }
+function getPrice(spin){ return num(spin?.entryPrice ?? spin?.price ?? 0, 0); }
 function getCapacity(spin){ return num(spin?.capacity ?? 0, 0); }
 function getSignedUp(spin){ return num(spin?.signedUp ?? 0, 0); }
-function getSpotsLeft(spin){
-  if(spin?.spotsLeft !== undefined && spin?.spotsLeft !== null) return Math.max(0, num(spin.spotsLeft,0));
-  return Math.max(0, getCapacity(spin) - getSignedUp(spin));
-}
+function getSpotsLeft(spin){ return num(spin?.spotsLeft ?? Math.max(0, getCapacity(spin)-getSignedUp(spin)), 0); }
 
-/** taken numbers array from API */
 function getTakenNumbers(spin){
-  const t = spin?.takenNumbers ?? spin?.taken ?? spin?.numbersTaken ?? [];
-  if(Array.isArray(t)) return t.map(x=>Number(x)).filter(n=>Number.isFinite(n));
-  return [];
+  const t = spin?.takenNumbers ?? [];
+  return Array.isArray(t) ? t.map(x=>Number(x)).filter(n=>Number.isFinite(n)) : [];
 }
 
-/** photo */
+/** photo resolver */
 function resolvePhotoUrl(photo){
   const p=String(photo||"").trim();
   if(!p) return "";
   if(p.startsWith("http://")||p.startsWith("https://")){
-    if(p.includes("github.com")&&p.includes("/blob/")) return p.replace("https://github.com/","https://raw.githubusercontent.com/").replace("/blob/","/");
+    if(p.includes("github.com")&&p.includes("/blob/")){
+      return p.replace("https://github.com/","https://raw.githubusercontent.com/").replace("/blob/","/");
+    }
     const m1=p.match(/drive\.google\.com\/file\/d\/([^/]+)/i); if(m1&&m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
     const m2=p.match(/drive\.google\.com\/open\?id=([^&]+)/i); if(m2&&m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
     return p;
@@ -360,8 +342,8 @@ async function apiSubmitEntry(payload){
 /** =========================
  * NAV
  *  ========================= */
-function goSignup(key){
-  state.selectedSpinKey = String(key);
+function goSignup(spinId){
+  state.selectedSpinId = String(spinId);
   clearMsg(msg);
   nameEl.value=""; phoneEl.value=""; emailEl.value=""; venmoEl.value="";
   slotEl.value="";
@@ -371,7 +353,7 @@ function goSignup(key){
   renderSignup();
 }
 function goPick(){
-  state.selectedSpinKey = null;
+  state.selectedSpinId = null;
   clearMsg(msg);
   pageSignup.classList.add("hidden");
   pagePick.classList.remove("hidden");
@@ -388,7 +370,7 @@ function renderPick(){
   let anyOpen=false;
 
   state.spins.forEach(spin=>{
-    const key = spinKey(spin);
+    const spinId = spinIdOf(spin);
     const title=String(spin.title||"");
     const desc=String(spin.desc||"");
     const price=getPrice(spin);
@@ -402,8 +384,7 @@ function renderPick(){
 
     const pct=cap>0?Math.min(100,(signed/cap)*100):0;
 
-    const photoValue = spin.imageUrl || spin.imageURL || spin.photo || (Array.isArray(spin.photos)?spin.photos[0]:"");
-    const photoUrl = resolvePhotoUrl(photoValue);
+    const photoUrl = resolvePhotoUrl(spin.imageUrl || "");
 
     const div=document.createElement("div");
     div.className="card";
@@ -430,7 +411,7 @@ function renderPick(){
         ${photoUrl ? `<div class="photo"><img src="${photoUrl}" alt="Spin photo" onerror="this.style.display='none';console.warn('Image failed:',this.src);" /></div>` : ``}
       </div>
 
-      <button data-pick="${escapeHtml(key)}" ${open?"":"disabled"} style="margin-top:10px;width:100%">
+      <button data-pick="${escapeHtml(spinId)}" ${open?"":"disabled"} style="margin-top:10px;width:100%">
         ${open?"Choose Spin":"Full"}
       </button>
     `;
@@ -445,7 +426,7 @@ function renderPick(){
   });
 
   if(!state.spins.length){
-    showMsg(pickMsg, `<strong>No spins found.</strong><br/><span class="small">Check your Spins sheet rows and that the Web App is deployed as "Anyone".</span>`);
+    showMsg(pickMsg, `<strong>No spins found.</strong><br/><span class="small">Check your Spins sheet rows and Web App deployment access.</span>`);
   }
 }
 
@@ -453,29 +434,22 @@ function renderSlotDropdown(spin){
   const taken = new Set(getTakenNumbers(spin));
   const totalSlots = 24;
 
-  const options = [];
-  options.push(`<option value="">Select a number…</option>`);
-
+  const options = [`<option value="">Select a number…</option>`];
   for(let i=1;i<=totalSlots;i++){
-    const disabled = taken.has(i) ? "disabled" : "";
-    const label = taken.has(i) ? `${i} (taken)` : `${i}`;
-    options.push(`<option value="${i}" ${disabled}>${label}</option>`);
+    const isTaken = taken.has(i);
+    options.push(`<option value="${i}" ${isTaken?"disabled":""}>${isTaken?`${i} (taken)`:i}</option>`);
   }
-
   slotEl.innerHTML = options.join("");
 
-  // If ALL taken, disable submit
-  const availableCount = totalSlots - taken.size;
-  if(availableCount <= 0){
+  const available = totalSlots - taken.size;
+  slotEl.disabled = (available <= 0);
+  if(slotEl.disabled){
     slotEl.innerHTML = `<option value="">All numbers taken</option>`;
-    slotEl.disabled = true;
-  }else{
-    slotEl.disabled = false;
   }
 }
 
 function renderSignup(){
-  const spin = getSpinByKey(state.selectedSpinKey);
+  const spin = getSpin(state.selectedSpinId);
   if(!spin){
     showMsg(msg,"<strong>Spin not found.</strong> Go back and try again.");
     return;
@@ -492,8 +466,7 @@ function renderSignup(){
   const status=String(spin.status||"OPEN").toUpperCase();
   const open = left>0 && status==="OPEN";
 
-  const photoValue = spin.imageUrl || spin.imageURL || spin.photo || (Array.isArray(spin.photos)?spin.photos[0]:"");
-  const photoUrl = resolvePhotoUrl(photoValue);
+  const photoUrl = resolvePhotoUrl(spin.imageUrl || "");
 
   signupTitle.textContent=`Sign up — ${title}`;
   signupDesc.textContent=desc;
@@ -508,12 +481,9 @@ function renderSignup(){
     ? `<div class="photo"><img src="${photoUrl}" alt="Spin photo" onerror="this.style.display='none';console.warn('Signup image failed:',this.src);" /></div>`
     : ``;
 
-  // ✅ NEW: build dropdown based on taken numbers from API
   renderSlotDropdown(spin);
 
-  // submit enabled only if open AND there is an available slot
-  const hasSlot = !slotEl.disabled;
-  btnSubmit.disabled = !(open && hasSlot);
+  btnSubmit.disabled = !(open && !slotEl.disabled);
 }
 
 /** =========================
@@ -522,10 +492,10 @@ function renderSignup(){
 async function submitEntry(){
   clearMsg(msg);
 
-  const spin = getSpinByKey(state.selectedSpinKey);
+  const spin = getSpin(state.selectedSpinId);
   if(!spin) return showMsg(msg,"<strong>Error:</strong> Spin not found.");
 
-  const spinId = spinKey(spin);
+  const spinId = spinIdOf(spin);
 
   const name=nameEl.value.trim();
   const phone=phoneEl.value.trim();
@@ -544,14 +514,18 @@ async function submitEntry(){
   btnSubmit.textContent="Submitting…";
 
   try{
-    const payload = { spinId, spinID: spinId, name, phone, email, venmo, number: slot };
+    const payload = {
+      spinId,
+      name, phone, email, venmo,
+      spinNumber: slot,     // ✅ what server reads
+      SpinNumber: slot      // ✅ matches Entries header
+    };
 
     await apiSubmitEntry(payload);
 
-    // refresh spins + counts + taken numbers
     state.spins = await apiGetSpins();
 
-    const updated = getSpinByKey(spinId) || spin;
+    const updated = getSpin(spinId) || spin;
     const amount = getPrice(updated);
 
     showMsg(msg,
@@ -566,7 +540,7 @@ async function submitEntry(){
     showMsg(msg, `<strong>Error:</strong> ${escapeHtml(err.message || String(err))}`);
   }finally{
     btnSubmit.textContent=oldText;
-    const s2=getSpinByKey(state.selectedSpinKey);
+    const s2=getSpin(state.selectedSpinId);
     if(s2){
       const open2 = getSpotsLeft(s2)>0 && String(s2.status||"OPEN").toUpperCase()==="OPEN" && !slotEl.disabled;
       btnSubmit.disabled = !open2;
@@ -582,6 +556,7 @@ btnSubmit.addEventListener("click", submitEntry);
 
 (async function init(){
   try{
+    if(!API_URL || API_URL.includes("PASTE_YOUR")) throw new Error("Set API_URL to your Apps Script /exec URL.");
     state.spins = await apiGetSpins();
     renderPick();
   }catch(err){
@@ -598,6 +573,3 @@ btnSubmit.addEventListener("click", submitEntry);
 
 </body>
 </html>
-
-
-
