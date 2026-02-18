@@ -1,3 +1,4 @@
+<!-- ✅ UPDATED index.html (COPY/PASTE ENTIRE FILE) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -53,6 +54,7 @@ main{padding:14px}
   gap:12px;
 }
 @media(max-width:900px){.grid3{grid-template-columns:1fr}}
+
 .pill{
   font-size:12px;
   padding:6px 10px;
@@ -222,9 +224,9 @@ input,select{
   <!-- ✅ ONE dropdown only -->
   <div class="row" style="gap:10px">
     <div style="flex:1;min-width:240px">
-      <label for="slot">Pick your wheel number (1–24)</label>
-      <select id="slot">
-        <option value="">Select a number…</option>
+      <label for="spinNumber">Pick your wheel number (1–24)</label>
+      <select id="spinNumber">
+        <option value="">Loading…</option>
       </select>
       <div class="small" style="margin-top:6px">Numbers already taken for this spin won’t be available.</div>
     </div>
@@ -240,14 +242,9 @@ input,select{
 </main>
 
 <script>
-/** =========================
- *  CONFIG
- *  ========================= */
-const API_URL = "https://script.google.com/macros/s/AKfycbxIeUC_DKuO5b1xH8QzoXL8A9unft9M1Mb0P4T_m5xI9rPGWYUJua7B0nDqHm-3HxssHw/exec"; // must end with /exec
+/** ✅ SET YOUR WEB APP URL */
+const API_URL = "https://script.google.com/macros/s/AKfycbxIeUC_DKuO5b1xH8QzoXL8A9unft9M1Mb0P4T_m5xI9rPGWYUJua7B0nDqHm-3HxssHw/exec";
 
-/** =========================
- *  ELEMENTS
- *  ========================= */
 const pagePick = document.getElementById("pagePick");
 const pageSignup = document.getElementById("pageSignup");
 const spinCards = document.getElementById("spinCards");
@@ -268,47 +265,40 @@ const nameEl = document.getElementById("name");
 const phoneEl = document.getElementById("phone");
 const emailEl = document.getElementById("email");
 const venmoEl = document.getElementById("venmo");
-const slotEl  = document.getElementById("slot");
+const spinNumberEl = document.getElementById("spinNumber");
 
 const msg = document.getElementById("msg");
 const pickMsg = document.getElementById("pickMsg");
 
-/** =========================
- *  STATE
- *  ========================= */
-const state = { spins: [], selectedSpinId: null };
+const state = { spins: [], selectedSpinKey: null };
 
-/** =========================
- *  HELPERS
- *  ========================= */
 function showMsg(el, html){ if(!el) return; el.classList.remove("hidden"); el.innerHTML = html; }
 function clearMsg(el){ if(!el) return; el.classList.add("hidden"); el.innerHTML = ""; }
 function escapeHtml(str){ return String(str||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])); }
 function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||""); }
 function num(v,f=0){ const n=Number(v); return Number.isFinite(n)?n:f; }
 
-/** Your Spins sheet uses spinID */
-function spinIdOf(spin){ return String(spin?.spinID || "").trim(); }
-function getSpin(spinId){ return state.spins.find(s => spinIdOf(s) === String(spinId)); }
+function spinKey(spin){ return String(spin?.spinID || spin?.spinId || spin?.id || "").trim(); }
+function getSpinByKey(key){ return state.spins.find(s => spinKey(s) === String(key)); }
 
-function getPrice(spin){ return num(spin?.entryPrice ?? spin?.price ?? 0, 0); }
+function getPrice(spin){ return num(spin?.price ?? spin?.entryPrice ?? 0, 0); }
 function getCapacity(spin){ return num(spin?.capacity ?? 0, 0); }
 function getSignedUp(spin){ return num(spin?.signedUp ?? 0, 0); }
-function getSpotsLeft(spin){ return num(spin?.spotsLeft ?? Math.max(0, getCapacity(spin)-getSignedUp(spin)), 0); }
+function getSpotsLeft(spin){
+  if(spin?.spotsLeft !== undefined && spin?.spotsLeft !== null) return Math.max(0, num(spin.spotsLeft,0));
+  return Math.max(0, getCapacity(spin) - getSignedUp(spin));
+}
 
 function getTakenNumbers(spin){
   const t = spin?.takenNumbers ?? [];
-  return Array.isArray(t) ? t.map(x=>Number(x)).filter(n=>Number.isFinite(n)) : [];
+  return Array.isArray(t) ? t.map(Number).filter(Number.isFinite) : [];
 }
 
-/** photo resolver */
 function resolvePhotoUrl(photo){
   const p=String(photo||"").trim();
   if(!p) return "";
   if(p.startsWith("http://")||p.startsWith("https://")){
-    if(p.includes("github.com")&&p.includes("/blob/")){
-      return p.replace("https://github.com/","https://raw.githubusercontent.com/").replace("/blob/","/");
-    }
+    if(p.includes("github.com")&&p.includes("/blob/")) return p.replace("https://github.com/","https://raw.githubusercontent.com/").replace("/blob/","/");
     const m1=p.match(/drive\.google\.com\/file\/d\/([^/]+)/i); if(m1&&m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
     const m2=p.match(/drive\.google\.com\/open\?id=([^&]+)/i); if(m2&&m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
     return p;
@@ -316,14 +306,10 @@ function resolvePhotoUrl(photo){
   try{ return new URL(p.replace(/^\/+/,""), window.location.href).href; }catch{ return p.replace(/^\/+/,""); }
 }
 
-/** =========================
- *  API
- *  ========================= */
 async function apiGetSpins(){
   const res = await fetch(`${API_URL}?ts=${Date.now()}`, { method:"GET", redirect:"follow" });
-  if(!res.ok) throw new Error(`GET failed (${res.status})`);
   const data = await res.json();
-  if(!data?.ok) throw new Error(data?.error || "Bad response from API");
+  if(!res.ok || !data?.ok) throw new Error(data?.error || `GET failed (${res.status})`);
   return data.spins || [];
 }
 
@@ -339,30 +325,25 @@ async function apiSubmitEntry(payload){
   return data;
 }
 
-/** =========================
- * NAV
- *  ========================= */
-function goSignup(spinId){
-  state.selectedSpinId = String(spinId);
+function goSignup(key){
+  state.selectedSpinKey = String(key);
   clearMsg(msg);
   nameEl.value=""; phoneEl.value=""; emailEl.value=""; venmoEl.value="";
-  slotEl.value="";
+  spinNumberEl.value="";
 
   pagePick.classList.add("hidden");
   pageSignup.classList.remove("hidden");
   renderSignup();
 }
+
 function goPick(){
-  state.selectedSpinId = null;
+  state.selectedSpinKey = null;
   clearMsg(msg);
   pageSignup.classList.add("hidden");
   pagePick.classList.remove("hidden");
   renderPick();
 }
 
-/** =========================
- * RENDER
- *  ========================= */
 function renderPick(){
   spinCards.innerHTML="";
   clearMsg(pickMsg);
@@ -370,7 +351,7 @@ function renderPick(){
   let anyOpen=false;
 
   state.spins.forEach(spin=>{
-    const spinId = spinIdOf(spin);
+    const key = spinKey(spin);
     const title=String(spin.title||"");
     const desc=String(spin.desc||"");
     const price=getPrice(spin);
@@ -384,7 +365,8 @@ function renderPick(){
 
     const pct=cap>0?Math.min(100,(signed/cap)*100):0;
 
-    const photoUrl = resolvePhotoUrl(spin.imageUrl || "");
+    const photoValue = spin.imageUrl || spin.imageURL || spin.photo || "";
+    const photoUrl = resolvePhotoUrl(photoValue);
 
     const div=document.createElement("div");
     div.className="card";
@@ -411,7 +393,7 @@ function renderPick(){
         ${photoUrl ? `<div class="photo"><img src="${photoUrl}" alt="Spin photo" onerror="this.style.display='none';console.warn('Image failed:',this.src);" /></div>` : ``}
       </div>
 
-      <button data-pick="${escapeHtml(spinId)}" ${open?"":"disabled"} style="margin-top:10px;width:100%">
+      <button data-pick="${escapeHtml(key)}" ${open?"":"disabled"} style="margin-top:10px;width:100%">
         ${open?"Choose Spin":"Full"}
       </button>
     `;
@@ -424,36 +406,23 @@ function renderPick(){
   spinCards.querySelectorAll("button[data-pick]").forEach(btn=>{
     btn.addEventListener("click", ()=> goSignup(btn.getAttribute("data-pick")));
   });
-
-  if(!state.spins.length){
-    showMsg(pickMsg, `<strong>No spins found.</strong><br/><span class="small">Check your Spins sheet rows and Web App deployment access.</span>`);
-  }
 }
 
-function renderSlotDropdown(spin){
+function renderSpinNumberDropdown(spin){
   const taken = new Set(getTakenNumbers(spin));
-  const totalSlots = 24;
-
   const options = [`<option value="">Select a number…</option>`];
-  for(let i=1;i<=totalSlots;i++){
-    const isTaken = taken.has(i);
-    options.push(`<option value="${i}" ${isTaken?"disabled":""}>${isTaken?`${i} (taken)`:i}</option>`);
+  for(let i=1;i<=24;i++){
+    const disabled = taken.has(i) ? "disabled" : "";
+    const label = taken.has(i) ? `${i} (taken)` : `${i}`;
+    options.push(`<option value="${i}" ${disabled}>${label}</option>`);
   }
-  slotEl.innerHTML = options.join("");
-
-  const available = totalSlots - taken.size;
-  slotEl.disabled = (available <= 0);
-  if(slotEl.disabled){
-    slotEl.innerHTML = `<option value="">All numbers taken</option>`;
-  }
+  spinNumberEl.innerHTML = options.join("");
+  spinNumberEl.disabled = (taken.size >= 24);
 }
 
 function renderSignup(){
-  const spin = getSpin(state.selectedSpinId);
-  if(!spin){
-    showMsg(msg,"<strong>Spin not found.</strong> Go back and try again.");
-    return;
-  }
+  const spin = getSpinByKey(state.selectedSpinKey);
+  if(!spin){ showMsg(msg,"<strong>Spin not found.</strong> Go back and try again."); return; }
 
   const title=String(spin.title||"");
   const desc=String(spin.desc||"");
@@ -466,7 +435,8 @@ function renderSignup(){
   const status=String(spin.status||"OPEN").toUpperCase();
   const open = left>0 && status==="OPEN";
 
-  const photoUrl = resolvePhotoUrl(spin.imageUrl || "");
+  const photoValue = spin.imageUrl || spin.imageURL || spin.photo || "";
+  const photoUrl = resolvePhotoUrl(photoValue);
 
   signupTitle.textContent=`Sign up — ${title}`;
   signupDesc.textContent=desc;
@@ -481,58 +451,48 @@ function renderSignup(){
     ? `<div class="photo"><img src="${photoUrl}" alt="Spin photo" onerror="this.style.display='none';console.warn('Signup image failed:',this.src);" /></div>`
     : ``;
 
-  renderSlotDropdown(spin);
+  renderSpinNumberDropdown(spin);
 
-  btnSubmit.disabled = !(open && !slotEl.disabled);
+  btnSubmit.disabled = !(open && !spinNumberEl.disabled);
 }
 
-/** =========================
- * SUBMIT
- *  ========================= */
 async function submitEntry(){
   clearMsg(msg);
 
-  const spin = getSpin(state.selectedSpinId);
+  const spin = getSpinByKey(state.selectedSpinKey);
   if(!spin) return showMsg(msg,"<strong>Error:</strong> Spin not found.");
 
-  const spinId = spinIdOf(spin);
+  const spinId = spinKey(spin);
 
   const name=nameEl.value.trim();
   const phone=phoneEl.value.trim();
   const email=emailEl.value.trim();
   const venmo=venmoEl.value.trim();
-  const slot = Number(slotEl.value);
+  const spinNumber = Number(spinNumberEl.value);
 
   if(!name) return showMsg(msg,"Please enter your <strong>name</strong>.");
   if(!phone) return showMsg(msg,"Please enter your <strong>phone</strong>.");
   if(!email || !validEmail(email)) return showMsg(msg,"Please enter a valid <strong>email</strong>.");
   if(!venmo) return showMsg(msg,"Please enter your <strong>Venmo username</strong>.");
-  if(!Number.isFinite(slot) || slot < 1 || slot > 24) return showMsg(msg,"Please select a <strong>number (1–24)</strong>.");
+  if(!Number.isFinite(spinNumber) || spinNumber < 1 || spinNumber > 24) return showMsg(msg,"Please select a <strong>number (1–24)</strong>.");
 
   btnSubmit.disabled=true;
   const oldText=btnSubmit.textContent;
   btnSubmit.textContent="Submitting…";
 
   try{
-    const payload = {
-      spinId,
-      name, phone, email, venmo,
-      spinNumber: slot,     // ✅ what server reads
-      SpinNumber: slot      // ✅ matches Entries header
-    };
-
+    // ✅ IMPORTANT: send spinNumber (and number as fallback)
+    const payload = { spinId, spinNumber, number: spinNumber, name, phone, email, venmo };
     await apiSubmitEntry(payload);
 
+    // refresh
     state.spins = await apiGetSpins();
-
-    const updated = getSpin(spinId) || spin;
-    const amount = getPrice(updated);
+    const updated = getSpinByKey(spinId) || spin;
 
     showMsg(msg,
       `<strong>You're signed up ✅</strong><br/>
-       Your number: <strong>${slot}</strong><br/>
-       Amount due: <strong>$${amount}</strong><br/>
-       <span class="small">Pay on Venmo and include your name + number in the note.</span>`
+       Your number: <strong>${spinNumber}</strong><br/>
+       Amount due: <strong>$${getPrice(updated)}</strong>`
     );
 
     renderSignup();
@@ -540,33 +500,20 @@ async function submitEntry(){
     showMsg(msg, `<strong>Error:</strong> ${escapeHtml(err.message || String(err))}`);
   }finally{
     btnSubmit.textContent=oldText;
-    const s2=getSpin(state.selectedSpinId);
-    if(s2){
-      const open2 = getSpotsLeft(s2)>0 && String(s2.status||"OPEN").toUpperCase()==="OPEN" && !slotEl.disabled;
-      btnSubmit.disabled = !open2;
-    }
   }
 }
 
-/** =========================
- * INIT
- *  ========================= */
 btnBack.addEventListener("click", goPick);
 btnSubmit.addEventListener("click", submitEntry);
 
 (async function init(){
   try{
-    if(!API_URL || API_URL.includes("PASTE_YOUR")) throw new Error("Set API_URL to your Apps Script /exec URL.");
     state.spins = await apiGetSpins();
     renderPick();
   }catch(err){
     globalStatus.textContent="Error";
     globalStatus.className="pill bad";
-    showMsg(pickMsg,
-      `<strong>Could not load spins.</strong><br/>
-       ${escapeHtml(err.message || String(err))}<br/><br/>
-       <span class="small">Check: (1) API_URL is your Apps Script /exec URL, (2) Web App access is set to Anyone.</span>`
-    );
+    showMsg(pickMsg, `<strong>Could not load spins.</strong><br/>${escapeHtml(err.message || String(err))}`);
   }
 })();
 </script>
