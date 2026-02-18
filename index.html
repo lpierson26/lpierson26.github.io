@@ -235,26 +235,15 @@ input,select{
 
 <div class="row" style="gap:10px">
   <div style="flex:1;min-width:240px">
-    <label for="spinNumber">Pick your wheel number (1–24)</label>
-    <select id="spinNumber">
+    <label for="slot">Pick your number (1–24)</label>
+    <select id="slot">
       <option value="">Select a number…</option>
     </select>
-    <div class="small">Numbers already taken for this spin won’t be available.</div>
-  </div>
-</div>
-
-
-
-  <!-- ✅ NEW: Number dropdown -->
-  <div class="row" style="gap:10px">
-    <div style="flex:1;min-width:240px">
-      <label for="slot">Pick your number (1–24)</label>
-      <select id="slot">
-        <option value="">Loading…</option>
-      </select>
-      <div class="small" style="margin-top:6px">Once a number is taken for this spin, it can’t be selected again.</div>
+    <div class="small" style="margin-top:6px">
+      Once a number is taken for this spin, it can’t be selected again.
     </div>
   </div>
+</div>
 
   <div class="row" style="margin-top:10px">
     <button id="btnSubmit" style="width:100%">Submit Entry</button>
