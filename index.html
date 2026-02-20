@@ -1,79 +1,229 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Locker Room Legends</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Locker Room Legends | Spin to Win</title>
 
 <style>
+:root{
+  --red:#dc2626;
+  --blue:#1d4ed8;
+  --dark:#0f172a;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --card:#f8fafc;
+  --white:#ffffff;
+}
+
+*{box-sizing:border-box}
+
 body{
   margin:0;
-  font-family:system-ui, Arial, sans-serif;
-  background:linear-gradient(180deg,#f8fafc,#e2e8f0);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height:100vh;
-  text-align:center;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:#f1f5f9;
+  color:var(--dark);
 }
 
 .container{
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
+
+/* HEADER */
+header{
   background:white;
-  padding:40px;
-  border-radius:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
-  max-width:500px;
-  width:90%;
+  border-bottom:1px solid var(--border);
+}
+
+.header-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
 }
 
 .logo{
-  height:80px;
-  margin-bottom:20px;
+  height:60px;
 }
 
-h1{
-  margin:0 0 10px 0;
-  font-size:36px;
-}
-
-p{
-  color:#64748b;
-  margin-bottom:25px;
-}
-
-button{
-  background:#1d4ed8;
+.cta-btn{
+  background:linear-gradient(90deg,var(--blue),var(--red));
   color:white;
   border:none;
-  padding:14px 24px;
-  font-size:18px;
-  border-radius:12px;
-  cursor:pointer;
+  border-radius:10px;
+  padding:12px 18px;
   font-weight:700;
+  cursor:pointer;
+  font-size:15px;
 }
 
-button:hover{
-  background:#1e40af;
+/* HERO */
+.hero{
+  background:linear-gradient(120deg,var(--blue),var(--red));
+  color:white;
+  padding:60px 20px;
+  text-align:center;
 }
+
+.hero h1{
+  margin:0;
+  font-size:40px;
+}
+
+.hero p{
+  margin-top:10px;
+  font-size:18px;
+  opacity:.95;
+}
+
+.hero button{
+  margin-top:25px;
+  background:white;
+  color:var(--dark);
+  border:none;
+  border-radius:12px;
+  padding:14px 22px;
+  font-weight:800;
+  font-size:16px;
+  cursor:pointer;
+}
+
+/* SECTION */
+.section{
+  background:white;
+  padding:30px;
+  border-radius:16px;
+  margin-top:25px;
+  border:1px solid var(--border);
+}
+
+.section h2{
+  margin-top:0;
+}
+
+/* INFO GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:20px;
+}
+
+@media(max-width:800px){
+  .grid{grid-template-columns:1fr}
+}
+
+.info-card{
+  background:var(--card);
+  padding:18px;
+  border-radius:12px;
+  border:1px solid var(--border);
+}
+
+.hours-table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+.hours-table td{
+  padding:6px 0;
+}
+
+/* FOOTER */
+footer{
+  text-align:center;
+  color:var(--muted);
+  margin-top:40px;
+  padding-bottom:30px;
+}
+
+.social-btn{
+  display:inline-block;
+  margin-top:10px;
+  padding:10px 16px;
+  background:#1877f2;
+  color:white;
+  border-radius:8px;
+  text-decoration:none;
+  font-weight:600;
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<header>
+  <div class="container header-inner">
+    <img src="logo.webp" class="logo" alt="Locker Room Legends">
+    <a href="./spin.html">
+      <button class="cta-btn">Enter Spin to Win</button>
+    </a>
+  </div>
+</header>
 
-  <!-- your logo -->
-  <img src="logo.webp" class="logo">
-
+<section class="hero">
   <h1>Spin to Win</h1>
-  <p>Enter the latest Locker Room Legends jersey spins.</p>
-
-  <!-- link to your main page -->
-  <a href="spin.html">
+  <p>Premium sports memorabilia, collectibles, and exclusive raffles.</p>
+  <a href="./spin.html">
     <button>Enter Spins</button>
   </a>
+</section>
+
+<div class="container">
+
+  <div class="section">
+    <h2>About Locker Room Legends</h2>
+    <p>
+      Locker Room Legends has proudly served the Cedar Rapids and Iowa City area for over 30 years.
+      Owned and operated by Dan & Tanya Miller, our retail store is located in the lower level of
+      Lindale Mall in Cedar Rapids, Iowa — behind Chick‑fil‑A.
+    </p>
+    <p>
+      Everything we sell is related to MLB, NBA, NCAA, NFL & NHL. We offer sports cards, wax packs,
+      autographed memorabilia, vintage collectibles, artwork, fan cave decor, apparel, kitchen items,
+      tailgating gear, and much more.
+    </p>
+  </div>
+
+  <div class="grid">
+
+    <div class="info-card">
+      <h3>Visit Our Store</h3>
+      <p>
+        Lindale Mall<br>
+        4444 1st Ave NE #458<br>
+        Cedar Rapids, IA 52402
+      </p>
+      <p><strong>Phone:</strong> (319) 396‑2358</p>
+      <p><strong>Email:</strong> LRMLEGENDS@MCHSI.COM</p>
+
+      <a class="social-btn" href="https://www.facebook.com/lrmlegends" target="_blank">
+        Visit us on Facebook
+      </a>
+    </div>
+
+    <div class="info-card">
+      <h3>Store Hours</h3>
+      <table class="hours-table">
+        <tr><td>Monday</td><td>Closed</td></tr>
+        <tr><td>Tuesday</td><td>Closed</td></tr>
+        <tr><td>Wednesday</td><td>11 AM – 7 PM</td></tr>
+        <tr><td>Thursday</td><td>11 AM – 7 PM</td></tr>
+        <tr><td>Friday</td><td>11 AM – 7 PM</td></tr>
+        <tr><td>Saturday</td><td>11 AM – 7 PM</td></tr>
+        <tr><td>Sunday</td><td>12 PM – 5 PM</td></tr>
+      </table>
+    </div>
+
+  </div>
 
 </div>
+
+<footer>
+  © 2026 Locker Room Legends • Cedar Rapids, Iowa
+</footer>
 
 </body>
 </html>
