@@ -1,4 +1,5 @@
 <!doctype html>
+
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -42,10 +43,17 @@ header{
   justify-content:space-between;
   align-items:center;
   gap:20px;
+  flex-wrap:wrap;
 }
 
 .logo{
   height:60px;
+}
+
+.nav-buttons{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
 .cta-btn{
@@ -57,6 +65,10 @@ header{
   font-weight:700;
   cursor:pointer;
   font-size:15px;
+}
+
+.cta-btn.secondary{
+  background:#0f172a;
 }
 
 /* HERO */
@@ -78,8 +90,15 @@ header{
   opacity:.95;
 }
 
-.hero button{
+.hero-buttons{
   margin-top:25px;
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  flex-wrap:wrap;
+}
+
+.hero button{
   background:white;
   color:var(--dark);
   border:none;
@@ -148,8 +167,8 @@ footer{
   text-decoration:none;
   font-weight:600;
 }
-
 </style>
+
 </head>
 
 <body>
@@ -157,18 +176,38 @@ footer{
 <header>
   <div class="container header-inner">
     <img src="logo.webp" class="logo" alt="Locker Room Legends">
-    <a href="./spin.html">
-      <button class="cta-btn">Enter Spin to Win</button>
-    </a>
+
+```
+<div class="nav-buttons">
+  <a href="./spin.html">
+    <button class="cta-btn">Spin to Win</button>
+  </a>
+
+  <a href="./storefront.html">
+    <button class="cta-btn secondary">Storefront</button>
+  </a>
+</div>
+```
+
   </div>
 </header>
 
 <section class="hero">
   <h1>Spin to Win</h1>
   <p>Premium sports memorabilia, collectibles, and exclusive raffles.</p>
-  <a href="./spin.html">
-    <button>Enter Spins</button>
-  </a>
+
+  <div class="hero-buttons">
+    <a href="./spin.html">
+      <button>Enter Spins</button>
+    </a>
+
+```
+<a href="./storefront.html">
+  <button>Browse Storefront</button>
+</a>
+```
+
+  </div>
 </section>
 
 <div class="container">
@@ -178,7 +217,7 @@ footer{
     <p>
       Locker Room Legends has proudly served the Cedar Rapids and Iowa City area for over 30 years.
       Owned and operated by Dan & Tanya Miller, our retail store is located in the lower level of
-      Lindale Mall in Cedar Rapids, Iowa — behind Chick‑fil‑A.
+      Lindale Mall in Cedar Rapids, Iowa — behind Chick-fil-A.
     </p>
     <p>
       Everything we sell is related to MLB, NBA, NCAA, NFL & NHL. We offer sports cards, wax packs,
@@ -189,33 +228,35 @@ footer{
 
   <div class="grid">
 
-    <div class="info-card">
-      <h3>Visit Our Store</h3>
-      <p>
-        Lindale Mall<br>
-        4444 1st Ave NE #458<br>
-        Cedar Rapids, IA 52402
-      </p>
-      <p><strong>Phone:</strong> (319) 396‑2358</p>
-      <p><strong>Email:</strong> LRMLEGENDS@MCHSI.COM</p>
+```
+<div class="info-card">
+  <h3>Visit Our Store</h3>
+  <p>
+    Lindale Mall<br>
+    4444 1st Ave NE #458<br>
+    Cedar Rapids, IA 52402
+  </p>
+  <p><strong>Phone:</strong> (319) 396-2358</p>
+  <p><strong>Email:</strong> LRMLEGENDS@MCHSI.COM</p>
 
-      <a class="social-btn" href="https://www.facebook.com/lrmlegends" target="_blank">
-        Visit us on Facebook
-      </a>
-    </div>
+  <a class="social-btn" href="https://www.facebook.com/lrmlegends" target="_blank">
+    Visit us on Facebook
+  </a>
+</div>
 
-    <div class="info-card">
-      <h3>Store Hours</h3>
-      <table class="hours-table">
-        <tr><td>Monday</td><td>Closed</td></tr>
-        <tr><td>Tuesday</td><td>Closed</td></tr>
-        <tr><td>Wednesday</td><td>11 AM – 7 PM</td></tr>
-        <tr><td>Thursday</td><td>11 AM – 7 PM</td></tr>
-        <tr><td>Friday</td><td>11 AM – 7 PM</td></tr>
-        <tr><td>Saturday</td><td>11 AM – 7 PM</td></tr>
-        <tr><td>Sunday</td><td>12 PM – 5 PM</td></tr>
-      </table>
-    </div>
+<div class="info-card">
+  <h3>Store Hours</h3>
+  <table class="hours-table">
+    <tr><td>Monday</td><td>Closed</td></tr>
+    <tr><td>Tuesday</td><td>Closed</td></tr>
+    <tr><td>Wednesday</td><td>11 AM – 7 PM</td></tr>
+    <tr><td>Thursday</td><td>11 AM – 7 PM</td></tr>
+    <tr><td>Friday</td><td>11 AM – 7 PM</td></tr>
+    <tr><td>Saturday</td><td>11 AM – 7 PM</td></tr>
+    <tr><td>Sunday</td><td>12 PM – 5 PM</td></tr>
+  </table>
+</div>
+```
 
   </div>
 
