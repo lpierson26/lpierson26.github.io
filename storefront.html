@@ -269,7 +269,7 @@ function render(){
   itemsGrid.innerHTML = "";
   hide(pageMsg);
 
-  const available = state.items.filter(x => String(x.status||"AVAILABLE").toUpperCase() === "AVAILABLE").length;
+  const available = state.items.filter(x => String(x.status||"OPEN").toUpperCase() === "OPEN").length;
   statusPill.textContent = `${available} available`;
   statusPill.className = `pill ${available ? "good" : "bad"}`;
 
@@ -279,8 +279,8 @@ function render(){
   }
 
   state.items.forEach(it => {
-    const status = String(it.status || "AVAILABLE").toUpperCase();
-    const isAvail = status === "AVAILABLE";
+    const status = String(it.status || "OPEN").toUpperCase();
+    const isAvail = status === "OPEN";
     const photoUrl = resolvePhotoUrl(it.imageUrl);
 
     const div = document.createElement("div");
