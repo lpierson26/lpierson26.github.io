@@ -124,6 +124,7 @@ input{
   padding:14px;
 }
 .modalOverlay.show{display:flex}
+.small{font-size:12px;color:var(--muted)}
 </style>
 </head>
 
@@ -135,7 +136,7 @@ input{
         <img src="logo.webp" class="logo" alt="Locker Room Legends">
         <div>
           <div class="title">Storefront</div>
-          <div class="sub">Live items. First person to reserve marks it SOLD.</div>
+          <div class="sub">Live items. First person to reserve marks it RESERVED.</div>
         </div>
       </div>
       <div class="row">
@@ -150,7 +151,7 @@ input{
   <section class="card">
     <div class="row between">
       <div>
-        <div class="title">OPEN Items</div>
+        <div class="title">Items</div>
         <div class="sub">Items update from Google Sheet.</div>
       </div>
       <button id="btnRefresh" class="secondary">Refresh</button>
@@ -190,6 +191,10 @@ input{
         <label for="buyerEmail">Email</label>
         <input id="buyerEmail" autocomplete="email" placeholder="you@email.com">
       </div>
+      <div style="flex:1;min-width:220px">
+        <label for="buyerVenmo">Venmo</label>
+        <input id="buyerVenmo" placeholder="@yourVenmo">
+      </div>
     </div>
 
     <div class="row" style="margin-top:10px">
@@ -197,12 +202,13 @@ input{
     </div>
 
     <div id="mMsg" class="notice hidden" style="margin-top:10px"></div>
+    <div class="small" style="margin-top:10px">Pay via Venmo after reserving. We’ll match by name + handle.</div>
   </div>
 </div>
 
 <script>
 /** ✅ Paste your Storefront Apps Script /exec URL here */
-const API_URL = "https://script.google.com/macros/s/AKfycbzqaj_HtGaXBdEHurfywXGNpw30Lv7gJQvg9wxdkk6WWVLwaaLSNx7pNziviXNDExA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwBDRTeFsCZuFMOkj8AvPm37ZPqfxQ_BLjPW6u5yxYvNEtGHmDrG4fBU8ap05yGkpK2/exec";
 
 const itemsGrid = document.getElementById("itemsGrid");
 const pageMsg = document.getElementById("pageMsg");
@@ -219,6 +225,7 @@ const mMsg = document.getElementById("mMsg");
 const buyerName = document.getElementById("buyerName");
 const buyerEmail = document.getElementById("buyerEmail");
 const buyerPhone = document.getElementById("buyerPhone");
+const buyerVenmo = document.getElementById("buyerVenmo");
 
 let state = { items: [], selected: null };
 
@@ -238,7 +245,7 @@ function resolvePhotoUrl(photo){
     }
     const m1=p.match(/drive\.google\.com\/file\/d\/([^/]+)/i);
     if(m1 && m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
-    const m2=p.match(/drive\.google\.com\/open\?id=([^&]+)/i);
+    const m2=p.match(/drive\.google\.com\/open\\?id=([^&]+)/i);
     if(m2 && m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
     return p;
   }
@@ -265,11 +272,20 @@ async function apiReserve(payload){
   return data;
 }
 
+function normalizeStatus_(s){
+  return String(s || "").trim().toUpperCase();
+}
+
+function itemId_(it){
+  // ✅ match Code.gs: Items sheet uses column "id"
+  return String(it.id || it.itemId || "").trim();
+}
+
 function render(){
   itemsGrid.innerHTML = "";
   hide(pageMsg);
 
-  const available = state.items.filter(x => String(x.status||"OPEN").toUpperCase() === "OPEN").length;
+  const available = state.items.filter(x => normalizeStatus_(x.status) === "OPEN").length;
   statusPill.textContent = `${available} available`;
   statusPill.className = `pill ${available ? "good" : "bad"}`;
 
@@ -279,9 +295,10 @@ function render(){
   }
 
   state.items.forEach(it => {
-    const status = String(it.status || "OPEN").toUpperCase();
+    const status = normalizeStatus_(it.status || "OPEN");
     const isAvail = status === "OPEN";
-    const photoUrl = resolvePhotoUrl(it.imageUrl);
+    const photoUrl = resolvePhotoUrl(it.imageUrl || it.imageURL || it.photo || "");
+    const id = itemId_(it);
 
     const div = document.createElement("div");
     div.className = "card";
@@ -290,16 +307,15 @@ function render(){
     div.innerHTML = `
       <div class="photo">${photoUrl ? `<img src="${photoUrl}" alt="item image" onerror="this.style.display='none'">` : ""}</div>
       <div style="margin-top:10px" class="title">${escapeHtml(it.title||"")}</div>
-      <div class="sub">${escapeHtml(it.description||"")}</div>
 
       <div class="row between" style="margin-top:10px">
         <span class="pill blue">$${escapeHtml(it.price ?? "")}</span>
-        <span class="pill ${isAvail ? "good" : "bad"}">${isAvail ? "OPEN" : "SOLD"}</span>
+        <span class="pill ${isAvail ? "good" : "bad"}">${escapeHtml(status || "CLOSED")}</span>
       </div>
 
       <div class="row" style="margin-top:10px">
-        <button data-buy="${escapeHtml(it.itemId||"")}" ${isAvail ? "" : "disabled"} style="width:100%">
-          ${isAvail ? "Reserve / Buy" : "Sold"}
+        <button class="reserveBtn" data-id="${escapeHtml(id)}" ${isAvail ? "" : "disabled"} style="width:100%">
+          ${isAvail ? "Reserve Item" : (status === "RESERVED" ? "Reserved" : "Unavailable")}
         </button>
       </div>
     `;
@@ -307,13 +323,13 @@ function render(){
     itemsGrid.appendChild(div);
   });
 
-  itemsGrid.querySelectorAll("button[data-buy]").forEach(btn => {
-    btn.addEventListener("click", () => openModal(btn.getAttribute("data-buy")));
+  itemsGrid.querySelectorAll("button.reserveBtn").forEach(btn => {
+    btn.addEventListener("click", () => openModal(btn.getAttribute("data-id")));
   });
 }
 
-function openModal(itemId){
-  const it = state.items.find(x => String(x.itemId||"") === String(itemId));
+function openModal(id){
+  const it = state.items.find(x => itemId_(x) === String(id));
   if(!it) return;
 
   state.selected = it;
@@ -325,6 +341,7 @@ function openModal(itemId){
   buyerName.value = "";
   buyerEmail.value = "";
   buyerPhone.value = "";
+  buyerVenmo.value = "";
 
   modalOverlay.classList.add("show");
   modalOverlay.setAttribute("aria-hidden","false");
@@ -358,18 +375,29 @@ async function submitReserve(){
   const name = buyerName.value.trim();
   const email = buyerEmail.value.trim();
   const phone = buyerPhone.value.trim();
+  const venmo = buyerVenmo.value.trim();
 
   if(!name) return show(mMsg, "Please enter your <strong>name</strong>.");
   if(!phone) return show(mMsg, "Please enter your <strong>phone</strong>.");
   if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return show(mMsg, "Please enter a valid <strong>email</strong>.");
+  if(!venmo) return show(mMsg, "Please enter your <strong>Venmo</strong>.");
 
   mSubmit.disabled = true;
   const old = mSubmit.textContent;
   mSubmit.textContent = "Reserving…";
 
   try{
-    await apiReserve({ itemId: it.itemId, name, email, phone });
-    show(mMsg, `<strong>Reserved ✅</strong><br>We’ll contact you to finalize.`);
+    // ✅ must match Code.gs: action=reserve and itemId uses Items.id
+    await apiReserve({
+      action: "reserve",
+      itemId: itemId_(it),
+      name,
+      phone,
+      email,
+      venmo
+    });
+
+    show(mMsg, `<strong>Reserved ✅</strong><br>Saved your info. Please pay via Venmo and include your name.`);
     await refresh();
   }catch(err){
     show(mMsg, `<strong>Error:</strong> ${escapeHtml(err.message||String(err))}`);
