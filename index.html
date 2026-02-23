@@ -1,10 +1,9 @@
 <!doctype html>
-
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Locker Room Legends | Spin to Win</title>
+<title>Locker Room Legends | Website</title>
 
 <style>
 :root{
@@ -16,7 +15,6 @@
   --card:#f8fafc;
   --white:#ffffff;
 }
-
 *{box-sizing:border-box}
 
 body{
@@ -46,9 +44,7 @@ header{
   flex-wrap:wrap;
 }
 
-.logo{
-  height:60px;
-}
+.logo{ height:60px; }
 
 .nav-buttons{
   display:flex;
@@ -66,10 +62,7 @@ header{
   cursor:pointer;
   font-size:15px;
 }
-
-.cta-btn.secondary{
-  background:#0f172a;
-}
+.cta-btn.secondary{ background:#0f172a; }
 
 /* HERO */
 .hero{
@@ -79,16 +72,8 @@ header{
   text-align:center;
 }
 
-.hero h1{
-  margin:0;
-  font-size:40px;
-}
-
-.hero p{
-  margin-top:10px;
-  font-size:18px;
-  opacity:.95;
-}
+.hero h1{ margin:0; font-size:40px; }
+.hero p{ margin-top:10px; font-size:18px; opacity:.95; }
 
 .hero-buttons{
   margin-top:25px;
@@ -98,6 +83,7 @@ header{
   flex-wrap:wrap;
 }
 
+.hero a{ text-decoration:none; }
 .hero button{
   background:white;
   color:var(--dark);
@@ -117,10 +103,7 @@ header{
   margin-top:25px;
   border:1px solid var(--border);
 }
-
-.section h2{
-  margin-top:0;
-}
+.section h2{ margin-top:0; }
 
 /* INFO GRID */
 .grid{
@@ -128,10 +111,7 @@ header{
   grid-template-columns:repeat(2,1fr);
   gap:20px;
 }
-
-@media(max-width:800px){
-  .grid{grid-template-columns:1fr}
-}
+@media(max-width:800px){ .grid{grid-template-columns:1fr} }
 
 .info-card{
   background:var(--card);
@@ -144,10 +124,7 @@ header{
   width:100%;
   border-collapse:collapse;
 }
-
-.hours-table td{
-  padding:6px 0;
-}
+.hours-table td{ padding:6px 0; }
 
 /* FOOTER */
 footer{
@@ -168,7 +145,6 @@ footer{
   font-weight:600;
 }
 </style>
-
 </head>
 
 <body>
@@ -177,36 +153,22 @@ footer{
   <div class="container header-inner">
     <img src="logo.webp" class="logo" alt="Locker Room Legends">
 
-
-<div class="nav-buttons">
-  <a href="./spin.html">
-    <button class="cta-btn">Spin to Win</button>
-  </a>
-
-  <a href="./storefront.html">
-    <button class="cta-btn secondary">Storefront</button>
-  </a>
-</div>
-
-
+    <div class="nav-buttons">
+      <a href="./spin.html"><button class="cta-btn">Spin to Win</button></a>
+      <a href="./storefront.html"><button class="cta-btn secondary">Storefront</button></a>
+      <a href="./tables.html"><button class="cta-btn secondary">Card Show Tables</button></a>
+    </div>
   </div>
 </header>
 
 <section class="hero">
-  <h1>Spin to Win</h1>
-  <p>Premium sports memorabilia, collectibles, and exclusive raffles.</p>
+  <h1>Locker Room Legends Website</h1>
+  <p>Explore raffles, reserve storefront items, and claim card show tables — all in one place.</p>
 
   <div class="hero-buttons">
-    <a href="./spin.html">
-      <button>Enter Spins</button>
-    </a>
-
-
-<a href="./storefront.html">
-  <button>Browse Storefront</button>
-</a>
-
-
+    <a href="./spin.html"><button>Enter Spin to Win</button></a>
+    <a href="./storefront.html"><button>Browse Storefront</button></a>
+    <a href="./tables.html"><button>Reserve Card Show Tables</button></a>
   </div>
 </section>
 
@@ -228,35 +190,33 @@ footer{
 
   <div class="grid">
 
+    <div class="info-card">
+      <h3>Visit Our Store</h3>
+      <p>
+        Lindale Mall<br>
+        4444 1st Ave NE #458<br>
+        Cedar Rapids, IA 52402
+      </p>
+      <p><strong>Phone:</strong> (319) 396-2358</p>
+      <p><strong>Email:</strong> LRMLEGENDS@MCHSI.COM</p>
 
-<div class="info-card">
-  <h3>Visit Our Store</h3>
-  <p>
-    Lindale Mall<br>
-    4444 1st Ave NE #458<br>
-    Cedar Rapids, IA 52402
-  </p>
-  <p><strong>Phone:</strong> (319) 396-2358</p>
-  <p><strong>Email:</strong> LRMLEGENDS@MCHSI.COM</p>
+      <a class="social-btn" href="https://www.facebook.com/lrmlegends" target="_blank" rel="noopener">
+        Visit us on Facebook
+      </a>
+    </div>
 
-  <a class="social-btn" href="https://www.facebook.com/lrmlegends" target="_blank">
-    Visit us on Facebook
-  </a>
-</div>
-
-<div class="info-card">
-  <h3>Store Hours</h3>
-  <table class="hours-table">
-    <tr><td>Monday</td><td>Closed</td></tr>
-    <tr><td>Tuesday</td><td>Closed</td></tr>
-    <tr><td>Wednesday</td><td>11 AM – 7 PM</td></tr>
-    <tr><td>Thursday</td><td>11 AM – 7 PM</td></tr>
-    <tr><td>Friday</td><td>11 AM – 7 PM</td></tr>
-    <tr><td>Saturday</td><td>11 AM – 7 PM</td></tr>
-    <tr><td>Sunday</td><td>12 PM – 5 PM</td></tr>
-  </table>
-</div>
-
+    <div class="info-card">
+      <h3>Store Hours</h3>
+      <table class="hours-table">
+        <tr><td>Monday</td><td>Closed</td></tr>
+        <tr><td>Tuesday</td><td>Closed</td></tr>
+        <tr><td>Wednesday</td><td>11 AM – 7 PM</td></tr>
+        <tr><td>Thursday</td><td>11 AM – 7 PM</td></tr>
+        <tr><td>Friday</td><td>11 AM – 7 PM</td></tr>
+        <tr><td>Saturday</td><td>11 AM – 7 PM</td></tr>
+        <tr><td>Sunday</td><td>12 PM – 5 PM</td></tr>
+      </table>
+    </div>
 
   </div>
 
