@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Locker Room Legends — Storefront</title>
+
+<style>
+:root{
+  --red:#dc2626;
+  --blue:#1d4ed8;
+  --white:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --card:#f8fafc;
+  --good:#059669;
+  --bad:#dc2626;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:linear-gradient(180deg,rgba(29,78,216,.06),rgba(220,38,38,.03));
+  color:var(--text);
+}
+header{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:14px;
+}
+.wrap{max-width:980px;margin:0 auto}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.logo{height:44px;object-fit:contain}
+main{padding:14px}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:14px;
+}
+.grid3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+@media(max-width:900px){.grid3{grid-template-columns:1fr}}
+.pill{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:#fff;
+}
+.pill.good{color:var(--good)}
+.pill.bad{color:var(--bad)}
+.pill.blue{color:var(--blue)}
+.title{font-weight:900}
+.sub{font-size:13px;color:var(--muted)}
+button,a.btn{
+  border:none;
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:800;
+  cursor:pointer;
+  background:var(--blue);
+  color:#fff;
+  text-decoration:none;
+}
+button.secondary,a.btn.secondary{
+  background:#fff;
+  color:var(--text);
+  border:1px solid var(--border);
+}
+button:disabled{opacity:.5; cursor:not-allowed}
+
+.photo{
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  background:#fff;
+}
+.photo img{
+  width:100%;
+  height:200px;
+  object-fit:contain;
+  display:block;
+}
+label{display:block;margin:10px 0 6px;font-size:12px;color:var(--muted)}
+input{
+  width:100%;
+  padding:10px 10px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#fff;
+  font-size:14px;
+}
+.notice{
+  border:1px dashed var(--border);
+  border-radius:12px;
+  padding:10px;
+  font-size:13px;
+  color:var(--muted);
+  background:#fff;
+}
+.hr{height:1px;background:var(--border);margin:12px 0}
+.hidden{display:none}
+
+.modalOverlay{
+  position:fixed; inset:0;
+  background:rgba(15,23,42,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+}
+.modal{
+  width:min(560px, 100%);
+  background:#fff;
+  border-radius:16px;
+  border:1px solid var(--border);
+  padding:14px;
+}
+.modalOverlay.show{display:flex}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <div class="row between">
+      <div class="row">
+        <img src="logo.webp" class="logo" alt="Locker Room Legends">
+        <div>
+          <div class="title">Storefront</div>
+          <div class="sub">Live items. First person to reserve marks it SOLD.</div>
+        </div>
+      </div>
+      <div class="row">
+        <a class="btn secondary" href="./index.html">← Home</a>
+        <span id="statusPill" class="pill">Loading…</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card">
+    <div class="row between">
+      <div>
+        <div class="title">Available Items</div>
+        <div class="sub">Items update from Google Sheet.</div>
+      </div>
+      <button id="btnRefresh" class="secondary">Refresh</button>
+    </div>
+
+    <div id="itemsGrid" class="grid3" style="margin-top:12px"></div>
+    <div id="pageMsg" class="notice hidden" style="margin-top:12px"></div>
+  </section>
+</main>
+
+<!-- Modal -->
+<div id="modalOverlay" class="modalOverlay" aria-hidden="true">
+  <div class="modal">
+    <div class="row between">
+      <div>
+        <div class="title" id="mTitle">Reserve item</div>
+        <div class="sub" id="mSub"></div>
+      </div>
+      <button id="mClose" class="secondary">✕</button>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="row" style="gap:10px">
+      <div style="flex:1;min-width:220px">
+        <label for="buyerName">Name</label>
+        <input id="buyerName" autocomplete="name" placeholder="Your name">
+      </div>
+      <div style="flex:1;min-width:220px">
+        <label for="buyerPhone">Phone</label>
+        <input id="buyerPhone" autocomplete="tel" placeholder="(###) ###-####">
+      </div>
+    </div>
+
+    <div class="row" style="gap:10px">
+      <div style="flex:1;min-width:220px">
+        <label for="buyerEmail">Email</label>
+        <input id="buyerEmail" autocomplete="email" placeholder="you@email.com">
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <button id="mSubmit" style="width:100%">Reserve Item</button>
+    </div>
+
+    <div id="mMsg" class="notice hidden" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<script>
+/** ✅ Paste your Storefront Apps Script /exec URL here */
+const API_URL = "PASTE_STOREFRONT_APPS_SCRIPT_EXEC_URL_HERE";
+
+const itemsGrid = document.getElementById("itemsGrid");
+const pageMsg = document.getElementById("pageMsg");
+const statusPill = document.getElementById("statusPill");
+const btnRefresh = document.getElementById("btnRefresh");
+
+// modal
+const modalOverlay = document.getElementById("modalOverlay");
+const mClose = document.getElementById("mClose");
+const mSubmit = document.getElementById("mSubmit");
+const mTitle = document.getElementById("mTitle");
+const mSub = document.getElementById("mSub");
+const mMsg = document.getElementById("mMsg");
+const buyerName = document.getElementById("buyerName");
+const buyerEmail = document.getElementById("buyerEmail");
+const buyerPhone = document.getElementById("buyerPhone");
+
+let state = { items: [], selected: null };
+
+function show(el, html){ el.classList.remove("hidden"); el.innerHTML = html; }
+function hide(el){ el.classList.add("hidden"); el.innerHTML = ""; }
+function escapeHtml(str){
+  return String(str||"").replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+function resolvePhotoUrl(photo){
+  const p = String(photo||"").trim();
+  if(!p) return "";
+  if(p.startsWith("http://") || p.startsWith("https://")){
+    if(p.includes("github.com") && p.includes("/blob/")){
+      return p.replace("https://github.com/","https://raw.githubusercontent.com/").replace("/blob/","/");
+    }
+    const m1=p.match(/drive\.google\.com\/file\/d\/([^/]+)/i);
+    if(m1 && m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
+    const m2=p.match(/drive\.google\.com\/open\?id=([^&]+)/i);
+    if(m2 && m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
+    return p;
+  }
+  try{ return new URL(p.replace(/^\/+/,""), window.location.href).href; }catch{ return p; }
+}
+
+async function apiGetItems(){
+  const res = await fetch(`${API_URL}?ts=${Date.now()}`, { method:"GET", redirect:"follow" });
+  if(!res.ok) throw new Error(`GET failed (${res.status})`);
+  const data = await res.json();
+  if(!data?.ok) throw new Error(data?.error || "Bad response");
+  return data.items || [];
+}
+
+async function apiReserve(payload){
+  const res = await fetch(API_URL, {
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    redirect:"follow",
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json().catch(()=> ({}));
+  if(!res.ok || !data?.ok) throw new Error(data?.error || "Reserve failed");
+  return data;
+}
+
+function render(){
+  itemsGrid.innerHTML = "";
+  hide(pageMsg);
+
+  const available = state.items.filter(x => String(x.status||"AVAILABLE").toUpperCase() === "AVAILABLE").length;
+  statusPill.textContent = `${available} available`;
+  statusPill.className = `pill ${available ? "good" : "bad"}`;
+
+  if(!state.items.length){
+    show(pageMsg, "<strong>No items found.</strong> Add rows to the Items sheet.");
+    return;
+  }
+
+  state.items.forEach(it => {
+    const status = String(it.status || "AVAILABLE").toUpperCase();
+    const isAvail = status === "AVAILABLE";
+    const photoUrl = resolvePhotoUrl(it.imageUrl);
+
+    const div = document.createElement("div");
+    div.className = "card";
+    div.style.background = "#fff";
+
+    div.innerHTML = `
+      <div class="photo">${photoUrl ? `<img src="${photoUrl}" alt="item image" onerror="this.style.display='none'">` : ""}</div>
+      <div style="margin-top:10px" class="title">${escapeHtml(it.title||"")}</div>
+      <div class="sub">${escapeHtml(it.description||"")}</div>
+
+      <div class="row between" style="margin-top:10px">
+        <span class="pill blue">$${escapeHtml(it.price ?? "")}</span>
+        <span class="pill ${isAvail ? "good" : "bad"}">${isAvail ? "AVAILABLE" : "SOLD"}</span>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button data-buy="${escapeHtml(it.itemId||"")}" ${isAvail ? "" : "disabled"} style="width:100%">
+          ${isAvail ? "Reserve / Buy" : "Sold"}
+        </button>
+      </div>
+    `;
+
+    itemsGrid.appendChild(div);
+  });
+
+  itemsGrid.querySelectorAll("button[data-buy]").forEach(btn => {
+    btn.addEventListener("click", () => openModal(btn.getAttribute("data-buy")));
+  });
+}
+
+function openModal(itemId){
+  const it = state.items.find(x => String(x.itemId||"") === String(itemId));
+  if(!it) return;
+
+  state.selected = it;
+  hide(mMsg);
+
+  mTitle.textContent = `Reserve: ${it.title || "Item"}`;
+  mSub.textContent = `Price: $${it.price ?? ""} — first person reserves it.`;
+
+  buyerName.value = "";
+  buyerEmail.value = "";
+  buyerPhone.value = "";
+
+  modalOverlay.classList.add("show");
+  modalOverlay.setAttribute("aria-hidden","false");
+}
+
+function closeModal(){
+  modalOverlay.classList.remove("show");
+  modalOverlay.setAttribute("aria-hidden","true");
+  state.selected = null;
+}
+
+async function refresh(){
+  try{
+    hide(pageMsg);
+    statusPill.textContent = "Loading…";
+    statusPill.className = "pill";
+    state.items = await apiGetItems();
+    render();
+  }catch(err){
+    statusPill.textContent = "Error";
+    statusPill.className = "pill bad";
+    show(pageMsg, `<strong>Could not load items.</strong><br>${escapeHtml(err.message||String(err))}`);
+  }
+}
+
+async function submitReserve(){
+  hide(mMsg);
+  const it = state.selected;
+  if(!it) return;
+
+  const name = buyerName.value.trim();
+  const email = buyerEmail.value.trim();
+  const phone = buyerPhone.value.trim();
+
+  if(!name) return show(mMsg, "Please enter your <strong>name</strong>.");
+  if(!phone) return show(mMsg, "Please enter your <strong>phone</strong>.");
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return show(mMsg, "Please enter a valid <strong>email</strong>.");
+
+  mSubmit.disabled = true;
+  const old = mSubmit.textContent;
+  mSubmit.textContent = "Reserving…";
+
+  try{
+    await apiReserve({ itemId: it.itemId, name, email, phone });
+    show(mMsg, `<strong>Reserved ✅</strong><br>We’ll contact you to finalize.`);
+    await refresh();
+  }catch(err){
+    show(mMsg, `<strong>Error:</strong> ${escapeHtml(err.message||String(err))}`);
+  }finally{
+    mSubmit.textContent = old;
+    mSubmit.disabled = false;
+  }
+}
+
+btnRefresh.addEventListener("click", refresh);
+mClose.addEventListener("click", closeModal);
+modalOverlay.addEventListener("click", (e) => { if(e.target === modalOverlay) closeModal(); });
+mSubmit.addEventListener("click", submitReserve);
+
+if(!API_URL || API_URL.includes("PASTE_")){
+  show(pageMsg, "Paste your Storefront Apps Script <strong>/exec URL</strong> into <code>API_URL</code> at the top of this file.");
+  statusPill.textContent = "Setup";
+  statusPill.className = "pill bad";
+}else{
+  refresh();
+}
+</script>
+
+</body>
+</html>
