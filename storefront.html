@@ -150,7 +150,7 @@ input{
   <section class="card">
     <div class="row between">
       <div>
-        <div class="title">Available Items</div>
+        <div class="title">OPEN Items</div>
         <div class="sub">Items update from Google Sheet.</div>
       </div>
       <button id="btnRefresh" class="secondary">Refresh</button>
@@ -294,7 +294,7 @@ function render(){
 
       <div class="row between" style="margin-top:10px">
         <span class="pill blue">$${escapeHtml(it.price ?? "")}</span>
-        <span class="pill ${isAvail ? "good" : "bad"}">${isAvail ? "AVAILABLE" : "SOLD"}</span>
+        <span class="pill ${isAvail ? "good" : "bad"}">${isAvail ? "OPEN" : "SOLD"}</span>
       </div>
 
       <div class="row" style="margin-top:10px">
