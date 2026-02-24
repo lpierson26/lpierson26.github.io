@@ -1,522 +1,176 @@
-<!-- ✅ UPDATED index.html (COPY/PASTE ENTIRE FILE) -->
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Spin to Win — Venmo Only</title>
-
-<style>
-:root{
-  --red:#dc2626;
-  --blue:#1d4ed8;
-  --white:#ffffff;
-  --text:#0f172a;
-  --muted:#64748b;
-  --border:#e2e8f0;
-  --card:#f8fafc;
-  --good:#059669;
-  --bad:#dc2626;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  background:linear-gradient(180deg,rgba(29,78,216,.06),rgba(220,38,38,.03));
-  color:var(--text);
-}
-header{
-  background:#fff;
-  border-bottom:1px solid var(--border);
-  padding:14px;
-}
-.brandBar{
-  height:4px;
-  background:linear-gradient(90deg,var(--blue),var(--white),var(--red));
-  border-radius:999px;
-  margin-bottom:10px;
-}
-.wrap{max-width:980px;margin:0 auto}
-.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.between{justify-content:space-between}
-.logo{height:44px;object-fit:contain}
-main{padding:14px}
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-  margin-bottom:14px;
-}
-.grid3{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-}
-@media(max-width:900px){.grid3{grid-template-columns:1fr}}
-
-.pill{
-  font-size:12px;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:#fff;
-}
-.pill.good{color:var(--good)}
-.pill.bad{color:var(--bad)}
-.pill.blue{color:var(--blue)}
-.title{font-weight:900}
-.sub{font-size:13px;color:var(--muted)}
-
-button,a.btn{
-  border:none;
-  border-radius:12px;
-  padding:10px 12px;
-  font-weight:800;
-  cursor:pointer;
-  background:var(--blue);
-  color:#fff;
-  text-decoration:none;
-}
-button.secondary{
-  background:#fff;
-  color:var(--text);
-  border:1px solid var(--border);
-}
-button:disabled{opacity:.5; cursor:not-allowed}
-
-/* photo */
-.photos{display:flex;justify-content:center;margin-top:10px}
-.photo{
-  border:1px solid var(--border);
-  border-radius:12px;
-  overflow:hidden;
-  background:#fff;
-}
-.photo img{
-  width:100%;
-  max-width:320px;
-  height:180px;
-  object-fit:contain;
-  display:block;
-}
-
-.progressWrap{
-  margin-top:10px;
-  height:10px;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:999px;
-  overflow:hidden;
-}
-.bar{
-  height:100%;
-  background:linear-gradient(90deg,var(--blue),var(--red));
-  width:0%;
-}
-
-.hidden{display:none}
-.notice{
-  margin-top:10px;
-  border:1px dashed var(--border);
-  border-radius:12px;
-  padding:10px;
-  font-size:13px;
-  color:var(--muted);
-  background:#fff;
-}
-
-/* form bits */
-label{display:block;margin:10px 0 6px;font-size:12px;color:var(--muted)}
-input,select{
-  width:100%;
-  padding:10px 10px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:#fff;
-  font-size:14px;
-}
-.hr{height:1px;background:var(--border);margin:12px 0}
-.small{font-size:12px;color:var(--muted)}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Spin to Win — Locker Room Legends</title>
+  <style>
+    /* Insert Design System CSS Here */
+    .wrap { max-width: 980px; margin: 0 auto; padding: 20px; }
+    .photo img { width: 100%; max-width: 320px; height: 180px; object-fit: contain; display: block; border-radius: 12px; margin: 10px auto; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media(max-width: 900px) { .grid3 { grid-template-columns: 1fr; } }
+    .hidden { display: none; }
+    input, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; font-size: 14px; }
+    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 5px; }
+  </style>
 </head>
-
 <body>
-
-<header>
-  <div class="wrap">
+  <header style="background: var(--white); border-bottom: 1px solid var(--border);">
     <div class="brandBar"></div>
-    <div class="row between">
-      <div class="row">
-        <img src="logo.webp" class="logo" alt="Locker Room Legends">
+    <div style="max-width: 1100px; margin: auto; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <a href="index.html"><img src="logo.webp" alt="Locker Room Legends" style="height: 60px;"></a>
         <div>
-          <div class="title">Spin to Win</div>
-          <div class="sub"><strong>Venmo only.</strong> Sign up → pay Venmo.</div>
+          <div style="font-weight: 900;">Spin to Win</div>
+          <div style="font-size: 12px; color: var(--muted);">Venmo Only. Sign up → Pay.</div>
         </div>
       </div>
       <span id="globalStatus" class="pill">Loading…</span>
     </div>
-  </div>
-</header>
+  </header>
 
-<main class="wrap">
-
-<!-- PAGE 1 -->
-<section id="pagePick" class="card">
-  <div class="row between">
-    <div>
-      <div class="title">Pick a Spin</div>
-      <div class="sub">Choose an option to sign up.</div>
-    </div>
-  </div>
-
-  <div id="spinCards" class="grid3" style="margin-top:12px"></div>
-  <div id="pickMsg" class="notice hidden"></div>
-</section>
-
-<!-- PAGE 2 -->
-<section id="pageSignup" class="card hidden">
-  <div class="row between">
-    <div>
-      <div class="title" id="signupTitle">Sign up</div>
-      <div class="sub" id="signupDesc"></div>
-    </div>
-    <button id="btnBack" class="secondary">← Back</button>
-  </div>
-
-  <div class="row" style="margin-top:10px;gap:10px">
-    <span class="pill blue" id="signupPrice">$0</span>
-    <span class="pill" id="signupFill">0/0 filled</span>
-    <span class="pill" id="signupSpots">0 spots left</span>
-    <span class="pill" id="signupStatus">Open</span>
-  </div>
-
-  <div class="progressWrap" aria-label="fill progress">
-    <div class="bar" id="signupBar"></div>
-  </div>
-
-  <div class="photos" id="signupPhotoWrap"></div>
-
-  <div class="hr"></div>
-
-  <div class="row" style="gap:10px">
-    <div style="flex:1;min-width:240px">
-      <label for="name">Name</label>
-      <input id="name" placeholder="Your name" autocomplete="name" />
-    </div>
-    <div style="flex:1;min-width:240px">
-      <label for="phone">Phone</label>
-      <input id="phone" placeholder="(###) ###-####" autocomplete="tel" />
-    </div>
-  </div>
-
-  <div class="row" style="gap:10px">
-    <div style="flex:1;min-width:240px">
-      <label for="email">Email</label>
-      <input id="email" placeholder="you@email.com" autocomplete="email" />
-    </div>
-    <div style="flex:1;min-width:240px">
-      <label for="venmo">Venmo username</label>
-      <input id="venmo" placeholder="@yourVenmo" />
-    </div>
-  </div>
-
-  <!-- ✅ ONE dropdown only -->
-  <div class="row" style="gap:10px">
-    <div style="flex:1;min-width:240px">
-      <label for="spinNumber">Pick your wheel number (1–24)</label>
-      <select id="spinNumber">
-        <option value="">Loading…</option>
-      </select>
-      <div class="small" style="margin-top:6px">Numbers already taken for this spin won’t be available.</div>
-    </div>
-  </div>
-
-  <div class="row" style="margin-top:10px">
-    <button id="btnSubmit" style="width:100%">Submit Entry</button>
-  </div>
-
-  <div id="msg" class="notice hidden"></div>
-</section>
-
-</main>
-
-<script>
-/** ✅ SET YOUR WEB APP URL */
-const API_URL = "https://script.google.com/macros/s/AKfycbzKySmUQWZMOBe0KIKk5mTA_XrM-5g41duDkO9Ic9jC6MgeOClObz78ZRrx-gSyPDW6Pg/exec";
-
-const pagePick = document.getElementById("pagePick");
-const pageSignup = document.getElementById("pageSignup");
-const spinCards = document.getElementById("spinCards");
-const globalStatus = document.getElementById("globalStatus");
-const btnBack = document.getElementById("btnBack");
-const btnSubmit = document.getElementById("btnSubmit");
-
-const signupTitle = document.getElementById("signupTitle");
-const signupDesc = document.getElementById("signupDesc");
-const signupPrice = document.getElementById("signupPrice");
-const signupFill = document.getElementById("signupFill");
-const signupSpots = document.getElementById("signupSpots");
-const signupBar = document.getElementById("signupBar");
-const signupPhotoWrap = document.getElementById("signupPhotoWrap");
-const signupStatus = document.getElementById("signupStatus");
-
-const nameEl = document.getElementById("name");
-const phoneEl = document.getElementById("phone");
-const emailEl = document.getElementById("email");
-const venmoEl = document.getElementById("venmo");
-const spinNumberEl = document.getElementById("spinNumber");
-
-const msg = document.getElementById("msg");
-const pickMsg = document.getElementById("pickMsg");
-
-const state = { spins: [], selectedSpinKey: null };
-
-function showMsg(el, html){ if(!el) return; el.classList.remove("hidden"); el.innerHTML = html; }
-function clearMsg(el){ if(!el) return; el.classList.add("hidden"); el.innerHTML = ""; }
-function escapeHtml(str){ return String(str||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])); }
-function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||""); }
-function num(v,f=0){ const n=Number(v); return Number.isFinite(n)?n:f; }
-
-function spinKey(spin){ return String(spin?.spinID || spin?.spinId || spin?.id || "").trim(); }
-function getSpinByKey(key){ return state.spins.find(s => spinKey(s) === String(key)); }
-
-function getPrice(spin){ return num(spin?.price ?? spin?.entryPrice ?? 0, 0); }
-function getCapacity(spin){ return num(spin?.capacity ?? 0, 0); }
-function getSignedUp(spin){ return num(spin?.signedUp ?? 0, 0); }
-function getSpotsLeft(spin){
-  if(spin?.spotsLeft !== undefined && spin?.spotsLeft !== null) return Math.max(0, num(spin.spotsLeft,0));
-  return Math.max(0, getCapacity(spin) - getSignedUp(spin));
-}
-
-function getTakenNumbers(spin){
-  const t = spin?.takenNumbers ?? [];
-  return Array.isArray(t) ? t.map(Number).filter(Number.isFinite) : [];
-}
-
-function resolvePhotoUrl(photo){
-  const p=String(photo||"").trim();
-  if(!p) return "";
-  if(p.startsWith("http://")||p.startsWith("https://")){
-    if(p.includes("github.com")&&p.includes("/blob/")) return p.replace("https://github.com/","https://raw.githubusercontent.com/").replace("/blob/","/");
-    const m1=p.match(/drive\.google\.com\/file\/d\/([^/]+)/i); if(m1&&m1[1]) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
-    const m2=p.match(/drive\.google\.com\/open\?id=([^&]+)/i); if(m2&&m2[1]) return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
-    return p;
-  }
-  try{ return new URL(p.replace(/^\/+/,""), window.location.href).href; }catch{ return p.replace(/^\/+/,""); }
-}
-
-async function apiGetSpins(){
-  const res = await fetch(`${API_URL}?ts=${Date.now()}`, { method:"GET", redirect:"follow" });
-  const data = await res.json();
-  if(!res.ok || !data?.ok) throw new Error(data?.error || `GET failed (${res.status})`);
-  return data.spins || [];
-}
-
-async function apiSubmitEntry(payload){
-  const res = await fetch(API_URL, {
-    method:"POST",
-    headers:{ "Content-Type":"text/plain;charset=utf-8" },
-    redirect:"follow",
-    body: JSON.stringify(payload)
-  });
-  const data = await res.json().catch(()=> ({}));
-  if(!res.ok || !data?.ok) throw new Error(data?.error || `Submit failed (${res.status})`);
-  return data;
-}
-
-function goSignup(key){
-  state.selectedSpinKey = String(key);
-  clearMsg(msg);
-  nameEl.value=""; phoneEl.value=""; emailEl.value=""; venmoEl.value="";
-  spinNumberEl.value="";
-
-  pagePick.classList.add("hidden");
-  pageSignup.classList.remove("hidden");
-  renderSignup();
-}
-
-function goPick(){
-  state.selectedSpinKey = null;
-  clearMsg(msg);
-  pageSignup.classList.add("hidden");
-  pagePick.classList.remove("hidden");
-  renderPick();
-}
-
-function renderPick(){
-  spinCards.innerHTML="";
-  clearMsg(pickMsg);
-
-  let anyOpen=false;
-
-  state.spins.forEach(spin=>{
-    const key = spinKey(spin);
-    const title=String(spin.title||"");
-    const desc=String(spin.desc||"");
-    const price=getPrice(spin);
-    const cap=getCapacity(spin);
-    const signed=getSignedUp(spin);
-    const left=getSpotsLeft(spin);
-
-    const status=String(spin.status||"OPEN").toUpperCase();
-    const open = left>0 && status==="OPEN";
-    if(open) anyOpen=true;
-
-    const pct=cap>0?Math.min(100,(signed/cap)*100):0;
-
-    const photoValue = spin.imageUrl || spin.imageURL || spin.photo || "";
-    const photoUrl = resolvePhotoUrl(photoValue);
-
-    const div=document.createElement("div");
-    div.className="card";
-    div.style.background="#fff";
-    div.innerHTML=`
-      <div class="row between">
+  <main class="wrap">
+    <section id="pagePick" class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div>
-          <div class="title">${escapeHtml(title)}</div>
-          <div class="sub">${escapeHtml(desc)}</div>
+          <h2 style="margin: 0;">Pick a Spin</h2>
+          <p style="margin: 0; color: var(--muted); font-size: 14px;">Choose an available raffle below.</p>
         </div>
-        <span class="pill blue">$${price}</span>
       </div>
+      <div id="spinCards" class="grid3"></div>
+    </section>
 
-      <div class="row" style="margin-top:6px">
-        <span class="pill">${signed}/${cap} filled</span>
-        <span class="pill ${open?"good":"bad"}">${open?"Open":"Full"}</span>
+    <section id="pageSignup" class="card hidden">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 id="signupTitle" style="margin: 0;">Sign Up</h2>
+        <button id="btnBack" class="secondary">← Back</button>
       </div>
-
-      <div class="progressWrap">
-        <div class="bar" style="width:${pct}%"></div>
+      <div id="signupDesc" style="margin: 10px 0; color: var(--muted);"></div>
+      <div style="display: flex; gap: 10px; margin: 15px 0;">
+        <span id="signupPrice" class="pill blue">$0</span>
+        <span id="signupFill" class="pill">0/0 filled</span>
+        <span id="signupStatus" class="pill">Open</span>
       </div>
-
-      <div class="photos">
-        ${photoUrl ? `<div class="photo"><img src="${photoUrl}" alt="Spin photo" onerror="this.style.display='none';console.warn('Image failed:',this.src);" /></div>` : ``}
+      <div class="progressWrap"><div id="signupBar" class="bar"></div></div>
+      <div id="signupPhotoWrap"></div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+        <div><label>Name</label><input id="name" placeholder="Full Name"></div>
+        <div><label>Phone</label><input id="phone" placeholder="(###) ###-####"></div>
       </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div><label>Email</label><input id="email" placeholder="email@example.com"></div>
+        <div><label>Venmo</label><input id="venmo" placeholder="@username"></div>
+      </div>
+      <label>Pick your wheel number (1–24)</label>
+      <select id="spinNumber"><option value="">Loading...</option></select>
+      
+      <button id="btnSubmit" style="width: 100%; margin-top: 10px;">Submit Entry</button>
+      <div id="msg" class="pill hidden" style="width: 100%; text-align: center; margin-top: 15px; padding: 15px; border-radius: 12px;"></div>
+    </section>
+  </main>
 
-      <button data-pick="${escapeHtml(key)}" ${open?"":"disabled"} style="margin-top:10px;width:100%">
-        ${open?"Choose Spin":"Full"}
-      </button>
-    `;
-    spinCards.appendChild(div);
-  });
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzKySmUQWZMOBe0KIKk5mTA_XrM-5g41duDkO9Ic9jC6MgeOClObz78ZRrx-gSyPDW6Pg/exec";
+    let state = { spins: [], selectedSpinKey: null };
 
-  globalStatus.textContent = anyOpen ? "Open" : "All Full";
-  globalStatus.className = `pill ${anyOpen ? "good" : "bad"}`;
+    function escapeHtml(s){ return String(s||"").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])); }
+    function num(v){ const n=Number(v); return isFinite(n)?n:0; }
+    function resolvePhotoUrl(p){
+      p=String(p||"").trim(); if(!p) return "";
+      if(p.includes("drive.google.com")){
+        const id = p.match(/id=([^&]+)/) || p.match(/\/d\/([^/]+)/);
+        return id ? `https://drive.google.com/uc?export=view&id=${id[1]}` : p;
+      }
+      if(p.includes("github.com/blob/")) return p.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+      return p;
+    }
 
-  spinCards.querySelectorAll("button[data-pick]").forEach(btn=>{
-    btn.addEventListener("click", ()=> goSignup(btn.getAttribute("data-pick")));
-  });
-}
+    async function refresh() {
+      const res = await fetch(`${API_URL}?ts=${Date.now()}`);
+      const data = await res.json();
+      state.spins = data.spins || [];
+      renderPick();
+    }
 
-function renderSpinNumberDropdown(spin){
-  const taken = new Set(getTakenNumbers(spin));
-  const options = [`<option value="">Select a number…</option>`];
-  for(let i=1;i<=24;i++){
-    const disabled = taken.has(i) ? "disabled" : "";
-    const label = taken.has(i) ? `${i} (taken)` : `${i}`;
-    options.push(`<option value="${i}" ${disabled}>${label}</option>`);
-  }
-  spinNumberEl.innerHTML = options.join("");
-  spinNumberEl.disabled = (taken.size >= 24);
-}
+    function renderPick() {
+      const grid = document.getElementById("spinCards");
+      grid.innerHTML = "";
+      state.spins.forEach(s => {
+        const left = num(s.capacity) - num(s.signedUp);
+        const open = left > 0 && (s.status || "OPEN").toUpperCase() === "OPEN";
+        const pct = s.capacity > 0 ? (s.signedUp / s.capacity) * 100 : 0;
+        const img = resolvePhotoUrl(s.imageUrl || s.photo);
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div style="font-weight: 800;">${escapeHtml(s.title)}</div>
+          <div style="font-size: 13px; color: var(--muted); height: 40px; overflow: hidden;">${escapeHtml(s.desc)}</div>
+          <div style="margin: 10px 0;"><span class="pill blue">$${s.price}</span></div>
+          ${img ? `<div class="photo"><img src="${img}"></div>` : ""}
+          <div class="progressWrap"><div class="bar" style="width: ${pct}%"></div></div>
+          <button style="width: 100%; margin-top: 15px;" ${open ? "" : "disabled"} onclick="goSignup('${s.spinID}')">${open ? 'Enter Spin' : 'Sold Out'}</button>
+        `;
+        grid.appendChild(card);
+      });
+      document.getElementById("globalStatus").textContent = state.spins.some(s => num(s.capacity) > num(s.signedUp)) ? "Spins Available" : "All Full";
+    }
 
-function renderSignup(){
-  const spin = getSpinByKey(state.selectedSpinKey);
-  if(!spin){ showMsg(msg,"<strong>Spin not found.</strong> Go back and try again."); return; }
+    window.goSignup = (key) => {
+      state.selectedSpinKey = key;
+      const s = state.spins.find(x => x.spinID == key);
+      document.getElementById("pagePick").classList.add("hidden");
+      document.getElementById("pageSignup").classList.remove("hidden");
+      document.getElementById("signupTitle").textContent = `Sign Up: ${s.title}`;
+      document.getElementById("signupDesc").textContent = s.desc;
+      document.getElementById("signupPrice").textContent = `$${s.price} Entry`;
+      document.getElementById("signupFill").textContent = `${s.signedUp}/${s.capacity} Filled`;
+      document.getElementById("signupBar").style.width = `${(s.signedUp/s.capacity)*100}%`;
+      
+      const select = document.getElementById("spinNumber");
+      select.innerHTML = '<option value="">Select a number...</option>';
+      const taken = new Set((s.takenNumbers || []).map(Number));
+      for(let i=1; i<=24; i++) {
+        const opt = document.createElement("option");
+        opt.value = i; opt.textContent = taken.has(i) ? `${i} (Taken)` : i;
+        if(taken.has(i)) opt.disabled = true;
+        select.appendChild(opt);
+      }
+    };
 
-  const title=String(spin.title||"");
-  const desc=String(spin.desc||"");
-  const price=getPrice(spin);
-  const cap=getCapacity(spin);
-  const signed=getSignedUp(spin);
-  const left=getSpotsLeft(spin);
+    document.getElementById("btnBack").onclick = () => {
+      document.getElementById("pageSignup").classList.add("hidden");
+      document.getElementById("pagePick").classList.remove("hidden");
+    };
 
-  const pct=cap>0?Math.min(100,Math.round((signed/cap)*100)):0;
-  const status=String(spin.status||"OPEN").toUpperCase();
-  const open = left>0 && status==="OPEN";
+    document.getElementById("btnSubmit").onclick = async () => {
+      const btn = document.getElementById("btnSubmit");
+      const m = document.getElementById("msg");
+      const email = document.getElementById("email").value;
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert("Invalid Email");
+      
+      btn.disabled = true; btn.textContent = "Submitting...";
+      const payload = {
+        spinId: state.selectedSpinKey,
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        email: email,
+        venmo: document.getElementById("venmo").value,
+        spinNumber: document.getElementById("spinNumber").value
+      };
+      
+      try {
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+        const data = await res.json();
+        if(data.ok) {
+          m.innerHTML = "<strong>Success!</strong> Pay via Venmo now."; m.className = "pill good"; m.classList.remove("hidden");
+          setTimeout(() => location.reload(), 3000);
+        } else { throw new Error(data.error); }
+      } catch(e) { alert(e.message); btn.disabled = false; btn.textContent = "Submit Entry"; }
+    };
 
-  const photoValue = spin.imageUrl || spin.imageURL || spin.photo || "";
-  const photoUrl = resolvePhotoUrl(photoValue);
-
-  signupTitle.textContent=`Sign up — ${title}`;
-  signupDesc.textContent=desc;
-  signupPrice.textContent=`$${price} per entry`;
-  signupFill.textContent=`${signed}/${cap} filled`;
-  signupSpots.textContent=`${left} spots left`;
-  signupBar.style.width=pct+"%";
-  signupStatus.textContent=open?"Open":"Full";
-  signupStatus.className=`pill ${open?"good":"bad"}`;
-
-  signupPhotoWrap.innerHTML = photoUrl
-    ? `<div class="photo"><img src="${photoUrl}" alt="Spin photo" onerror="this.style.display='none';console.warn('Signup image failed:',this.src);" /></div>`
-    : ``;
-
-  renderSpinNumberDropdown(spin);
-
-  btnSubmit.disabled = !(open && !spinNumberEl.disabled);
-}
-
-async function submitEntry(){
-  clearMsg(msg);
-
-  const spin = getSpinByKey(state.selectedSpinKey);
-  if(!spin) return showMsg(msg,"<strong>Error:</strong> Spin not found.");
-
-  const spinId = spinKey(spin);
-
-  const name=nameEl.value.trim();
-  const phone=phoneEl.value.trim();
-  const email=emailEl.value.trim();
-  const venmo=venmoEl.value.trim();
-  const spinNumber = Number(spinNumberEl.value);
-
-  if(!name) return showMsg(msg,"Please enter your <strong>name</strong>.");
-  if(!phone) return showMsg(msg,"Please enter your <strong>phone</strong>.");
-  if(!email || !validEmail(email)) return showMsg(msg,"Please enter a valid <strong>email</strong>.");
-  if(!venmo) return showMsg(msg,"Please enter your <strong>Venmo username</strong>.");
-  if(!Number.isFinite(spinNumber) || spinNumber < 1 || spinNumber > 24) return showMsg(msg,"Please select a <strong>number (1–24)</strong>.");
-
-  btnSubmit.disabled=true;
-  const oldText=btnSubmit.textContent;
-  btnSubmit.textContent="Submitting…";
-
-  try{
-    // ✅ IMPORTANT: send spinNumber (and number as fallback)
-    const payload = { spinId, spinNumber, number: spinNumber, name, phone, email, venmo };
-    await apiSubmitEntry(payload);
-
-    // refresh
-    state.spins = await apiGetSpins();
-    const updated = getSpinByKey(spinId) || spin;
-
-    showMsg(msg,
-      `<strong>You're signed up ✅</strong><br/>
-       Your number: <strong>${spinNumber}</strong><br/>
-       Amount due: <strong>$${getPrice(updated)}</strong>`
-    );
-
-    renderSignup();
-  }catch(err){
-    showMsg(msg, `<strong>Error:</strong> ${escapeHtml(err.message || String(err))}`);
-  }finally{
-    btnSubmit.textContent=oldText;
-  }
-}
-
-btnBack.addEventListener("click", goPick);
-btnSubmit.addEventListener("click", submitEntry);
-
-(async function init(){
-  try{
-    state.spins = await apiGetSpins();
-    renderPick();
-  }catch(err){
-    globalStatus.textContent="Error";
-    globalStatus.className="pill bad";
-    showMsg(pickMsg, `<strong>Could not load spins.</strong><br/>${escapeHtml(err.message || String(err))}`);
-  }
-})();
-</script>
-
+    refresh();
+  </script>
 </body>
 </html>
