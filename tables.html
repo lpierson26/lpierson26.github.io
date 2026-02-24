@@ -38,7 +38,7 @@ header{
 .wrap{max-width:980px;margin:0 auto}
 .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .between{justify-content:space-between}
-.logo{height:44px;object-fit:contain}
+.logo{height:44px}
 main{padding:14px}
 .card{
   background:var(--card);
@@ -64,6 +64,7 @@ main{padding:14px}
 .pill.good{color:var(--good)}
 .pill.bad{color:var(--bad)}
 .pill.blue{color:var(--blue)}
+
 .title{font-weight:900}
 .sub{font-size:13px;color:var(--muted)}
 
@@ -82,7 +83,6 @@ button.secondary,a.btn.secondary{
   color:var(--text);
   border:1px solid var(--border);
 }
-button:disabled{opacity:.5; cursor:not-allowed}
 
 .progressWrap{
   margin-top:10px;
@@ -101,11 +101,9 @@ button:disabled{opacity:.5; cursor:not-allowed}
 label{display:block;margin:10px 0 6px;font-size:12px;color:var(--muted)}
 input{
   width:100%;
-  padding:10px 10px;
+  padding:10px;
   border-radius:12px;
   border:1px solid var(--border);
-  background:#fff;
-  font-size:14px;
 }
 .notice{
   border:1px dashed var(--border);
@@ -115,39 +113,37 @@ input{
   color:var(--muted);
   background:#fff;
 }
-.hr{height:1px;background:var(--border);margin:12px 0}
 .hidden{display:none}
 
 .modalOverlay{
-  position:fixed; inset:0;
+  position:fixed;
+  inset:0;
   background:rgba(15,23,42,.55);
   display:none;
   align-items:center;
   justify-content:center;
-  padding:14px;
 }
 .modal{
-  width:min(560px, 100%);
+  width:min(560px,100%);
   background:#fff;
   border-radius:16px;
-  border:1px solid var(--border);
   padding:14px;
 }
 .modalOverlay.show{display:flex}
-.small{font-size:12px;color:var(--muted)}
 </style>
 </head>
 
 <body>
+
 <header>
   <div class="wrap">
     <div class="brandBar"></div>
     <div class="row between">
       <div class="row">
-        <img src="logo.webp" class="logo" alt="Locker Room Legends">
+        <img src="logo.webp" class="logo">
         <div>
           <div class="title">Card Show Tables</div>
-          <div class="sub">Reserve a vendor table. First come, first served.</div>
+          <div class="sub">Reserve a vendor table</div>
         </div>
       </div>
       <div class="row">
@@ -159,273 +155,170 @@ input{
 </header>
 
 <main class="wrap">
-  <section class="card">
-    <div class="row between">
-      <div>
-        <div class="title">Available Shows</div>
-        <div class="sub">Counts update live from the Reservations sheet.</div>
-      </div>
-      <button id="btnRefresh" class="secondary">Refresh</button>
-    </div>
+<section class="card">
+<div class="row between">
+<div>
+<div class="title">Available Shows</div>
+<div class="sub">Counts update live</div>
+</div>
+<button id="btnRefresh" class="secondary">Refresh</button>
+</div>
 
-    <div id="showsGrid" class="grid3" style="margin-top:12px"></div>
-    <div id="pageMsg" class="notice hidden" style="margin-top:12px"></div>
-  </section>
+<div id="showsGrid" class="grid3" style="margin-top:12px"></div>
+<div id="pageMsg" class="notice hidden"></div>
+</section>
 </main>
 
 <!-- Modal -->
-<div id="modalOverlay" class="modalOverlay" aria-hidden="true">
-  <div class="modal">
-    <div class="row between">
-      <div>
-        <div class="title" id="mTitle">Reserve table</div>
-        <div class="sub" id="mSub"></div>
-      </div>
-      <button id="mClose" class="secondary">✕</button>
-    </div>
+<div id="modalOverlay" class="modalOverlay">
+<div class="modal">
 
-    <div class="hr"></div>
+<div class="row between">
+<div>
+<div class="title" id="mTitle"></div>
+<div class="sub" id="mSub"></div>
+</div>
+<button id="mClose" class="secondary">✕</button>
+</div>
 
-    <div class="row" style="gap:10px">
-      <div style="flex:1;min-width:220px">
-        <label for="buyerName">Name</label>
-        <input id="buyerName" autocomplete="name" placeholder="Your name">
-      </div>
-      <div style="flex:1;min-width:220px">
-        <label for="buyerPhone">Phone</label>
-        <input id="buyerPhone" autocomplete="tel" placeholder="(###) ###-####">
-      </div>
-    </div>
+<label>Name</label>
+<input id="buyerName">
 
-    <div class="row" style="gap:10px">
-      <div style="flex:1;min-width:220px">
-        <label for="buyerEmail">Email</label>
-        <input id="buyerEmail" autocomplete="email" placeholder="you@email.com">
-      </div>
-      <div style="flex:1;min-width:220px">
-        <label for="buyerVenmo">Venmo</label>
-        <input id="buyerVenmo" placeholder="@yourVenmo">
-      </div>
-    </div>
+<label>Phone</label>
+<input id="buyerPhone">
 
-    <div class="row" style="margin-top:10px">
-      <button id="mSubmit" style="width:100%">Reserve 1 Table</button>
-    </div>
+<label>Email</label>
+<input id="buyerEmail">
 
-    <div id="mMsg" class="notice hidden" style="margin-top:10px"></div>
-    <div class="small" style="margin-top:8px">
-      After reserving, please pay via Venmo (we’ll finalize payment instructions soon).
-    </div>
-  </div>
+<label>Venmo</label>
+<input id="buyerVenmo">
+
+<button id="mSubmit" style="margin-top:10px;width:100%">Reserve Table</button>
+<div id="mMsg" class="notice hidden"></div>
+
+</div>
 </div>
 
 <script>
-/** ✅ Paste your Tables Apps Script /exec URL here */
-const API_URL = "https://script.google.com/macros/s/AKfycbz3HBsbjaWm8blGzmJKD3MJVIXq2u2V5z6ZAXDMr2Zb15Pwcl5pOkhUFG5vxJciTC9e/exec";
+
+const API_URL = "PASTE_YOUR_TABLES_SCRIPT_EXEC_URL_HERE";
 
 const showsGrid = document.getElementById("showsGrid");
 const pageMsg = document.getElementById("pageMsg");
 const statusPill = document.getElementById("statusPill");
-const btnRefresh = document.getElementById("btnRefresh");
-
-// modal
 const modalOverlay = document.getElementById("modalOverlay");
 const mClose = document.getElementById("mClose");
 const mSubmit = document.getElementById("mSubmit");
 const mTitle = document.getElementById("mTitle");
 const mSub = document.getElementById("mSub");
 const mMsg = document.getElementById("mMsg");
+
 const buyerName = document.getElementById("buyerName");
 const buyerEmail = document.getElementById("buyerEmail");
 const buyerPhone = document.getElementById("buyerPhone");
 const buyerVenmo = document.getElementById("buyerVenmo");
 
-let state = { shows: [], selected: null };
+let state = { shows: [], selected:null };
 
-function show(el, html){ el.classList.remove("hidden"); el.innerHTML = html; }
-function hide(el){ el.classList.add("hidden"); el.innerHTML = ""; }
-function escapeHtml(str){
-  return String(str||"").replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-  }[m]));
-}
-function num(v,f=0){ const n=Number(v); return Number.isFinite(n)?n:f; }
+function show(el,html){el.classList.remove("hidden");el.innerHTML=html}
+function hide(el){el.classList.add("hidden");el.innerHTML=""}
 
 async function apiGetShows(){
-  const res = await fetch(`${API_URL}?ts=${Date.now()}`, { method:"GET", redirect:"follow" });
-  if(!res.ok) throw new Error(`GET failed (${res.status})`);
-  const data = await res.json();
-  if(!data?.ok) throw new Error(data?.error || "Bad response");
-  return data.shows || [];
-}
-async function apiReserve(payload){
-  const res = await fetch(API_URL, {
-    method:"POST",
-    headers:{ "Content-Type":"text/plain;charset=utf-8" },
-    redirect:"follow",
-    body: JSON.stringify(payload)
-  });
-  const data = await res.json().catch(()=> ({}));
-  if(!res.ok || !data?.ok) throw new Error(data?.error || "Reserve failed");
-  return data;
+const res = await fetch(API_URL);
+const data = await res.json();
+return data.tables || data.items || data.shows || [];
 }
 
-function showKey(s){ return String(s.tableID || s.tableId || s.id || "").trim(); }
+async function apiReserve(payload){
+const res = await fetch(API_URL,{
+method:"POST",
+headers:{ "Content-Type":"text/plain;charset=utf-8"},
+body:JSON.stringify(payload)
+});
+return await res.json();
+}
+
+function showKey(s){return String(s.tableID||s.tableId||s.id)}
 
 function render(){
-  showsGrid.innerHTML = "";
-  hide(pageMsg);
-
-  const available = state.shows.filter(s => {
-    const status = String(s.status||"OPEN").toUpperCase();
-    return status === "OPEN" && num(s.spotsLeft, 0) > 0;
-  }).length;
-
-  statusPill.textContent = `${available} open`;
-  statusPill.className = `pill ${available ? "good" : "bad"}`;
-
-  if(!state.shows.length){
-    show(pageMsg, "<strong>No shows found.</strong> Add rows to the Tables sheet.");
-    return;
-  }
-
-  state.shows.forEach(s => {
-    const id = showKey(s);
-    const title = String(s.title||"");
-    const desc = String(s.desc||"");
-    const price = num(s.price ?? 0, 0);
-    const cap = num(s.capacity ?? 0, 0);
-    const signed = num(s.signedUp ?? 0, 0);
-    const left = num(s.spotsLeft ?? Math.max(0, cap - signed), 0);
-
-    const status = String(s.status||"OPEN").toUpperCase();
-    const open = status === "OPEN" && left > 0;
-
-    const pct = cap > 0 ? Math.min(100, (signed/cap)*100) : 0;
-
-    const div = document.createElement("div");
-    div.className = "card";
-    div.style.background = "#fff";
-    div.innerHTML = `
-      <div class="title">${escapeHtml(title)}</div>
-      <div class="sub">${escapeHtml(desc)}</div>
-
-      <div class="row between" style="margin-top:10px">
-        <span class="pill blue">$${escapeHtml(price)}</span>
-        <span class="pill ${open ? "good" : "bad"}">${open ? "OPEN" : "CLOSED"}</span>
-      </div>
-
-      <div class="row" style="margin-top:8px">
-        <span class="pill">${signed}/${cap} reserved</span>
-        <span class="pill">${left} left</span>
-      </div>
-
-      <div class="progressWrap">
-        <div class="bar" style="width:${pct}%"></div>
-      </div>
-
-      <div class="row" style="margin-top:10px">
-        <button data-reserve="${escapeHtml(id)}" ${open ? "" : "disabled"} style="width:100%">
-          ${open ? "Reserve 1 Table" : "Unavailable"}
-        </button>
-      </div>
-    `;
-    showsGrid.appendChild(div);
-  });
-
-  showsGrid.querySelectorAll("button[data-reserve]").forEach(btn => {
-    btn.addEventListener("click", () => openModal(btn.getAttribute("data-reserve")));
-  });
+showsGrid.innerHTML="";
+if(!state.shows.length){
+show(pageMsg,"No shows found");
+return;
 }
 
-function openModal(tableID){
-  const s = state.shows.find(x => showKey(x) === String(tableID));
-  if(!s) return;
+state.shows.forEach(s=>{
+const id=showKey(s);
+const cap=Number(s.capacity||0);
+const signed=Number(s.signedUp||0);
+const left=Number(s.spotsLeft||cap-signed);
+const open=left>0 && String(s.status).toUpperCase()=="OPEN";
+const pct=cap? (signed/cap)*100 :0;
 
-  state.selected = s;
-  hide(mMsg);
+const div=document.createElement("div");
+div.className="card";
+div.innerHTML=`
+<div class="title">${s.title}</div>
+<div class="sub">${s.desc}</div>
 
-  const title = String(s.title||"Show");
-  const price = num(s.price ?? 0, 0);
-  const left = num(s.spotsLeft ?? 0, 0);
+<div class="row between">
+<span class="pill blue">$${s.price}</span>
+<span class="pill ${open?"good":"bad"}">${open?"OPEN":"CLOSED"}</span>
+</div>
 
-  mTitle.textContent = `Reserve: ${title}`;
-  mSub.textContent = `Price: $${price} • Tables left: ${left}`;
+<div class="row">
+<span class="pill">${signed}/${cap}</span>
+<span class="pill">${left} left</span>
+</div>
 
-  buyerName.value = "";
-  buyerEmail.value = "";
-  buyerPhone.value = "";
-  buyerVenmo.value = "";
+<div class="progressWrap"><div class="bar" style="width:${pct}%"></div></div>
 
-  modalOverlay.classList.add("show");
-  modalOverlay.setAttribute("aria-hidden","false");
+<button data-id="${id}" ${open?"":"disabled"} style="margin-top:10px;width:100%">
+Reserve Table
+</button>
+`;
+showsGrid.appendChild(div);
+});
+
+document.querySelectorAll("[data-id]").forEach(b=>{
+b.onclick=()=>openModal(b.dataset.id);
+});
 }
 
-function closeModal(){
-  modalOverlay.classList.remove("show");
-  modalOverlay.setAttribute("aria-hidden","true");
-  state.selected = null;
+function openModal(id){
+state.selected=state.shows.find(s=>showKey(s)==id);
+mTitle.textContent=state.selected.title;
+mSub.textContent="Reserve 1 table";
+modalOverlay.classList.add("show");
+}
+
+function closeModal(){modalOverlay.classList.remove("show")}
+
+async function submitReserve(){
+const s=state.selected;
+const payload={
+tableID:showKey(s),
+name:buyerName.value,
+email:buyerEmail.value,
+phone:buyerPhone.value,
+venmo:buyerVenmo.value
+};
+await apiReserve(payload);
+show(mMsg,"Reserved!");
+refresh();
 }
 
 async function refresh(){
-  try{
-    hide(pageMsg);
-    statusPill.textContent = "Loading…";
-    statusPill.className = "pill";
-    state.shows = await apiGetShows();
-    render();
-  }catch(err){
-    statusPill.textContent = "Error";
-    statusPill.className = "pill bad";
-    show(pageMsg, `<strong>Could not load shows.</strong><br>${escapeHtml(err.message||String(err))}`);
-  }
+state.shows=await apiGetShows();
+render();
 }
 
-async function submitReserve(){
-  hide(mMsg);
-  const s = state.selected;
-  if(!s) return;
+mSubmit.onclick=submitReserve;
+mClose.onclick=closeModal;
+document.getElementById("btnRefresh").onclick=refresh;
 
-  const tableID = showKey(s);
-  const name = buyerName.value.trim();
-  const email = buyerEmail.value.trim();
-  const phone = buyerPhone.value.trim();
-  const venmo = buyerVenmo.value.trim();
+refresh();
 
-  if(!name) return show(mMsg, "Please enter your <strong>name</strong>.");
-  if(!phone) return show(mMsg, "Please enter your <strong>phone</strong>.");
-  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return show(mMsg, "Please enter a valid <strong>email</strong>.");
-  if(!venmo) return show(mMsg, "Please enter your <strong>Venmo</strong>.");
-
-  mSubmit.disabled = true;
-  const old = mSubmit.textContent;
-  mSubmit.textContent = "Reserving…";
-
-  try{
-    await apiReserve({ tableID, name, email, phone, venmo });
-    show(mMsg, `<strong>Reserved ✅</strong><br/>We’ll contact you to confirm payment and details.`);
-    await refresh();
-  }catch(err){
-    show(mMsg, `<strong>Error:</strong> ${escapeHtml(err.message||String(err))}`);
-  }finally{
-    mSubmit.textContent = old;
-    mSubmit.disabled = false;
-  }
-}
-
-btnRefresh.addEventListener("click", refresh);
-mClose.addEventListener("click", closeModal);
-modalOverlay.addEventListener("click", (e) => { if(e.target === modalOverlay) closeModal(); });
-mSubmit.addEventListener("click", submitReserve);
-
-if(!API_URL || API_URL.includes("PASTE_")){
-  show(pageMsg, "Paste your Tables Apps Script <strong>/exec URL</strong> into <code>API_URL</code> at the top of this file.");
-  statusPill.textContent = "Setup";
-  statusPill.className = "pill bad";
-}else{
-  refresh();
-}
 </script>
-
 </body>
 </html>
