@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -77,6 +76,7 @@ button,a.btn{
   background:var(--blue);
   color:#fff;
   text-decoration:none;
+  display:inline-block;
 }
 button.secondary{
   background:#fff;
@@ -138,6 +138,38 @@ input,select{
 }
 .hr{height:1px;background:var(--border);margin:12px 0}
 .small{font-size:12px;color:var(--muted)}
+
+/* Pay Now panel */
+.payPanel{
+  margin-top:12px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+}
+.payRow{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-top:10px;
+}
+.payRow .btn.secondaryLink{
+  background:#fff;
+  color:var(--text);
+  border:1px solid var(--border);
+}
+.codeBox{
+  margin-top:10px;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#f8fafc;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  font-size:12px;
+  color:#0f172a;
+  word-break:break-word;
+}
 </style>
 </head>
 
@@ -221,7 +253,7 @@ input,select{
     </div>
   </div>
 
-  <!-- ✅ ONE dropdown only -->
+  <!-- ✅ Wheel number dropdown -->
   <div class="row" style="gap:10px">
     <div style="flex:1;min-width:240px">
       <label for="spinNumber">Pick your wheel number (1–24)</label>
@@ -232,11 +264,52 @@ input,select{
     </div>
   </div>
 
+  <!-- ✅ NEW: Selection dropdown (1–3) -->
+  <div class="row" style="gap:10px">
+    <div style="flex:1;min-width:240px">
+      <label for="selection">Selection (1–3)</label>
+      <select id="selection">
+        <option value="">Select…</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+      <div class="small" style="margin-top:6px">Choose 1, 2, or 3.</div>
+    </div>
+  </div>
+
   <div class="row" style="margin-top:10px">
     <button id="btnSubmit" style="width:100%">Submit Entry</button>
   </div>
 
   <div id="msg" class="notice hidden"></div>
+
+  <!-- ✅ Pay Now panel (shows only after successful submit) -->
+  <div id="payNowPanel" class="payPanel hidden">
+    <div class="row between">
+      <div>
+        <div class="title" style="font-size:16px">Pay now</div>
+        <div class="sub">Tap to pay immediately in Venmo.</div>
+      </div>
+      <span class="pill blue" id="payAmountPill">$0.00</span>
+    </div>
+
+    <div class="codeBox">
+      <div class="small" style="margin-bottom:6px;color:#475569">Use this note in Venmo:</div>
+      <div id="payNoteText"></div>
+    </div>
+
+    <div class="payRow">
+      <a id="venmoPayBtn" class="btn" href="#" rel="noopener">Open Venmo to Pay</a>
+      <button id="btnCopyNote" class="secondary" type="button">Copy note</button>
+      <a id="venmoFallbackLink" class="btn secondaryLink" href="#" target="_blank" rel="noopener">Venmo web fallback</a>
+    </div>
+
+    <div class="small" style="margin-top:10px">
+      If the “Open Venmo” button doesn’t work on desktop, use the fallback link or pay in the Venmo app manually.
+    </div>
+  </div>
+
 </section>
 
 </main>
@@ -244,6 +317,9 @@ input,select{
 <script>
 /** ✅ SET YOUR WEB APP URL */
 const API_URL = "https://script.google.com/macros/s/AKfycbzKySmUQWZMOBe0KIKk5mTA_XrM-5g41duDkO9Ic9jC6MgeOClObz78ZRrx-gSyPDW6Pg/exec";
+
+/** ✅ SET YOUR RECEIVING VENMO USERNAME (NO @) */
+const RECEIVER_VENMO = "LockerRoomLegends"; // <-- change if needed
 
 const pagePick = document.getElementById("pagePick");
 const pageSignup = document.getElementById("pageSignup");
@@ -266,9 +342,18 @@ const phoneEl = document.getElementById("phone");
 const emailEl = document.getElementById("email");
 const venmoEl = document.getElementById("venmo");
 const spinNumberEl = document.getElementById("spinNumber");
+const selectionEl = document.getElementById("selection"); // ✅ NEW
 
 const msg = document.getElementById("msg");
 const pickMsg = document.getElementById("pickMsg");
+
+/* ✅ Pay Now elements */
+const payNowPanel = document.getElementById("payNowPanel");
+const payAmountPill = document.getElementById("payAmountPill");
+const payNoteText = document.getElementById("payNoteText");
+const venmoPayBtn = document.getElementById("venmoPayBtn");
+const venmoFallbackLink = document.getElementById("venmoFallbackLink");
+const btnCopyNote = document.getElementById("btnCopyNote");
 
 const state = { spins: [], selectedSpinKey: null };
 
@@ -325,11 +410,58 @@ async function apiSubmitEntry(payload){
   return data;
 }
 
+/* ✅ Venmo helpers */
+function money(n){
+  const x = Number(n);
+  return (Number.isFinite(x) ? x : 0).toFixed(2);
+}
+function stripAt(v){
+  return String(v||"").trim().replace(/^@+/,"");
+}
+function buildVenmoDeepLink({ recipients, amount, note }){
+  const r = encodeURIComponent(stripAt(recipients));
+  const a = encodeURIComponent(money(amount));
+  const n = encodeURIComponent(note || "");
+  return `venmo://paycharge?txn=pay&recipients=${r}&amount=${a}&note=${n}`;
+}
+function buildVenmoFallbackProfile(recipients){
+  const r = encodeURIComponent(stripAt(recipients));
+  return `https://venmo.com/u/${r}`;
+}
+async function copyToClipboard(text){
+  try{
+    await navigator.clipboard.writeText(text);
+    return true;
+  }catch{
+    const ta=document.createElement("textarea");
+    ta.value=text;
+    ta.style.position="fixed"; ta.style.left="-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); }catch{}
+    document.body.removeChild(ta);
+    return true;
+  }
+}
+function showPayNow({ amount, note }){
+  const amt = money(amount);
+  payAmountPill.textContent = `$${amt}`;
+  payNoteText.textContent = note;
+
+  venmoPayBtn.href = buildVenmoDeepLink({ recipients: RECEIVER_VENMO, amount: amt, note });
+  venmoFallbackLink.href = buildVenmoFallbackProfile(RECEIVER_VENMO);
+
+  payNowPanel.classList.remove("hidden");
+}
+
+/* navigation */
 function goSignup(key){
   state.selectedSpinKey = String(key);
   clearMsg(msg);
+  payNowPanel.classList.add("hidden");
   nameEl.value=""; phoneEl.value=""; emailEl.value=""; venmoEl.value="";
   spinNumberEl.value="";
+  selectionEl.value=""; // ✅ NEW reset
 
   pagePick.classList.add("hidden");
   pageSignup.classList.remove("hidden");
@@ -339,6 +471,7 @@ function goSignup(key){
 function goPick(){
   state.selectedSpinKey = null;
   clearMsg(msg);
+  payNowPanel.classList.add("hidden");
   pageSignup.classList.add("hidden");
   pagePick.classList.remove("hidden");
   renderPick();
@@ -458,44 +591,55 @@ function renderSignup(){
 
 async function submitEntry(){
   clearMsg(msg);
+  payNowPanel.classList.add("hidden");
 
   const spin = getSpinByKey(state.selectedSpinKey);
   if(!spin) return showMsg(msg,"<strong>Error:</strong> Spin not found.");
 
   const spinId = spinKey(spin);
+  const spinTitle = String(spin.title || "").trim();
 
   const name=nameEl.value.trim();
   const phone=phoneEl.value.trim();
   const email=emailEl.value.trim();
   const venmo=venmoEl.value.trim();
   const spinNumber = Number(spinNumberEl.value);
+  const selection = Number(selectionEl.value); // ✅ NEW
 
   if(!name) return showMsg(msg,"Please enter your <strong>name</strong>.");
   if(!phone) return showMsg(msg,"Please enter your <strong>phone</strong>.");
   if(!email || !validEmail(email)) return showMsg(msg,"Please enter a valid <strong>email</strong>.");
   if(!venmo) return showMsg(msg,"Please enter your <strong>Venmo username</strong>.");
   if(!Number.isFinite(spinNumber) || spinNumber < 1 || spinNumber > 24) return showMsg(msg,"Please select a <strong>number (1–24)</strong>.");
+  if(!Number.isFinite(selection) || selection < 1 || selection > 3) return showMsg(msg,"Please select a <strong>selection (1–3)</strong>.");
 
   btnSubmit.disabled=true;
   const oldText=btnSubmit.textContent;
   btnSubmit.textContent="Submitting…";
 
   try{
-    // ✅ IMPORTANT: send spinNumber (and number as fallback)
-    const payload = { spinId, spinNumber, number: spinNumber, name, phone, email, venmo };
+    const payload = { spinId, spinNumber, number: spinNumber, selection, name, phone, email, venmo };
     await apiSubmitEntry(payload);
 
-    // refresh
     state.spins = await apiGetSpins();
     const updated = getSpinByKey(spinId) || spin;
+
+    const amountDue = getPrice(updated);
+
+    const note = `SpinToWin • ${spinTitle || spinId} • #${spinNumber} • Sel ${selection} • ${name}`;
 
     showMsg(msg,
       `<strong>You're signed up ✅</strong><br/>
        Your number: <strong>${spinNumber}</strong><br/>
-       Amount due: <strong>$${getPrice(updated)}</strong>`
+       Selection: <strong>${selection}</strong><br/>
+       Amount due: <strong>$${money(amountDue)}</strong><br/>
+       <span class="small">Pay now using the panel below.</span>`
     );
 
+    showPayNow({ amount: amountDue, note });
+
     renderSignup();
+
   }catch(err){
     showMsg(msg, `<strong>Error:</strong> ${escapeHtml(err.message || String(err))}`);
   }finally{
@@ -505,6 +649,14 @@ async function submitEntry(){
 
 btnBack.addEventListener("click", goPick);
 btnSubmit.addEventListener("click", submitEntry);
+
+btnCopyNote.addEventListener("click", async ()=>{
+  const note = payNoteText?.textContent || "";
+  if(!note) return;
+  await copyToClipboard(note);
+  btnCopyNote.textContent = "Copied ✅";
+  setTimeout(()=> btnCopyNote.textContent="Copy note", 1200);
+});
 
 (async function init(){
   try{
@@ -520,4 +672,3 @@ btnSubmit.addEventListener("click", submitEntry);
 
 </body>
 </html>
-
