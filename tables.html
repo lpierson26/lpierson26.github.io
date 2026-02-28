@@ -76,6 +76,7 @@ button,a.btn{
   background:var(--blue);
   color:#fff;
   text-decoration:none;
+  display:inline-block;
 }
 button.secondary,a.btn.secondary{
   background:#fff;
@@ -135,6 +136,30 @@ input,select{
 }
 .modalOverlay.show{display:flex}
 .small{font-size:12px;color:var(--muted)}
+
+/* Pay panel in modal */
+.payPanel{
+  margin-top:12px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+}
+.payRow{
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  margin-top:10px;
+}
+.codeBox{
+  margin-top:10px;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#f8fafc;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+  font-size:12px;
+  color:#0f172a;
+  word-break:break-word;
+}
 </style>
 </head>
 
@@ -208,6 +233,18 @@ input,select{
       </div>
     </div>
 
+    <!-- ✅ NEW: Payment method -->
+    <div class="row" style="gap:10px">
+      <div style="flex:1;min-width:220px">
+        <label for="paymentMethod">Payment method</label>
+        <select id="paymentMethod">
+          <option value="venmo">Venmo</option>
+          <option value="paypal">PayPal</option>
+        </select>
+        <div class="small" style="margin-top:6px">Choose how you want to pay after reserving.</div>
+      </div>
+    </div>
+
     <!-- ✅ Qty dropdown -->
     <div class="row" style="gap:10px">
       <div style="flex:1;min-width:220px">
@@ -226,15 +263,42 @@ input,select{
     </div>
 
     <div id="mMsg" class="notice hidden" style="margin-top:10px"></div>
-    <div class="small" style="margin-top:8px">
-      After reserving, please pay via Venmo (payment instructions coming soon).
+
+    <!-- ✅ NEW: Pay Now panel (shows after successful reserve) -->
+    <div id="payNowPanel" class="payPanel hidden">
+      <div class="row between">
+        <div>
+          <div class="title" style="font-size:16px">Pay now</div>
+          <div class="sub" id="paySub">Pay immediately after reserving.</div>
+        </div>
+        <span class="pill blue" id="payAmountPill">$0.00</span>
+      </div>
+
+      <div class="codeBox">
+        <div class="small" style="margin-bottom:6px;color:#475569">Use this note:</div>
+        <div id="payNoteText"></div>
+      </div>
+
+      <div class="payRow">
+        <a id="payBtn" class="btn" href="#" target="_blank" rel="noopener">Pay now</a>
+        <button id="copyNoteBtn" class="secondary" type="button">Copy note</button>
+        <a id="fallbackLink" class="btn secondary" href="#" target="_blank" rel="noopener">Fallback</a>
+      </div>
+
+      <div class="small" style="margin-top:10px">
+        If the main pay button doesn’t work on desktop, use the fallback link or pay manually in your app.
+      </div>
     </div>
+
   </div>
 </div>
 
 <script>
-
 const API_URL = "https://script.google.com/macros/s/AKfycbzt4aIiexSXFq8gzDySNATHZ2L7KVwYXRSO5sUC_ouCjoMyE9EymJmt3RkxZC3sncO9/exec";
+
+/** ✅ Set your receiving accounts */
+const VENMO_RECEIVER = "lockerroomcr"; // no @
+const PAYPAL_ME_URL = "https://paypal.me/LockerRoomLegends"; // <-- change to yours (or a full PayPal checkout link)
 
 const showsGrid = document.getElementById("showsGrid");
 const pageMsg = document.getElementById("pageMsg");
@@ -253,6 +317,16 @@ const buyerEmail = document.getElementById("buyerEmail");
 const buyerPhone = document.getElementById("buyerPhone");
 const buyerVenmo = document.getElementById("buyerVenmo");
 const buyerQty = document.getElementById("buyerQty");
+const paymentMethod = document.getElementById("paymentMethod");
+
+/* Pay Now elements */
+const payNowPanel = document.getElementById("payNowPanel");
+const paySub = document.getElementById("paySub");
+const payAmountPill = document.getElementById("payAmountPill");
+const payNoteText = document.getElementById("payNoteText");
+const payBtn = document.getElementById("payBtn");
+const fallbackLink = document.getElementById("fallbackLink");
+const copyNoteBtn = document.getElementById("copyNoteBtn");
 
 let state = { shows: [], selected: null };
 
@@ -264,13 +338,44 @@ function escapeHtml(str){
   }[m]));
 }
 function num(v,f=0){ const n=Number(v); return Number.isFinite(n)?n:f; }
+function money(v){ const n=Number(v); return (Number.isFinite(n)?n:0).toFixed(2); }
+function stripAt(v){ return String(v||"").trim().replace(/^@+/,""); }
+
+async function copyToClipboard(text){
+  try{
+    await navigator.clipboard.writeText(text);
+  }catch{
+    const ta=document.createElement("textarea");
+    ta.value=text;
+    ta.style.position="fixed"; ta.style.left="-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); }catch{}
+    document.body.removeChild(ta);
+  }
+}
+
+function buildVenmoDeepLink({ recipients, amount, note }){
+  const r = encodeURIComponent(stripAt(recipients));
+  const a = encodeURIComponent(money(amount));
+  const n = encodeURIComponent(note || "");
+  return `venmo://paycharge?txn=pay&recipients=${r}&amount=${a}&note=${n}`;
+}
+function buildVenmoFallbackProfile(recipients){
+  const r = encodeURIComponent(stripAt(recipients));
+  return `https://venmo.com/u/${r}`;
+}
+function buildPayPalMeLink(paypalMeBase, amount){
+  const base = String(paypalMeBase||"").replace(/\/$/,"");
+  const a = money(amount);
+  return `${base}/${a}`;
+}
 
 async function apiGetShows(){
   const res = await fetch(`${API_URL}?ts=${Date.now()}`, { method:"GET", redirect:"follow" });
   if(!res.ok) throw new Error(`GET failed (${res.status})`);
   const data = await res.json();
   if(!data?.ok) throw new Error(data?.error || "Bad response");
-  // supports multiple response keys
   return data.shows || data.tables || data.items || [];
 }
 async function apiReserve(payload){
@@ -361,18 +466,20 @@ function openModal(tableID){
 
   state.selected = s;
   hide(mMsg);
+  payNowPanel.classList.add("hidden"); // ✅ reset pay panel
 
   const title = String(s.title||"Show");
   const price = num(s.price ?? 0, 0);
   const left = num(s.tablesLeft ?? s.spotsLeft ?? 0, 0);
 
   mTitle.textContent = `Reserve: ${title}`;
-  mSub.textContent = `Price: $${price} • Tables left: ${left}`;
+  mSub.textContent = `Price: $${price} each • Tables left: ${left}`;
 
   buyerName.value = "";
   buyerEmail.value = "";
   buyerPhone.value = "";
   buyerVenmo.value = "";
+  paymentMethod.value = "venmo";
 
   // ✅ build qty dropdown 1..left (cap per order)
   const maxPerOrder = 8;
@@ -404,6 +511,28 @@ function closeModal(){
   state.selected = null;
 }
 
+function showPayNow({ method, amount, note }){
+  const amt = money(amount);
+  payAmountPill.textContent = `$${amt}`;
+  payNoteText.textContent = note;
+
+  if(method === "paypal"){
+    paySub.textContent = "Pay immediately with PayPal.";
+    payBtn.textContent = "Pay with PayPal";
+    payBtn.href = buildPayPalMeLink(PAYPAL_ME_URL, amount);
+    fallbackLink.textContent = "Open PayPal.Me";
+    fallbackLink.href = PAYPAL_ME_URL;
+  } else {
+    paySub.textContent = "Pay immediately with Venmo.";
+    payBtn.textContent = "Open Venmo to Pay";
+    payBtn.href = buildVenmoDeepLink({ recipients: VENMO_RECEIVER, amount, note });
+    fallbackLink.textContent = "Venmo web fallback";
+    fallbackLink.href = buildVenmoFallbackProfile(VENMO_RECEIVER);
+  }
+
+  payNowPanel.classList.remove("hidden");
+}
+
 async function refresh(){
   try{
     hide(pageMsg);
@@ -420,29 +549,49 @@ async function refresh(){
 
 async function submitReserve(){
   hide(mMsg);
+  payNowPanel.classList.add("hidden");
+
   const s = state.selected;
   if(!s) return;
 
   const tableID = showKey(s);
+  const title = String(s.title||"");
+  const priceEach = num(s.price ?? 0, 0);
+
   const name = buyerName.value.trim();
   const email = buyerEmail.value.trim();
   const phone = buyerPhone.value.trim();
   const venmo = buyerVenmo.value.trim();
   const qty = Number(buyerQty.value || 1);
+  const method = String(paymentMethod.value || "venmo");
 
   if(!name) return show(mMsg, "Please enter your <strong>name</strong>.");
   if(!phone) return show(mMsg, "Please enter your <strong>phone</strong>.");
   if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return show(mMsg, "Please enter a valid <strong>email</strong>.");
-  if(!venmo) return show(mMsg, "Please enter your <strong>Venmo</strong>.");
+  if(method === "venmo" && !venmo) return show(mMsg, "Please enter your <strong>Venmo</strong> (required for Venmo payments).");
   if(!Number.isFinite(qty) || qty < 1) return show(mMsg, "Please select a valid <strong>quantity</strong>.");
+
+  const total = priceEach * qty;
 
   mSubmit.disabled = true;
   const old = mSubmit.textContent;
   mSubmit.textContent = "Reserving…";
 
   try{
-    await apiReserve({ tableID, name, email, phone, venmo, qty });
-    show(mMsg, `<strong>Reserved ✅</strong><br/>Reserved <strong>${qty}</strong> table(s). We’ll contact you to confirm details.`);
+    // ✅ Send payment method + total for logging (server should compute too)
+    await apiReserve({ tableID, name, email, phone, venmo, qty, payment_method: method });
+
+    const note = `Tables • ${title || tableID} • Qty ${qty} • ${name}`;
+
+    show(mMsg,
+      `<strong>Reserved ✅</strong><br/>
+       Reserved <strong>${qty}</strong> table(s).<br/>
+       Amount due: <strong>$${money(total)}</strong><br/>
+       <span class="small">Pay now using the panel below.</span>`
+    );
+
+    showPayNow({ method, amount: total, note });
+
     await refresh();
   }catch(err){
     show(mMsg, `<strong>Error:</strong> ${escapeHtml(err.message||String(err))}`);
@@ -457,6 +606,14 @@ mClose.addEventListener("click", closeModal);
 modalOverlay.addEventListener("click", (e) => { if(e.target === modalOverlay) closeModal(); });
 mSubmit.addEventListener("click", submitReserve);
 
+copyNoteBtn.addEventListener("click", async ()=>{
+  const note = payNoteText?.textContent || "";
+  if(!note) return;
+  await copyToClipboard(note);
+  copyNoteBtn.textContent = "Copied ✅";
+  setTimeout(()=> copyNoteBtn.textContent="Copy note", 1200);
+});
+
 if(!API_URL || API_URL.includes("PASTE_")){
   show(pageMsg, "Paste your Tables Apps Script <strong>/exec URL</strong> into <code>API_URL</code> near the top of this file.");
   statusPill.textContent = "Setup";
@@ -468,4 +625,3 @@ if(!API_URL || API_URL.includes("PASTE_")){
 
 </body>
 </html>
-
