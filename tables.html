@@ -1,290 +1,284 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Locker Room Legends — Card Show Tables</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Vendor Tables | Locker Room Legends</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --red:#dc2626;
-  --blue:#1d4ed8;
-  --white:#ffffff;
-  --text:#0f172a;
-  --muted:#64748b;
-  --border:#e2e8f0;
-  --card:#f8fafc;
-  --good:#059669;
-  --bad:#dc2626;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-  background:linear-gradient(180deg,rgba(29,78,216,.06),rgba(220,38,38,.03));
-  color:var(--text);
-}
-header{
-  background:#fff;
-  border-bottom:1px solid var(--border);
-  padding:14px;
-}
-.brandBar{
-  height:4px;
-  background:linear-gradient(90deg,var(--blue),var(--white),var(--red));
-  border-radius:999px;
-  margin-bottom:10px;
-}
-.wrap{max-width:980px;margin:0 auto}
-.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.between{justify-content:space-between}
-.logo{height:44px;object-fit:contain}
-main{padding:14px}
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-  margin-bottom:14px;
-}
-.grid3{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-}
-@media(max-width:900px){.grid3{grid-template-columns:1fr}}
-
-.pill{
-  font-size:12px;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:#fff;
-}
-.pill.good{color:var(--good)}
-.pill.bad{color:var(--bad)}
-.pill.blue{color:var(--blue)}
-.title{font-weight:900}
-.sub{font-size:13px;color:var(--muted)}
-
-button,a.btn{
-  border:none;
-  border-radius:12px;
-  padding:10px 12px;
-  font-weight:800;
-  cursor:pointer;
-  background:var(--blue);
-  color:#fff;
-  text-decoration:none;
-  display:inline-block;
-}
-button.secondary,a.btn.secondary{
-  background:#fff;
-  color:var(--text);
-  border:1px solid var(--border);
-}
-button:disabled{opacity:.5; cursor:not-allowed}
-
-.progressWrap{
-  margin-top:10px;
-  height:10px;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:999px;
-  overflow:hidden;
-}
-.bar{
-  height:100%;
-  background:linear-gradient(90deg,var(--blue),var(--red));
-  width:0%;
+:root {
+  --red: #dc2626;
+  --blue: #1d4ed8;
+  --dark: #0f172a;
+  --text: #1e293b;
+  --muted: #64748b;
+  --bg: #f8fafc;
+  --white: #ffffff;
+  --border: #e2e8f0;
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --good: #059669;
 }
 
-label{display:block;margin:10px 0 6px;font-size:12px;color:var(--muted)}
-input,select{
-  width:100%;
-  padding:10px 10px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:#fff;
-  font-size:14px;
-}
-.notice{
-  border:1px dashed var(--border);
-  border-radius:12px;
-  padding:10px;
-  font-size:13px;
-  color:var(--muted);
-  background:#fff;
-}
-.hr{height:1px;background:var(--border);margin:12px 0}
-.hidden{display:none}
+* { box-sizing: border-box; transition: all 0.2s ease; }
 
-.modalOverlay{
-  position:fixed; inset:0;
-  background:rgba(15,23,42,.55);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:14px;
-}
-.modal{
-  width:min(560px, 100%);
-  background:#fff;
-  border-radius:16px;
-  border:1px solid var(--border);
-  padding:14px;
-}
-.modalOverlay.show{display:flex}
-.small{font-size:12px;color:var(--muted)}
-
-/* Pay panel in modal */
-.payPanel{
-  margin-top:12px;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:12px;
-}
-.payRow{
-  display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-  margin-top:10px;
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
 }
 
-/* ✅ Make logo link look clean */
-.logoLink{display:inline-flex; align-items:center}
-.logoLink:focus{outline:2px solid rgba(29,78,216,.35); outline-offset:4px; border-radius:10px;}
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+/* HEADER STYLE */
+header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+}
+
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo { height: 50px; }
+
+/* STADIUM HERO */
+.page-hero {
+  padding: 60px 0;
+  text-align: center;
+  background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.9)), 
+              url('https://images.unsplash.com/photo-1517054466905-5c54f8c27a7d?q=80&w=2000&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  margin-bottom: 40px;
+}
+
+.page-hero h1 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 3rem;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* CARDS & GRID */
+.card-section {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: var(--shadow);
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.show-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* SIDE ACCENT LINE */
+.show-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
+  background: linear-gradient(to bottom, var(--blue), var(--red));
+}
+
+.title { font-family: 'Oswald', sans-serif; font-size: 22px; text-transform: uppercase; color: var(--dark); margin-bottom: 5px;}
+.sub { font-size: 13px; color: var(--muted); margin-bottom: 15px; }
+
+/* PILLS */
+.pill {
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #f1f5f9;
+  border: 1px solid var(--border);
+}
+.pill.good { color: var(--white); background: var(--good); border: none; }
+.pill.bad { color: var(--white); background: var(--red); border: none; }
+.pill.blue { color: var(--white); background: var(--blue); border: none; }
+
+/* PROGRESS BAR */
+.progressWrap {
+  height: 10px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 15px 0;
+  border: 1px solid var(--border);
+}
+.bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--red));
+  width: 0%;
+}
+
+/* INPUTS & MODAL */
+.modalOverlay {
+  position: fixed; inset: 0;
+  background: rgba(15, 23, 42, 0.8);
+  display: none; align-items: center; justify-content: center;
+  z-index: 2000; padding: 20px;
+}
+.modalOverlay.show { display: flex; }
+
+.modal {
+  background: var(--white);
+  width: 100%; max-width: 550px;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+label { display: block; margin: 15px 0 5px; font-weight: 700; font-size: 12px; color: var(--dark); text-transform: uppercase; }
+input, select {
+  width: 100%; padding: 12px;
+  border-radius: 8px; border: 1px solid var(--border);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+}
+
+/* BUTTONS */
+button, .btn {
+  background: var(--blue);
+  color: white; padding: 12px 20px;
+  border-radius: 8px; font-weight: 800;
+  text-transform: uppercase; border: none;
+  cursor: pointer; text-decoration: none;
+  text-align: center;
+  display: inline-block;
+}
+button.secondary { background: #f1f5f9; color: var(--dark); border: 1px solid var(--border); }
+button:disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
+
+/* PAY PANEL */
+.payPanel {
+  margin-top: 20px;
+  background: #f1f5f9;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.hr { height: 1px; background: var(--border); margin: 20px 0; }
+.hidden { display: none; }
+.notice { padding: 15px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; font-size: 14px; color: #92400e; margin-top: 15px; }
 </style>
 </head>
 
 <body>
+
 <header>
-  <div class="wrap">
-    <div class="brandBar"></div>
-    <div class="row between">
-      <div class="row">
-        <!-- ✅ Logo now links back to index.html -->
-        <a class="logoLink" href="index.html" aria-label="Back to Locker Room Legends home">
-          <img src="logo.webp" class="logo" alt="Locker Room Legends">
-        </a>
-        <div>
-          <div class="title">Card Show Tables</div>
-          <div class="sub">Reserve vendor tables. First come, first served.</div>
-        </div>
-      </div>
-      <div class="row">
-        <!-- ✅ Home button removed -->
-        <span id="statusPill" class="pill">Loading…</span>
-      </div>
-    </div>
+  <div class="wrap header-inner">
+      <a href="index.html"><img src="logo.webp" class="logo" alt="Locker Room Legends"></a>
+      <span id="statusPill" class="pill">Updating Shows...</span>
   </div>
 </header>
 
-<main class="wrap">
-  <section class="card">
-    <div class="row between">
-      <div>
-        <div class="title">Available Shows</div>
-        <div class="sub">Counts update live from the Reservations sheet.</div>
-      </div>
-      <button id="btnRefresh" class="secondary">Refresh</button>
-    </div>
+<div class="page-hero">
+    <h1>Vendor Reservations</h1>
+    <p>Secure Your Table for Upcoming Card Shows</p>
+</div>
 
-    <div id="showsGrid" class="grid3" style="margin-top:12px"></div>
-    <div id="pageMsg" class="notice hidden" style="margin-top:12px"></div>
-  </section>
+<main class="wrap">
+    <section class="card-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <div>
+                <div class="title">Available Shows</div>
+                <div class="sub">Live availability for table space.</div>
+            </div>
+            <button id="btnRefresh" class="secondary">Refresh</button>
+        </div>
+
+        <div id="showsGrid" class="grid3"></div>
+        <div id="pageMsg" class="notice hidden"></div>
+    </section>
 </main>
 
-<!-- Modal -->
-<div id="modalOverlay" class="modalOverlay" aria-hidden="true">
-  <div class="modal">
-    <div class="row between">
-      <div>
-        <div class="title" id="mTitle">Reserve table</div>
-        <div class="sub" id="mSub"></div>
-      </div>
-      <button id="mClose" class="secondary">✕</button>
-    </div>
-
-    <div class="hr"></div>
-
-    <div class="row" style="gap:10px">
-      <div style="flex:1;min-width:220px">
-        <label for="buyerName">Name</label>
-        <input id="buyerName" autocomplete="name" placeholder="Your name">
-      </div>
-      <div style="flex:1;min-width:220px">
-        <label for="buyerPhone">Phone</label>
-        <input id="buyerPhone" autocomplete="tel" placeholder="(###) ###-####">
-      </div>
-    </div>
-
-    <div class="row" style="gap:10px">
-      <div style="flex:1;min-width:220px">
-        <label for="buyerEmail">Email</label>
-        <input id="buyerEmail" autocomplete="email" placeholder="you@email.com">
-      </div>
-
-      <div id="venmoWrap" style="flex:1;min-width:220px">
-        <label for="buyerVenmo">Venmo</label>
-        <input id="buyerVenmo" placeholder="@yourVenmo">
-      </div>
-    </div>
-
-    <div class="row" style="gap:10px">
-      <div style="flex:1;min-width:220px">
-        <label for="paymentMethod">Payment method</label>
-        <select id="paymentMethod">
-          <option value="venmo">Venmo</option>
-          <option value="paypal">PayPal</option>
-        </select>
-        <div class="small" style="margin-top:6px">
-          Pay now opens the selected payment method in a new tab (no amount is pre-filled).
+<div id="modalOverlay" class="modalOverlay">
+    <div class="modal">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <div class="title" id="mTitle">Reserve Table</div>
+                <div class="sub" id="mSub">Complete the form to hold your spot.</div>
+            </div>
+            <button id="mClose" class="secondary">✕</button>
         </div>
-      </div>
-    </div>
 
-    <div class="row" style="gap:10px">
-      <div style="flex:1;min-width:220px">
-        <label for="buyerQty">How many tables?</label>
-        <select id="buyerQty">
-          <option value="1">1</option>
-        </select>
-        <div class="small" style="margin-top:6px">
-          You can only reserve up to the remaining available tables for this show.
+        <div class="hr"></div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+                <label>Vendor Name</label>
+                <input id="buyerName" placeholder="Full Name">
+            </div>
+            <div>
+                <label>Phone</label>
+                <input id="buyerPhone" placeholder="(###) ###-####">
+            </div>
+            <div style="grid-column: span 2;">
+                <label>Email Address</label>
+                <input id="buyerEmail" placeholder="you@example.com">
+            </div>
+            <div>
+                <label>Payment Method</label>
+                <select id="paymentMethod">
+                    <option value="venmo">Venmo</option>
+                    <option value="paypal">PayPal</option>
+                </select>
+            </div>
+            <div id="venmoWrap">
+                <label>Venmo Username</label>
+                <input id="buyerVenmo" placeholder="@yourhandle">
+            </div>
+            <div style="grid-column: span 2;">
+                <label>Table Quantity</label>
+                <select id="buyerQty"></select>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <div class="row" style="margin-top:10px">
-      <button id="mSubmit" style="width:100%">Reserve Tables</button>
-    </div>
+        <button id="mSubmit" style="width: 100%; margin-top: 25px; background: var(--blue);">Confirm Reservation</button>
+        <div id="mMsg" class="notice hidden"></div>
 
-    <div id="mMsg" class="notice hidden" style="margin-top:10px"></div>
-
-    <div id="payNowPanel" class="payPanel hidden">
-      <div class="row between">
-        <div>
-          <div class="title" style="font-size:16px">Pay now</div>
-          <div class="sub" id="paySub">Payment is completed after reserving.</div>
+        <div id="payNowPanel" class="payPanel hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="title" style="font-size: 16px;">Next Step: Pay</div>
+                <span id="payMethodPill" class="pill blue">Venmo</span>
+            </div>
+            <p id="paySub" style="font-size: 12px; color: var(--muted); margin: 5px 0 15px;"></p>
+            <a id="payBtn" class="btn" style="width: 100%;" href="#" target="_blank">Go to Payment</a>
         </div>
-        <span class="pill blue" id="payMethodPill">Venmo</span>
-      </div>
-
-      <div class="payRow">
-        <a id="payBtn" class="btn" href="#" target="_blank" rel="noopener">Open to Pay</a>
-      </div>
-
-      <div class="small" style="margin-top:10px">
-        Please include your <strong>name</strong> and <strong>show</strong> in the payment note so we can match your payment to your reservation.
-      </div>
     </div>
-
-  </div>
 </div>
 
 <script>
+/** CORE LOGIC PRESERVED */
 const API_URL = "https://script.google.com/macros/s/AKfycbyp-4flyjQc8-GrWF9epEvTCA70LTKtMoHEOuSvdv0eMolGG9JDxo9Txq3nnUqQ0nCn/exec";
-
 const VENMO_RECEIVER = "lockerroomcr";
 const VENMO_PROFILE_URL = `https://venmo.com/u/${encodeURIComponent(VENMO_RECEIVER)}`;
 const PAYPAL_ME_URL = "https://paypal.me/LockerRoomLegends";
@@ -293,7 +287,6 @@ const showsGrid = document.getElementById("showsGrid");
 const pageMsg = document.getElementById("pageMsg");
 const statusPill = document.getElementById("statusPill");
 const btnRefresh = document.getElementById("btnRefresh");
-
 const modalOverlay = document.getElementById("modalOverlay");
 const mClose = document.getElementById("mClose");
 const mSubmit = document.getElementById("mSubmit");
@@ -307,7 +300,6 @@ const buyerVenmo = document.getElementById("buyerVenmo");
 const buyerQty = document.getElementById("buyerQty");
 const paymentMethod = document.getElementById("paymentMethod");
 const venmoWrap = document.getElementById("venmoWrap");
-
 const payNowPanel = document.getElementById("payNowPanel");
 const payBtn = document.getElementById("payBtn");
 const paySub = document.getElementById("paySub");
@@ -317,19 +309,13 @@ let state = { shows: [], selected: null };
 
 function show(el, html){ el.classList.remove("hidden"); el.innerHTML = html; }
 function hide(el){ el.classList.add("hidden"); el.innerHTML = ""; }
-function escapeHtml(str){
-  return String(str||"").replace(/[&<>"']/g, m => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-  }[m]));
-}
+function escapeHtml(str){ return String(str||"").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])); }
 function num(v,f=0){ const n=Number(v); return Number.isFinite(n)?n:f; }
 
 function setPaymentUI(method){
-  const m = String(method || "venmo");
-  if(m === "paypal"){
+  if(method === "paypal"){
     venmoWrap.classList.add("hidden");
     buyerVenmo.value = "";
-    buyerVenmo.removeAttribute("required");
   } else {
     venmoWrap.classList.remove("hidden");
   }
@@ -337,11 +323,11 @@ function setPaymentUI(method){
 
 async function apiGetShows(){
   const res = await fetch(`${API_URL}?ts=${Date.now()}`, { method:"GET", redirect:"follow" });
-  if(!res.ok) throw new Error(`GET failed (${res.status})`);
   const data = await res.json();
   if(!data?.ok) throw new Error(data?.error || "Bad response");
   return data.shows || data.tables || data.items || [];
 }
+
 async function apiReserve(payload){
   const res = await fetch(API_URL, {
     method:"POST",
@@ -349,220 +335,95 @@ async function apiReserve(payload){
     redirect:"follow",
     body: JSON.stringify(payload)
   });
-  const data = await res.json().catch(()=> ({}));
-  if(!res.ok || !data?.ok) throw new Error(data?.error || "Reserve failed");
+  const data = await res.json();
+  if(!data?.ok) throw new Error(data?.error || "Reserve failed");
   return data;
 }
-
-function showKey(s){ return String(s.tableID || s.tableId || s.id || "").trim(); }
 
 function render(){
   showsGrid.innerHTML = "";
   hide(pageMsg);
-
-  const openCount = state.shows.filter(s => {
-    const status = String(s.status||"OPEN").toUpperCase();
-    const left = num(s.tablesLeft ?? s.spotsLeft ?? 0, 0);
-    return status === "OPEN" && left > 0;
-  }).length;
-
-  statusPill.textContent = `${openCount} open`;
+  const openCount = state.shows.filter(s => num(s.tablesLeft ?? s.spotsLeft ?? 0) > 0).length;
+  statusPill.textContent = `${openCount} SHOWS OPEN`;
   statusPill.className = `pill ${openCount ? "good" : "bad"}`;
 
-  if(!state.shows.length){
-    show(pageMsg, "<strong>No shows found.</strong> Add rows to the Tables sheet.");
-    return;
-  }
-
   state.shows.forEach(s => {
-    const id = showKey(s);
-    const title = String(s.title||"");
-    const desc = String(s.desc||"");
-    const price = String(s.price ?? "");
-    const cap = num(s.capacity ?? 0, 0);
-
     const reserved = num(s.signedUp ?? 0, 0);
+    const cap = num(s.capacity ?? 0, 0);
     const left = num(s.tablesLeft ?? s.spotsLeft ?? Math.max(0, cap - reserved), 0);
-
-    const status = String(s.status||"OPEN").toUpperCase();
-    const open = status === "OPEN" && left > 0;
-
+    const open = String(s.status||"OPEN").toUpperCase() === "OPEN" && left > 0;
     const pct = cap > 0 ? Math.min(100, (reserved/cap)*100) : 0;
 
     const div = document.createElement("div");
-    div.className = "card";
-    div.style.background = "#fff";
+    div.className = "show-card";
     div.innerHTML = `
-      <div class="title">${escapeHtml(title)}</div>
-      <div class="sub">${escapeHtml(desc)}</div>
-
-      <div class="row between" style="margin-top:10px">
-        <span class="pill blue">${price ? "$"+escapeHtml(price) : "Price set by organizer"}</span>
-        <span class="pill ${open ? "good" : "bad"}">${open ? "OPEN" : "CLOSED"}</span>
+      <div class="title">${escapeHtml(s.title)}</div>
+      <div class="sub">${escapeHtml(s.desc)}</div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="pill blue">$${s.price || '--'} per Table</span>
+        <span class="pill ${open?'good':'bad'}">${open?'Available':'Full'}</span>
       </div>
-
-      <div class="row" style="margin-top:8px">
-        <span class="pill">${reserved}/${cap} reserved</span>
-        <span class="pill">${left} left</span>
-      </div>
-
-      <div class="progressWrap">
-        <div class="bar" style="width:${pct}%"></div>
-      </div>
-
-      <div class="row" style="margin-top:10px">
-        <button data-reserve="${escapeHtml(id)}" ${open ? "" : "disabled"} style="width:100%">
-          ${open ? "Reserve Tables" : "Unavailable"}
-        </button>
-      </div>
+      <div class="progressWrap"><div class="bar" style="width:${pct}%"></div></div>
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--muted);">${reserved}/${cap} Tables Booked</div>
+      <button class="reserveBtn" data-id="${String(s.tableID||s.id).trim()}" ${open?"":"disabled"} style="width:100%; margin-top:20px;">
+        ${open ? 'Book Table' : 'Show Full'}
+      </button>
     `;
     showsGrid.appendChild(div);
   });
 
-  showsGrid.querySelectorAll("button[data-reserve]").forEach(btn => {
-    btn.addEventListener("click", () => openModal(btn.getAttribute("data-reserve")));
+  showsGrid.querySelectorAll(".reserveBtn").forEach(btn => {
+    btn.onclick = () => {
+      const s = state.shows.find(x => String(x.tableID || x.id).trim() === btn.dataset.id);
+      state.selected = s;
+      hide(mMsg);
+      hide(payNowPanel);
+      mTitle.textContent = s.title;
+      const left = num(s.tablesLeft ?? s.spotsLeft ?? 0);
+      mSub.textContent = `${left} tables remaining`;
+      
+      const max = Math.min(left, 8);
+      buyerQty.innerHTML = Array.from({length: max}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join("");
+      modalOverlay.classList.add("show");
+    };
   });
 }
 
-function openModal(tableID){
-  const s = state.shows.find(x => showKey(x) === String(tableID));
-  if(!s) return;
-
-  state.selected = s;
-  hide(mMsg);
-  payNowPanel.classList.add("hidden");
-
-  const title = String(s.title||"Show");
-  const left = num(s.tablesLeft ?? s.spotsLeft ?? 0, 0);
-
-  mTitle.textContent = `Reserve: ${title}`;
-  mSub.textContent = `Tables left: ${left}`;
-
-  buyerName.value = "";
-  buyerEmail.value = "";
-  buyerPhone.value = "";
-  buyerVenmo.value = "";
-  paymentMethod.value = "venmo";
-  setPaymentUI("venmo");
-
-  const maxPerOrder = 8;
-  const max = Math.min(left, maxPerOrder);
-
-  buyerQty.innerHTML = "";
-  if (max <= 0) {
-    buyerQty.innerHTML = `<option value="">None available</option>`;
-    buyerQty.disabled = true;
-    mSubmit.disabled = true;
-  } else {
-    buyerQty.disabled = false;
-    mSubmit.disabled = false;
-    buyerQty.innerHTML = Array.from({ length: max }, (_, i) => {
-      const n = i + 1;
-      return `<option value="${n}">${n}</option>`;
-    }).join("");
-  }
-
-  mSubmit.textContent = "Reserve Tables";
-
-  modalOverlay.classList.add("show");
-  modalOverlay.setAttribute("aria-hidden","false");
-}
-
-function closeModal(){
-  modalOverlay.classList.remove("show");
-  modalOverlay.setAttribute("aria-hidden","true");
-  state.selected = null;
-}
-
-function showPayNow(method){
-  if(method === "paypal"){
-    payMethodPill.textContent = "PayPal";
-    paySub.textContent = "Payment is completed in PayPal after reserving.";
-    payBtn.textContent = "Open PayPal";
-    payBtn.href = PAYPAL_ME_URL;
-  } else {
-    payMethodPill.textContent = "Venmo";
-    paySub.textContent = "Payment is completed in Venmo after reserving.";
-    payBtn.textContent = "Open Venmo Profile";
-    payBtn.href = VENMO_PROFILE_URL;
-  }
-  payNowPanel.classList.remove("hidden");
-}
-
 async function refresh(){
-  try{
-    hide(pageMsg);
-    statusPill.textContent = "Loading…";
-    statusPill.className = "pill";
-    state.shows = await apiGetShows();
-    render();
-  }catch(err){
-    statusPill.textContent = "Error";
-    statusPill.className = "pill bad";
-    show(pageMsg, `<strong>Could not load shows.</strong><br>${escapeHtml(err.message||String(err))}`);
-  }
+  statusPill.textContent = "Loading...";
+  state.shows = await apiGetShows();
+  render();
 }
 
-async function submitReserve(){
-  hide(mMsg);
-  payNowPanel.classList.add("hidden");
-
+mSubmit.onclick = async () => {
   const s = state.selected;
-  if(!s) return;
+  const method = paymentMethod.value;
+  const payload = { 
+    tableID: String(s.tableID || s.id).trim(), 
+    name: buyerName.value.trim(), email: buyerEmail.value.trim(), 
+    phone: buyerPhone.value.trim(), venmo: buyerVenmo.value.trim(), 
+    qty: Number(buyerQty.value), payment_method: method 
+  };
 
-  const tableID = showKey(s);
-  const title = String(s.title||tableID);
+  if(!payload.name || !payload.email) return alert("Required fields missing.");
 
-  const name = buyerName.value.trim();
-  const email = buyerEmail.value.trim();
-  const phone = buyerPhone.value.trim();
-  const venmo = buyerVenmo.value.trim();
-  const qty = Number(buyerQty.value || 1);
-  const method = String(paymentMethod.value || "venmo");
-
-  if(!name) return show(mMsg, "Please enter your <strong>name</strong>.");
-  if(!phone) return show(mMsg, "Please enter your <strong>phone</strong>.");
-  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return show(mMsg, "Please enter a valid <strong>email</strong>.");
-  if(method === "venmo" && !venmo) return show(mMsg, "Please enter your <strong>Venmo</strong>.");
-  if(!Number.isFinite(qty) || qty < 1) return show(mMsg, "Please select a valid <strong>quantity</strong>.");
-
-  mSubmit.disabled = true;
-  const old = mSubmit.textContent;
-  mSubmit.textContent = "Reserving…";
-
-  try{
-    await apiReserve({ tableID, name, email, phone, venmo, qty, payment_method: method });
-
-    show(mMsg,
-      `<strong>Reserved ✅</strong><br/>
-       Reserved <strong>${qty}</strong> table(s) for <strong>${escapeHtml(title)}</strong>.<br/>
-       <span class="small">Click Pay now to complete payment (${escapeHtml(method.toUpperCase())}).</span>`
-    );
-
-    showPayNow(method);
+  mSubmit.disabled = true; mSubmit.textContent = "Reserving...";
+  try {
+    await apiReserve(payload);
+    show(mMsg, `<strong>Reserved!</strong> You have booked ${payload.qty} table(s). Pay now below.`);
+    payMethodPill.textContent = method.toUpperCase();
+    paySub.textContent = `Click to open ${method} and send your payment. Include your name and "${s.title}" in the note.`;
+    payBtn.href = method === 'paypal' ? PAYPAL_ME_URL : VENMO_PROFILE_URL;
+    payNowPanel.classList.remove("hidden");
     await refresh();
-  }catch(err){
-    show(mMsg, `<strong>Error:</strong> ${escapeHtml(err.message||String(err))}`);
-  }finally{
-    mSubmit.textContent = old;
-    mSubmit.disabled = false;
-  }
-}
+  } catch(e) { show(mMsg, "Error: " + e.message); }
+  finally { mSubmit.disabled = false; mSubmit.textContent = "Confirm Reservation"; }
+};
 
-btnRefresh.addEventListener("click", refresh);
-mClose.addEventListener("click", closeModal);
-modalOverlay.addEventListener("click", (e) => { if(e.target === modalOverlay) closeModal(); });
-mSubmit.addEventListener("click", submitReserve);
-paymentMethod.addEventListener("change", () => setPaymentUI(paymentMethod.value));
-
-if(!API_URL || API_URL.includes("PASTE_")){
-  show(pageMsg, "Paste your Tables Apps Script <strong>/exec URL</strong> into <code>API_URL</code> near the top of this file.");
-  statusPill.textContent = "Setup";
-  statusPill.className = "pill bad";
-}else{
-  refresh();
-}
+mClose.onclick = () => modalOverlay.classList.remove("show");
+paymentMethod.onchange = () => setPaymentUI(paymentMethod.value);
+btnRefresh.onclick = refresh;
+refresh();
 </script>
-
 </body>
 </html>
