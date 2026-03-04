@@ -3,12 +3,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Locker Room Legends | Sports Memorabilia Cedar Rapids</title>
+    <title>Locker Room Legends | Home of Spin to Win</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
 
 <style>
 :root {
   --red: #dc2626;
+  --gold: #f59e0b; /* For that "Winner" feeling */
   --dark: #0f172a;
   --text: #1e293b;
   --muted: #64748b;
@@ -34,7 +35,6 @@ body {
   padding: 0 20px;
 }
 
-/* HEADER */
 header {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -51,7 +51,7 @@ header {
   align-items: center;
 }
 
-.logo { height: 50px; }
+.logo { height: 55px; }
 
 .nav-links { display: flex; gap: 25px; }
 
@@ -66,135 +66,119 @@ header {
 
 .nav-links a:hover { color: var(--red); }
 
-/* HERO SECTION WITH STADIUM IMAGE */
+/* HERO SECTION - ADVERTISING SPIN TO WIN */
 .hero {
-  padding: 140px 0 100px;
+  padding: 160px 0 120px;
   text-align: center;
-  /* Dark overlay over a professional sports stadium image */
-  background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.8)), 
-              url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop');
+  /* Cinematic Stadium Background */
+  background: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.9)), 
+              url('https://images.unsplash.com/photo-1517054466905-5c54f8c27a7d?q=80&w=2000&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
-  background-attachment: fixed; /* Parallax Effect */
+  background-attachment: fixed;
   color: white;
 }
 
 .hero h1 {
   margin: 0;
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(40px, 8vw, 72px);
+  font-size: clamp(40px, 8vw, 80px);
   text-transform: uppercase;
-  letter-spacing: -1px;
+  letter-spacing: -2px;
   line-height: 1;
 }
 
 .hero p {
-  margin: 20px auto;
-  font-size: 1.25rem;
-  max-width: 700px;
-  color: #cbd5e1;
+  margin: 25px auto;
+  font-size: 1.4rem;
+  max-width: 750px;
+  color: #f1f5f9;
 }
 
-.btn-main {
+/* SPIN TO WIN BUTTON - SPECIAL GLOW EFFECT */
+.btn-spin {
   display: inline-block;
   background: var(--red);
   color: white;
-  padding: 16px 32px;
-  border-radius: 4px;
+  padding: 20px 45px;
+  border-radius: 50px;
   text-decoration: none;
-  font-weight: 800;
+  font-weight: 900;
+  font-size: 1.2rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.4);
+  letter-spacing: 2px;
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  animation: pulse 2s infinite;
 }
 
-.btn-main:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6); }
-
-/* CATEGORY QUICK LINKS */
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-top: -50px; /* Overlaps hero slightly for modern look */
-  position: relative;
-  z-index: 10;
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 20px rgba(220, 38, 38, 0.6); }
+  50% { transform: scale(1.05); box-shadow: 0 0 35px rgba(220, 38, 38, 0.9); }
+  100% { transform: scale(1); box-shadow: 0 0 20px rgba(220, 38, 38, 0.6); }
 }
 
-.cat-card {
-  background: var(--white);
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: var(--shadow);
-  text-align: center;
-  text-decoration: none;
-  color: var(--dark);
+.btn-spin:hover {
+  background: #b91c1c;
+  transform: scale(1.1);
 }
-
-.cat-card img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 12px;
-}
-
-.cat-card span { font-weight: 800; text-transform: uppercase; }
-
-.cat-card:hover { transform: translateY(-5px); }
 
 /* CONTENT SECTIONS */
 .section {
   background: var(--white);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 40px;
-  margin-top: 40px;
+  border-radius: 20px;
+  padding: 50px;
+  margin-top: -40px; /* Slight overlap for modern look */
+  position: relative;
+  z-index: 10;
   box-shadow: var(--shadow);
 }
 
 h2 {
   font-family: 'Oswald', sans-serif;
-  font-size: 32px;
+  font-size: 36px;
   text-transform: uppercase;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   color: var(--dark);
-  border-left: 6px solid var(--red);
-  padding-left: 15px;
+  border-left: 8px solid var(--red);
+  padding-left: 20px;
 }
 
 .info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  gap: 50px;
+  margin-top: 30px;
 }
 
-@media(max-width: 800px) { .info-grid { grid-template-columns: 1fr; } }
+@media(max-width: 850px) { 
+  .info-grid { grid-template-columns: 1fr; }
+  .section { margin-top: 20px; padding: 30px; }
+}
 
-/* HOURS TABLE */
 .hours-table { width: 100%; border-collapse: collapse; }
-.hours-table td { padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+.hours-table td { padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 1.1rem; }
 .hours-table td:last-child { text-align: right; font-weight: 800; color: var(--red); }
 
-/* MAP BOX */
 .map-link {
     display: block;
-    margin-top: 30px;
-    height: 250px;
-    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=1000&auto=format&fit=crop');
+    margin-top: 35px;
+    height: 200px;
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1521233013423-bb269655cc95?q=80&w=1000&auto=format&fit=crop');
     background-size: cover;
     background-position: center;
-    border-radius: 12px;
+    border-radius: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    border: 1px solid var(--border);
 }
 
 .map-btn {
     background: var(--white);
     color: var(--dark);
-    padding: 12px 24px;
+    padding: 12px 28px;
     border-radius: 50px;
     font-weight: 800;
     box-shadow: var(--shadow);
@@ -202,10 +186,10 @@ h2 {
 
 footer {
   text-align: center;
-  padding: 60px 0;
-  margin-top: 80px;
+  padding: 80px 0;
   background: var(--dark);
   color: #94a3b8;
+  margin-top: 50px;
 }
 </style>
 </head>
@@ -216,7 +200,7 @@ footer {
     <div class="container header-inner">
         <img src="logo.webp" class="logo" alt="Locker Room Legends">
         <nav class="nav-links">
-            <a href="./spin.html">Spin to Win</a>
+            <a href="./spin.html" style="color: var(--red);">Spin to Win</a>
             <a href="./storefront.html">Storefront</a>
             <a href="./tables.html">Card Show</a>
         </nav>
@@ -227,57 +211,43 @@ footer {
     <section class="hero">
         <div class="container">
             <h1>Locker Room Legends</h1>
-            <p>The Midwest's premier destination for sports cards and authentic memorabilia for over 30 years.</p>
-            <a href="./storefront.html" class="btn-main">Browse The Collection</a>
+            <p>Experience the thrill of the hunt. Play our famous "Spin to Win" for a chance to take home rare wax, signed memorabilia, and legendary cards!</p>
+            <a href="./spin.html" class="btn-spin">🎯 Start Your Spin</a>
         </div>
     </section>
 
     <div class="container">
-        <div class="category-grid">
-            <a href="./storefront.html" class="cat-card">
-                <img src="https://images.unsplash.com/photo-1566577739112-5180d4bf9390?auto=format&fit=crop&q=80&w=400" alt="Helmets">
-                <span>Authentic Helmets</span>
-            </a>
-            <a href="./storefront.html" class="cat-card">
-                <img src="https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?auto=format&fit=crop&q=80&w=400" alt="Cards">
-                <span>Sports Cards</span>
-            </a>
-            <a href="./storefront.html" class="cat-card">
-                <img src="https://images.unsplash.com/photo-1519861155730-0b5fbd0dd899?auto=format&fit=crop&q=80&w=400" alt="Jerseys">
-                <span>Signed Memorabilia</span>
-            </a>
-        </div>
-
         <section class="section">
-            <h2>About The Legends</h2>
-            <p>Locker Room Legends has proudly served the Cedar Rapids and Iowa City area for over 30 years. Owned and operated by Dan & Tanya Miller, our retail store is located in the lower level of Lindale Mall in Cedar Rapids, Iowa — right behind Chick-fil-A.</p>
-            <p>Everything we sell is related to MLB, NBA, NCAA, NFL & NHL. We offer sports cards, wax packs, autographed memorabilia, vintage collectibles, artwork, fan cave decor, apparel, kitchen items, tailgating gear, and much more.</p>
-        </section>
+            <h2>About The Shop</h2>
+            <div style="font-size: 1.15rem; color: var(--text);">
+                <p>Locker Room Legends has been the heart of the Cedar Rapids and Iowa City sports community for over 30 years. Owned and operated by Dan & Tanya Miller, we specialize in high-end collectibles across the MLB, NBA, NCAA, NFL & NHL.</p>
+                <p>Whether you're looking for vintage wax packs, autographed memorabilia, or fan cave decor, we bring authentic sports history right to the Lindale Mall.</p>
+            </div>
 
-        <section class="section">
             <div class="info-grid">
                 <div>
-                    <h2>Visit Our Store</h2>
-                    <p><strong>Lindale Mall</strong><br>4444 1st Ave NE #458<br>Cedar Rapids, IA 52402</p>
+                    <h3>Visit Our Store</h3>
+                    <p style="font-size: 1.1rem; line-height: 1.8;">
+                        <strong>Lindale Mall</strong><br>
+                        4444 1st Ave NE #458<br>
+                        Cedar Rapids, IA 52402<br>
+                        <span style="color:var(--muted); font-size: 0.9rem;">(Located lower level, behind Chick-fil-A)</span>
+                    </p>
                     <p><strong>Phone:</strong> (319) 396-2358<br><strong>Email:</strong> LRMLEGENDS@MCHSI.COM</p>
-                    <p><a href="https://www.facebook.com/lrmlegends" target="_blank" style="color:var(--red); font-weight:800; text-decoration:none;">Follow us on Facebook →</a></p>
+                    <p><a href="https://www.facebook.com/lrmlegends" target="_blank" style="color:var(--red); font-weight:800; text-decoration:none;">Follow us on Facebook for Raffle Updates →</a></p>
                 </div>
                 <div>
                     <h3>Store Hours</h3>
                     <table class="hours-table">
-                        <tr><td>Monday</td><td>Closed</td></tr>
-                        <tr><td>Tuesday</td><td>Closed</td></tr>
-                        <tr><td>Wednesday</td><td>11 AM – 7 PM</td></tr>
-                        <tr><td>Thursday</td><td>11 AM – 7 PM</td></tr>
-                        <tr><td>Friday</td><td>11 AM – 7 PM</td></tr>
-                        <tr><td>Saturday</td><td>11 AM – 7 PM</td></tr>
+                        <tr><td>Monday / Tuesday</td><td>Closed</td></tr>
+                        <tr><td>Wednesday – Saturday</td><td>11 AM – 7 PM</td></tr>
                         <tr><td>Sunday</td><td>12 PM – 5 PM</td></tr>
                     </table>
                 </div>
             </div>
             
-            <a href="https://www.google.com/maps/search/Locker+Room+Legends+Lindale+Mall" target="_blank" class="map-link">
-                <div class="map-btn">📍 Find us behind Chick-fil-A</div>
+            <a href="https://www.google.com/maps/search/Lindale+Mall+Locker+Room+Legends" target="_blank" class="map-link">
+                <div class="map-btn">📍 View Mall Location</div>
             </a>
         </section>
     </div>
