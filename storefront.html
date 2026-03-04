@@ -125,6 +125,9 @@ input{
 }
 .modalOverlay.show{display:flex}
 .small{font-size:12px;color:var(--muted)}
+/* Make logo link look clean */
+.logoLink{display:inline-flex; align-items:center}
+.logoLink:focus{outline:2px solid rgba(29,78,216,.35); outline-offset:4px; border-radius:10px;}
 </style>
 </head>
 
@@ -133,14 +136,17 @@ input{
   <div class="wrap">
     <div class="row between">
       <div class="row">
-        <img src="logo.webp" class="logo" alt="Locker Room Legends">
+        <!-- ✅ Logo now links back to index.html -->
+        <a class="logoLink" href="index.html" aria-label="Back to Locker Room Legends home">
+          <img src="logo.webp" class="logo" alt="Locker Room Legends">
+        </a>
         <div>
           <div class="title">Storefront</div>
           <div class="sub">Live items. First person to reserve marks it RESERVED.</div>
         </div>
       </div>
       <div class="row">
-        <a class="btn secondary" href="./index.html">← Home</a>
+        <!-- ✅ Home button removed -->
         <span id="statusPill" class="pill">Loading…</span>
       </div>
     </div>
@@ -207,7 +213,6 @@ input{
 </div>
 
 <script>
-
 const API_URL = "https://script.google.com/macros/s/AKfycbwBDRTeFsCZuFMOkj8AvPm37ZPqfxQ_BLjPW6u5yxYvNEtGHmDrG4fBU8ap05yGkpK2/exec";
 
 const itemsGrid = document.getElementById("itemsGrid");
@@ -275,9 +280,7 @@ async function apiReserve(payload){
 function normalizeStatus_(s){
   return String(s || "").trim().toUpperCase();
 }
-
 function itemId_(it){
-  // ✅ match Code.gs: Items sheet uses column "id"
   return String(it.id || it.itemId || "").trim();
 }
 
@@ -387,7 +390,6 @@ async function submitReserve(){
   mSubmit.textContent = "Reserving…";
 
   try{
-    // ✅ must match Code.gs: action=reserve and itemId uses Items.id
     await apiReserve({
       action: "reserve",
       itemId: itemId_(it),
@@ -423,4 +425,3 @@ if(!API_URL || API_URL.includes("PASTE_")){
 
 </body>
 </html>
-
