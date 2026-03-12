@@ -30,7 +30,11 @@
       line-height: 1.6;
     }
 
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
 
     header {
       background: rgba(255, 255, 255, 0.95);
@@ -54,7 +58,7 @@
       padding: 60px 0;
       text-align: center;
       background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.9)),
-                  url('https://images.unsplash.com/photo-1517054466905-5c54f8c27a7d?q=80&w=2000&auto=format&fit=crop');
+        url('https://images.unsplash.com/photo-1517054466905-5c54f8c27a7d?q=80&w=2000&auto=format&fit=crop');
       background-size: cover;
       background-position: center;
       color: white;
@@ -128,9 +132,23 @@
       border: 1px solid var(--border);
     }
 
-    .pill.good { color: var(--white); background: var(--good); border: none; }
-    .pill.bad { color: var(--white); background: var(--red); border: none; }
-    .pill.blue { color: var(--white); background: var(--blue); border: none; }
+    .pill.good {
+      color: var(--white);
+      background: var(--good);
+      border: none;
+    }
+
+    .pill.bad {
+      color: var(--white);
+      background: var(--red);
+      border: none;
+    }
+
+    .pill.blue {
+      color: var(--white);
+      background: var(--blue);
+      border: none;
+    }
 
     .progressWrap {
       height: 10px;
@@ -145,28 +163,6 @@
       height: 100%;
       background: linear-gradient(90deg, var(--blue), var(--red));
       width: 0%;
-    }
-
-    .modalOverlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      padding: 20px;
-    }
-
-    .modalOverlay.show { display: flex; }
-
-    .modal {
-      background: var(--white);
-      width: 100%;
-      max-width: 550px;
-      border-radius: 16px;
-      padding: 30px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     }
 
     label {
@@ -213,12 +209,48 @@
       cursor: not-allowed;
     }
 
+    .hr {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    .modalOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.8);
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .modalOverlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--white);
+      width: 100%;
+      max-width: 550px;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      margin: 30px 0;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+    }
+
     .payPanel {
       margin-top: 25px;
       background: #fdf2f2;
       border: 2px solid var(--red);
       border-radius: 12px;
       padding: 20px;
+      scroll-margin-bottom: 20px;
     }
 
     .codeBox {
@@ -228,12 +260,7 @@
       font-family: monospace;
       margin: 10px 0;
       border: 1px solid var(--border);
-    }
-
-    .hr {
-      height: 1px;
-      background: var(--border);
-      margin: 20px 0;
+      word-break: break-word;
     }
 
     .hidden { display: none; }
@@ -247,11 +274,20 @@
       color: #92400e;
       margin-top: 15px;
     }
+
+    @media (max-width: 640px) {
+      .page-hero h1 {
+        font-size: 2.2rem;
+      }
+
+      .modal {
+        padding: 20px;
+      }
+    }
   </style>
 </head>
 
 <body>
-
   <header>
     <div class="wrap header-inner">
       <a href="index.html"><img src="logo.webp" class="logo" alt="Locker Room Legends"></a>
@@ -266,7 +302,7 @@
 
   <main class="wrap">
     <section class="card-section">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 12px; flex-wrap: wrap;">
         <div>
           <div class="title">Available Shows</div>
           <div class="sub">Live availability for table space.</div>
@@ -281,7 +317,7 @@
 
   <div id="modalOverlay" class="modalOverlay">
     <div class="modal">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
         <div>
           <div class="title" id="mTitle">Reserve Table</div>
           <div class="sub" id="mSub">Complete the form to hold your spot.</div>
@@ -447,6 +483,7 @@
       }
 
       payNowPanel.classList.remove("hidden");
+      payNowPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
     async function apiGetShows() {
@@ -472,7 +509,13 @@
       showsGrid.innerHTML = "";
       hide(pageMsg);
 
-      const openCount = state.shows.filter(s => num(s.tablesLeft ?? s.spotsLeft ?? 0) > 0).length;
+      const openCount = state.shows.filter(s => {
+        const reserved = num(s.signedUp ?? 0, 0);
+        const cap = num(s.capacity ?? 0, 0);
+        const left = num(s.tablesLeft ?? s.spotsLeft ?? Math.max(0, cap - reserved), 0);
+        return String(s.status || "OPEN").toUpperCase() === "OPEN" && left > 0;
+      }).length;
+
       statusPill.textContent = `${openCount} SHOWS OPEN`;
       statusPill.className = `pill ${openCount ? "good" : "bad"}`;
 
@@ -487,9 +530,9 @@
         div.className = "show-card";
         div.innerHTML = `
           <div class="title">${escapeHtml(s.title)}</div>
-          <div class="sub">${escapeHtml(s.desc)}</div>
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span class="pill blue">$${s.price || '--'} per Table</span>
+          <div class="sub">${escapeHtml(s.desc || "")}</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span class="pill blue">$${escapeHtml(s.price || '--')} per Table</span>
             <span class="pill ${open ? 'good' : 'bad'}">${open ? 'Available' : 'Full'}</span>
           </div>
           <div class="progressWrap"><div class="bar" style="width:${pct}%"></div></div>
@@ -504,16 +547,20 @@
       showsGrid.querySelectorAll(".reserveBtn").forEach(btn => {
         btn.onclick = () => {
           const s = state.shows.find(x => String(x.tableID || x.id).trim() === btn.dataset.id);
-          state.selected = s;
+          if (!s) return;
 
+          state.selected = s;
           hide(mMsg);
           payNowPanel.classList.add("hidden");
 
-          mTitle.textContent = s.title;
-          const left = num(s.tablesLeft ?? s.spotsLeft ?? 0);
+          mTitle.textContent = s.title || "Reserve Table";
+
+          const reserved = num(s.signedUp ?? 0, 0);
+          const cap = num(s.capacity ?? 0, 0);
+          const left = num(s.tablesLeft ?? s.spotsLeft ?? Math.max(0, cap - reserved), 0);
           mSub.textContent = `${left} tables remaining`;
 
-          const max = Math.min(left, 8);
+          const max = Math.max(1, Math.min(left, 8));
           buyerQty.innerHTML = Array.from({ length: max }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join("");
 
           modalOverlay.classList.add("show");
@@ -529,8 +576,10 @@
 
     mSubmit.onclick = async () => {
       const s = state.selected;
+      if (!s) return;
+
       const method = paymentMethod.value;
-      const qty = Number(buyerQty.value);
+      const qty = Number(buyerQty.value || 1);
       const pricePerTable = num(s.price, 0);
       const totalAmount = pricePerTable * qty;
 
@@ -575,16 +624,27 @@
 
     mClose.onclick = () => modalOverlay.classList.remove("show");
 
-    paymentMethod.onchange = () => setPaymentUI(paymentMethod.value);
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay) {
+        modalOverlay.classList.remove("show");
+      }
+    });
 
+    paymentMethod.onchange = () => setPaymentUI(paymentMethod.value);
     btnRefresh.onclick = refresh;
 
-    btnCopyNote.onclick = () => {
-      navigator.clipboard.writeText(payNoteText.textContent);
-      btnCopyNote.textContent = "Copied!";
-      setTimeout(() => btnCopyNote.textContent = "Copy Note", 2000);
+    btnCopyNote.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(payNoteText.textContent);
+        btnCopyNote.textContent = "Copied!";
+        setTimeout(() => btnCopyNote.textContent = "Copy Note", 2000);
+      } catch {
+        btnCopyNote.textContent = "Copy Failed";
+        setTimeout(() => btnCopyNote.textContent = "Copy Note", 2000);
+      }
     };
 
+    setPaymentUI(paymentMethod.value);
     refresh();
   </script>
 </body>
