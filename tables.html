@@ -348,6 +348,7 @@
           <select id="paymentMethod">
             <option value="venmo">Venmo</option>
             <option value="paypal">PayPal</option>
+            <option value="cash">In-person/Cash</option>
           </select>
         </div>
 
@@ -448,7 +449,7 @@
     }
 
     function setPaymentUI(method) {
-      if (method === "paypal") {
+      if (method === "paypal" || method === "cash") {
         venmoWrap.classList.add("hidden");
         buyerVenmo.value = "";
       } else {
@@ -474,12 +475,20 @@
         payBtn.href = buildPaypalLink({ amount });
         fallbackLink.href = PAYPAL_ME_URL;
         fallbackLink.textContent = "Problem with the button? Open PayPal web fallback";
+        payBtn.classList.remove("hidden");
+        fallbackLink.classList.remove("hidden");
+      } else if (method === "cash") {
+        payIntro.textContent = "Your reservation has been submitted. Please pay in person with cash at the event to fully secure your table.";
+        payBtn.classList.add("hidden");
+        fallbackLink.classList.add("hidden");
       } else {
         payIntro.textContent = "Your table is not fully secured until Venmo payment is received.";
         payBtn.textContent = "Open Venmo App";
         payBtn.href = buildVenmoDeepLink({ recipients: VENMO_RECEIVER, amount, note });
         fallbackLink.href = VENMO_PROFILE_URL;
         fallbackLink.textContent = "Problem with the button? Use Venmo web fallback";
+        payBtn.classList.remove("hidden");
+        fallbackLink.classList.remove("hidden");
       }
 
       payNowPanel.classList.remove("hidden");
